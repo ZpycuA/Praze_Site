@@ -42,7 +42,7 @@ self-contained HTML/Canvas build.
 - **Manual / help:** https://zpycua.github.io/Praze_Site/asp2d/help.html
 - **Source:** https://github.com/ZpycuA/Praze_Site
 
-> Serving note: `data.js` and `index.html` must be hosted over HTTP(S)
+> Serving note: Normally,`data.js` and `index.html` must be hosted over HTTP(S)
 > (e.g. GitHub Pages). Opening `index.html` directly from disk will not
 > load the data layer.
 
