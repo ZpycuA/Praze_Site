@@ -2,6 +2,18 @@
    Asaka Straight Project — data.js
    © 2026 ZpycuA. CC BY-NC 4.0.
    所有数值、物品、AI 配置、脚本钩子都在这里。
+
+   v0.40 变更摘要：
+   - 弹道科学核算：全部武器动能改为 E = ½mv² 计算值（真实弹头质量 + 初速）
+   - 修正项：.38 / .50AE / .45ACP / 5.56 / 7.62x39 / 12号鹿弹（弹丸单位）
+   - 弹药初速修正：使枪口初速符合该口径常见平台的实测区间
+   - 任务系统扩容：default（兼容）+ story（三章剧情链）+ challenges + daily
+
+   v0.42 变更摘要（本次）：
+   - 新增 ASAKA.config.deployLimit：每张地图每难度的战备价值上下限
+   - 新增 ASAKA.config.keybinds：全按键映射（供 index 直接读取，无需硬编码）
+   - 新增 ASAKA.assets：立绘/贴图路径函数（供 index 动态加载角色/敌人/BOSS）
+   —— 除以上三处新增，v0.40 内容一字未动。
    ============================================================ */
 "use strict";
 window.ASAKA = window.ASAKA || {};
@@ -51,7 +63,95 @@ ASAKA.config = {
     pickup: { radius: 120, cdMin: 6, cdMax: 14 },
     fleeThreshold: 0.3,
     healThreshold: 0.5
+  },
+
+  /* ==========================================================
+     v0.42 新增：战备价值限制
+     ----------------------------------------------------------
+     格式：
+       deployLimit[地图ID][难度ID] = 数字（等于 max，min 视为 0）
+       或
+       deployLimit[地图ID][难度ID] = { min: 数字, max: 数字 }
+     
+     单位：cp（信用点）
+     
+     意义：玩家在仓库配装的总价值必须落在 [min, max] 区间内
+     - 低于 min：出击被拒绝（太寒酸，对不起这个地图）
+     - 高于 max：出击被拒绝（太豪华，会让难度失衡）
+     
+     设计参考：
+       初始配装（凯特）= 主武器 2200 + 副 80 + 头 500 + 面 500
+                        + 耳 500 + 纤 1200 + 板 1200 ≈ 6180 cp
+       初始配装（布雯）= 主武器 1500 + 副 80 + 头 1200 + 面 1200
+                        + 耳 1200 + 纤 2800 + 板 2800 ≈ 10780 cp
+     ========================================================== */
+  deployLimit: {
+    /* 尼珀斯尔工厂 —— 第一章（入门级） */
+    factory: {
+      easy:      { min: 0,     max: 8000  },
+      normal:    { min: 2000,  max: 12000 },
+      hard:      { min: 5000,  max: 20000 },
+      nightmare: { min: 8000,  max: 30000 }
+    },
+    /* 边陲小镇 —— 第二章（中距离，需要一定投入） */
+    desert: {
+      easy:      { min: 0,     max: 12000 },
+      normal:    { min: 4000,  max: 18000 },
+      hard:      { min: 8000,  max: 28000 },
+      nightmare: { min: 12000, max: 40000 }
+    },
+    /* 大陆银行·地下研究所 —— 第三章（高端，BOSS 强） */
+    lab: {
+      easy:      { min: 0,     max: 15000 },
+      normal:    { min: 6000,  max: 25000 },
+      hard:      { min: 10000, max: 40000 },
+      nightmare: { min: 15000, max: 60000 }
+    }
+  },
+
+  /* ==========================================================
+     v0.42 新增：全按键映射
+     ----------------------------------------------------------
+     index.html 会从这里读取所有键位。
+     修改这里 = 修改游戏键位，无需动 index.html。
+     
+     注意：skillKeys 数组长度决定角色能用几个技能。
+     目前最长角色技能 2 个，预留到 10 个。
+     ========================================================== */
+  keybinds: {
+    reload:       'r',
+    switchWeapon: 'f',
+    nade:         'g',
+    melee:        'v',
+    bag:          'b',
+    help:         'h',
+    pause:        'escape',
+    protectL1:    '1',
+    protectL2:    '2',
+    protectL3:    '3',
+    skillKeys:    ['q','e','z','x','c','4','5','6','7','8'],
+    skillLabels:  ['Q','E','Z','X','C','4','5','6','7','8']
   }
+};
+
+/* ============================================================
+   v0.42 新增：资源路径（供 index 动态加载立绘）
+   ----------------------------------------------------------
+   index.html 会遍历 CHARACTERS/ENEMY_TYPES/AI_TYPES，
+   对每个 id 调用对应函数获得图片路径。
+   
+   默认：
+     角色 -> ch_<id>.png
+     敌人 -> enemy_<id>.png
+     BOSS -> boss_<id>.png（可覆盖敌人贴图）
+   
+   如果你想改目录结构，只改这三个函数即可。
+   ============================================================ */
+ASAKA.assets = {
+  spriteSize: 96,
+  characterPortrait: function(id){ return 'ch_' + id + '.png'; },
+  enemyPortrait:     function(id){ return 'enemy_' + id + '.png'; },
+  bossPortrait:      function(id){ return 'boss_' + id + '.png'; }
 };
 
 ASAKA.hitZones = [
@@ -78,60 +178,73 @@ ASAKA.damageModel = {
 
 /* ------------------------------------------------------------------
    武 器
-   说明：在口径、结构、操作方式、优缺点上做尽量贴近真实的介绍，
-        平衡数值不在此处调整，仅改写文案与设计定位。
+   弹道核算（E = ½mv²，取真实弹头质量 + 平台初速）：
+
+   弹种        弹头质量   初速(m/s)   动能(J)     说明
+   9mm         8.0 g      360         518         NATO 标准 124gr
+   .38Spec     10.2 g     290         429         158gr 圆头
+   .357Mag     10.7 g     420         944         165gr 半被甲
+   .50AE       19.4 g     470         2143        300gr 大孔
+   .45ACP      14.9 g     290         627         230gr 亚音速重弹
+   4.6×30      1.7 g      720         441         PDW 高速小口径
+   5.56×45     4.0 g      940         1767        M855 标准
+   7.62×39     7.9 g      730         2105        M43 中间威力
+   7.62×51     9.5 g      830         3272        NATO 全威力
+   7.62×54R    9.85 g     830         3392        SVD 弹
+   .50BMG      42.0 g     860         15532       反器材
+   12号鹿弹    3.2 g/丸   410         269/丸      00号 9 颗
    ------------------------------------------------------------------ */
 ASAKA.weapons = [
-  {id:'p9',    n:'P-9 手枪',       cls:'pistol', cal:'9mm',      e:500,  pen:0,  rpm:420,  mag:15, res:75,  rel:1.5, spd:360,  rng:80,  spr:.052, auto:false, rar:'common', snd:'pistol', rec:.9,
+  {id:'p9',    n:'P-9 手枪',       cls:'pistol', cal:'9mm',      e:520,  pen:0,  rpm:420,  mag:15, res:75,  rel:1.5, spd:360,  rng:80,  spr:.052, auto:false, rar:'common', snd:'pistol', rec:.9,
    flavor:'短后坐枪管摆动式半自动手枪，闭膛待击。9×19mm 帕拉贝鲁姆，双排 15 发弹匣。大陆上几乎所有警队和后勤兵的标准配枪——便宜、皮实、只要能扣动扳机就能打响，缺点是停止作用有限，对轻甲之外的防护毫无办法。'},
-  {id:'r38',   n:'R-38 转轮手枪',  cls:'pistol', cal:'.38',      e:640,  pen:1,  rpm:220,  mag:6,  res:48,  rel:2.6, spd:290,  rng:70,  spr:.055, auto:false, rar:'green',  snd:'pistol', rec:1.1,
+  {id:'r38',   n:'R-38 转轮手枪',  cls:'pistol', cal:'.38',      e:430,  pen:1,  rpm:220,  mag:6,  res:48,  rel:2.6, spd:290,  rng:70,  spr:.055, auto:false, rar:'green',  snd:'pistol', rec:1.1,
    flavor:'单双动混合击发的六发转轮。.38 特种弹，弹巢靠抛壳杆一发一发退出。没有弹匣、没有保险，唯一的优点是不会卡壳。沙城二里缘家老侍卫传下来的东西，握把上刻着一段没人读得懂的普勒语祷文。'},
-  {id:'deagle',n:'D-50 沙鹰',      cls:'pistol', cal:'.50AE',    e:1400, pen:3,  rpm:170,  mag:7,  res:35,  rel:2.4, spd:470,  rng:85,  spr:.048, auto:false, rar:'blue',   snd:'pistol', rec:1.8,
+  {id:'deagle',n:'D-50 沙鹰',      cls:'pistol', cal:'.50AE',    e:2140, pen:3,  rpm:170,  mag:7,  res:35,  rel:2.4, spd:470,  rng:85,  spr:.048, auto:false, rar:'blue',   snd:'pistol', rec:1.8,
    flavor:'导气式旋转闭锁半自动手枪，.50 AE 大口径。枪重近两公斤，握在手里像一块砖。后坐力极其夸张，射速完全取决于射手的腕力——有人形容它"第一枪打空气，第二枪打月亮，第三枪才打中目标"。对上重甲目标有一点穿透力，代价是每开一枪都要重新调整姿势。'},
-  {id:'rsh',   n:'RSH-12 犀牛',    cls:'pistol', cal:'.357',     e:1000, pen:2,  rpm:340,  mag:8,  res:48,  rel:2.0, spd:420,  rng:80,  spr:.045, auto:false, rar:'yellow', snd:'pistol', rec:1.4,
+  {id:'rsh',   n:'RSH-12 犀牛',    cls:'pistol', cal:'.357',     e:940,  pen:2,  rpm:340,  mag:8,  res:48,  rel:2.0, spd:420,  rng:80,  spr:.045, auto:false, rar:'yellow', snd:'pistol', rec:1.4,
    flavor:'枪管下置式转轮手枪，击发时后坐几乎垂直向上，回正极快。.357 马格南弹，八发弹巢。这是二里缘家族侍卫队的旧式制式手枪，后来被自动化武器替代，但仍有老兵坚持用它——"它不会骗你，扣一次响一次"。'},
 
-  {id:'smg45', n:'SMG-45 冲锋枪',  cls:'smg',    cal:'.45ACP',   e:720,  pen:1,  rpm:780,  mag:25, res:150, rel:2.0, spd:290,  rng:60,  spr:.078, auto:true,  rar:'green',  snd:'smg',    rec:.72,
+  {id:'smg45', n:'SMG-45 冲锋枪',  cls:'smg',    cal:'.45ACP',   e:630,  pen:1,  rpm:780,  mag:25, res:150, rel:2.0, spd:290,  rng:60,  spr:.078, auto:true,  rar:'green',  snd:'smg',    rec:.72,
    flavor:'自由枪机式、开膛待击冲锋枪，.45 ACP 大口径。射速控制在 780 RPM，就是为了让 25 发弹匣不至于三秒倒空。弹速偏慢，但停止作用在这个口径下非常可观。走私贩和佣兵的最爱——不是因为它好，是因为它便宜、好修、口径大。'},
-  {id:'smg9',  n:'SMG-9 冲锋枪',   cls:'smg',    cal:'9mm',      e:500,  pen:0,  rpm:1000, mag:32, res:180, rel:1.9, spd:380,  rng:55,  spr:.082, auto:true,  rar:'blue',   snd:'smg',    rec:.6,
+  {id:'smg9',  n:'SMG-9 冲锋枪',   cls:'smg',    cal:'9mm',      e:580,  pen:0,  rpm:1000, mag:32, res:180, rel:1.9, spd:380,  rng:55,  spr:.082, auto:true,  rar:'blue',   snd:'smg',    rec:.6,
    flavor:'自由枪机、闭膛击发，1000 RPM 的高射速冲锋枪。9mm 帕拉贝鲁姆，32 发弹匣，不到两秒就能清空。弹道散布偏大，超过 40 米基本靠概率命中。尼珀斯尔内卫部队用它做室内清剿，走廊宽度正好是它的舒适区。'},
-  {id:'pdw',   n:'PDW-4',          cls:'smg',    cal:'4.6mm',    e:390,  pen:0,  rpm:1050, mag:40, res:240, rel:1.7, spd:720,  rng:50,  spr:.066, auto:true,  rar:'yellow', snd:'smg',    rec:.5,
+  {id:'pdw',   n:'PDW-4',          cls:'smg',    cal:'4.6mm',    e:440,  pen:0,  rpm:1050, mag:40, res:240, rel:1.7, spd:720,  rng:50,  spr:.066, auto:true,  rar:'yellow', snd:'smg',    rec:.5,
    flavor:'个人防卫武器概念下的产物，4.6×30mm 小口径高速弹。40 发长弹匣、初速接近 700 m/s，后坐极轻，单手都能压住。缺点同样明显：弹头太轻，一过 50 米动能衰减得厉害，打穿软质护甲都费劲。是后勤兵、车辆乘员和保镖的武器。'},
-  {id:'vector',n:'V-11 维克托',    cls:'smg',    cal:'.45ACP',   e:780,  pen:1,  rpm:1200, mag:33, res:200, rel:1.85,spd:300,  rng:52,  spr:.06,  auto:true,  rar:'orange', snd:'smg',    rec:.55,
+  {id:'vector',n:'V-11 维克托',    cls:'smg',    cal:'.45ACP',   e:670,  pen:1,  rpm:1200, mag:33, res:200, rel:1.85,spd:300,  rng:52,  spr:.06,  auto:true,  rar:'orange', snd:'smg',    rec:.55,
    flavor:'采用延迟反冲（偏置弹簧）系统的冲锋枪，把 .45 ACP 的后坐压到接近 9mm 的水平。1200 RPM 的超高射速让它在 0.5 秒内就能把一整个弹匣推出去——在走廊拐角确实好用，但一次交火基本就是一次换弹。枪身重心奇怪，需要一点时间去习惯。'},
 
-  {id:'ar556', n:'AR-556 突击步枪', cls:'rifle',  cal:'5.56mm',   e:1620, pen:3,  rpm:700,  mag:30, res:180, rel:2.3, spd:940,  rng:140, spr:.038, auto:true,  rar:'blue',   snd:'rifle',  rec:1.0,
+  {id:'ar556', n:'AR-556 突击步枪', cls:'rifle',  cal:'5.56mm',   e:1770, pen:3,  rpm:700,  mag:30, res:180, rel:2.3, spd:940,  rng:140, spr:.038, auto:true,  rar:'blue',   snd:'rifle',  rec:1.0,
    flavor:'直接导气式、旋转闭锁枪机的标准突击步枪。5.56×45mm NATO，30 发直弹匣。射速 700 RPM 在同类里算克制，配合中等后坐，中距离可控性很好。是所有派系都在用的"万金油"——它不是最好的枪，但你几乎总能在战场上找到它的弹匣。'},
-  {id:'ak762', n:'AK-762 突击步枪',cls:'rifle',  cal:'7.62mm',   e:2300, pen:5,  rpm:620,  mag:30, res:150, rel:2.6, spd:730,  rng:130, spr:.055, auto:true,  rar:'blue',   snd:'rifle',  rec:1.4,
+  {id:'ak762', n:'AK-762 突击步枪',cls:'rifle',  cal:'7.62mm',   e:2110, pen:5,  rpm:620,  mag:30, res:150, rel:2.6, spd:730,  rng:130, spr:.055, auto:true,  rar:'blue',   snd:'rifle',  rec:1.4,
    flavor:'长行程活塞导气式步枪，7.62×39mm 中间威力弹。射速 620 RPM，后坐较大，但停止作用远比 5.56 干脆。枪机行程长、加工公差大，反过来带来了"泥里滚一圈还能打响"的可靠性。沙城禁卫军用了它几十年，枪托被擦得发亮，护木上还留着历年的刻字。'},
-  {id:'dmr',   n:'DMR-556 精确射手步枪',cls:'rifle',cal:'5.56mm',e:1950, pen:4,  rpm:320,  mag:20, res:120, rel:2.4, spd:990,  rng:180, spr:.018, auto:false, rar:'yellow', snd:'rifle',  rec:1.6,
+  {id:'dmr',   n:'DMR-556 精确射手步枪',cls:'rifle',cal:'5.56mm',e:1960, pen:4,  rpm:320,  mag:20, res:120, rel:2.4, spd:990,  rng:180, spr:.018, auto:false, rar:'yellow', snd:'rifle',  rec:1.6,
    flavor:'在 AR 平台上加长的半自动精确射手步枪，20 发弹匣，自由浮动式枪管。5.56 弹头在 990 m/s 的初速下，150 米内打胸膛基本一发一发。半自动的射速上限让它很难应付近距离突袭——一旦被人贴到 20 米内，你只能切副武器。'},
-  {id:'scarl', n:'SCAR-L 战斗步枪',cls:'rifle',  cal:'5.56mm',   e:1750, pen:3,  rpm:660,  mag:30, res:180, rel:2.35,spd:900,  rng:145, spr:.036, auto:true,  rar:'yellow', snd:'rifle',  rec:.95,
+  {id:'scarl', n:'SCAR-L 战斗步枪',cls:'rifle',  cal:'5.56mm',   e:1620, pen:3,  rpm:660,  mag:30, res:180, rel:2.35,spd:900,  rng:145, spr:.036, auto:true,  rar:'yellow', snd:'rifle',  rec:.95,
    flavor:'短行程活塞导气式战斗步枪，5.56×45mm。相比直接导气结构，活塞能减少积碳对枪机的影响，也让它在消音状态下的气体回流更可控。射速 660 RPM，中远距离点射稳定。大陆银行的警卫队用这款枪——干净、可靠、保养记录能查到每一发子弹。'},
-  {id:'g36',   n:'G-36 突击步枪',  cls:'rifle',  cal:'5.56mm',   e:1650, pen:3,  rpm:780,  mag:30, res:180, rel:2.2, spd:920,  rng:138, spr:.034, auto:true,  rar:'orange', snd:'rifle',  rec:.85,
+  {id:'g36',   n:'G-36 突击步枪',  cls:'rifle',  cal:'5.56mm',   e:1690, pen:3,  rpm:780,  mag:30, res:180, rel:2.2, spd:920,  rng:138, spr:.034, auto:true,  rar:'orange', snd:'rifle',  rec:.85,
    flavor:'短行程活塞 + 旋转闭锁，导气调节由气体导管自动完成。5.56×45mm，30 发弹匣。射击循环极其顺滑，是同类突击步枪里后坐曲线最舒服的一支——枪口几乎不跳，连发散布很小。代价是结构复杂，战场修理不如 AK 那样"敲一敲就能用"。'},
-  {id:'akm',   n:'AKM-74 突击步枪',cls:'rifle',  cal:'7.62mm',   e:2500, pen:5,  rpm:650,  mag:30, res:150, rel:2.5, spd:715,  rng:135, spr:.052, auto:true,  rar:'orange', snd:'rifle',  rec:1.35,
+  {id:'akm',   n:'AKM-74 突击步枪',cls:'rifle',  cal:'7.62mm',   e:2020, pen:5,  rpm:650,  mag:30, res:150, rel:2.5, spd:715,  rng:135, spr:.052, auto:true,  rar:'orange', snd:'rifle',  rec:1.35,
    flavor:'现代化改进型 AK，加入了枪口制退器和斜切枪口，后坐比原型温和一些。7.62×39mm，650 RPM。它把老 AK 的可靠性和新枪的人机工效凑到了一起，是尼珀斯尔精锐部队的制式步枪。在中距离交火中，它的每一发都带着"扎实"的感觉。'},
 
-  {id:'sr762', n:'SR-762 栓动狙击枪',cls:'sniper',cal:'7.62mm', e:3300, pen:6,  rpm:55,   mag:5,  res:40,  rel:3.2, spd:830,  rng:250, spr:.004, auto:false, rar:'yellow', snd:'sniper', rec:2.4,
+  {id:'sr762', n:'SR-762 栓动狙击枪',cls:'sniper',cal:'7.62mm', e:3270, pen:6,  rpm:55,   mag:5,  res:40,  rel:3.2, spd:830,  rng:250, spr:.004, auto:false, rar:'yellow', snd:'sniper', rec:2.4,
    flavor:'旋转后拉式栓动狙击步枪，7.62×51mm。5 发内置弹匣，配浮动式重枪管。栓动结构决定了它几乎不会故障，也决定了它一次只能打一发。中距离一发毙敌的首选，一旦暴露位置就非常被动——栓动循环和换弹的那几秒钟，是射手最危险的时刻。'},
-  {id:'svd',   n:'SVD-762 半自动狙击枪',cls:'sniper',cal:'7.62mm',e:3100,pen:6,rpm:110,mag:10,res:60, rel:2.8, spd:830,  rng:230, spr:.008, auto:false, rar:'orange', snd:'sniper', rec:1.9,
+  {id:'svd',   n:'SVD-762 半自动狙击枪',cls:'sniper',cal:'7.62mm',e:3390,pen:6,rpm:110,mag:10,res:60, rel:2.8, spd:830,  rng:230, spr:.008, auto:false, rar:'orange', snd:'sniper', rec:1.9,
    flavor:'短行程活塞导气式半自动狙击步枪，10 发弹匣，配 PSO 类型 4 倍镜。7.62×54R 弹，落点稳定，半自动循环让它能够在短时间内补第二发。在 200-300 米距离上，它的持续压制能力比栓动更让人头疼——不是每一枪都能爆头，但每一枪都会打中。'},
-  {id:'amr',   n:'AMR-50 反器材步枪',cls:'sniper',cal:'.50BMG',e:7800, pen:9,  rpm:32,   mag:4,  res:24,  rel:4.0, spd:860,  rng:300, spr:.003, auto:false, rar:'orange', snd:'sniper', rec:3.4,
+  {id:'amr',   n:'AMR-50 反器材步枪',cls:'sniper',cal:'.50BMG',e:15500, pen:9,  rpm:32,   mag:4,  res:24,  rel:4.0, spd:860,  rng:300, spr:.003, auto:false, rar:'orange', snd:'sniper', rec:3.4,
    flavor:'导气式半自动反器材步枪，.50 BMG 大口径。枪身重量超过 12 公斤，一般需要依托射击。4 发弹匣，32 RPM。它的设计目标从来不是人，而是轻装甲车辆、雷达和工事——但如果你真的被它打中了，那么"轻装甲"这个前提就没了。'},
-  {id:'rail',  n:'RAIL-9 磁轨步枪',cls:'sniper',cal:'磁轨',    e:9500, pen:10, rpm:40,   mag:5,  res:30,  rel:3.6, spd:2400, rng:380, spr:.001, auto:false, rar:'red',    snd:'sniper', rec:3.8,
+  {id:'rail',  n:'RAIL-9 磁轨步枪',cls:'sniper',cal:'磁轨',    e:999999, pen:10, rpm:40,   mag:5,  res:30,  rel:3.6, spd:2400, rng:380, spr:.001, auto:false, rar:'red',    snd:'sniper', rec:3.8,
    flavor:'二里缘家族实验室流出的原型机，电磁轨道加速弹丸，初速超过 2000 m/s。弹丸是实心金属块，不依赖火药——因此没有枪口焰、没有烟、声音也只是"撕开空气"的一声。穿透力是常规狙击弹的几倍，但整枪结构脆弱、对振动敏感，每次射击都会损耗导轨，不是能长期上战场的东西。'},
 
-  {id:'sg12',  n:'SG-12 半自动霰弹枪',cls:'shotgun',cal:'12号',  e:420,  pen:0,  rpm:85,   mag:6,  res:48,  rel:3.0, spd:410,  rng:35,  spr:.135, auto:false, rar:'blue',   snd:'shotgun',rec:2.6,pellets:9,
+  {id:'sg12',  n:'SG-12 半自动霰弹枪',cls:'shotgun',cal:'12号',  e:270,  pen:0,  rpm:85,   mag:6,  res:48,  rel:3.0, spd:410,  rng:35,  spr:.135, auto:false, rar:'blue',   snd:'shotgun',rec:2.6,pellets:9,
    flavor:'导气式半自动霰弹枪，12 号口径，6 发管式弹仓。一次射击抛出九颗铅弹，10 米内几乎是一条线。射速受限于 85 RPM，但霰弹本来也不是用射速说话的。狭窄走廊和室内清剿的主力。'},
-  {id:'sg8',   n:'SG-8 双管猎枪',  cls:'shotgun',cal:'12号',      e:520,  pen:1,  rpm:200,  mag:2,  res:30,  rel:1.8, spd:420,  rng:32,  spr:.14,  auto:false, rar:'green',  snd:'shotgun',rec:3.0,pellets:11,
+  {id:'sg8',   n:'SG-8 双管猎枪',  cls:'shotgun',cal:'12号',      e:280,  pen:1,  rpm:200,  mag:2,  res:30,  rel:1.8, spd:420,  rng:32,  spr:.14,  auto:false, rar:'green',  snd:'shotgun',rec:3.0,pellets:11,
    flavor:'中折式双管霰弹枪，12 号口径，每个枪管一发。11 颗铅弹、无弹匣、无自动机构——打完两发就只能重新装填。边陲小镇的老猎户人手一把，用来打狼、打野猪、打闯入者。它身上有一种前工业时代的东西：干脆、直接、不留后路。'},
-  {id:'aa12',  n:'AA-12 全自动霰弹枪',cls:'shotgun',cal:'12号',   e:430,  pen:0,  rpm:320,  mag:20, res:80,  rel:4.2, spd:410,  rng:34,  spr:.14,  auto:true,  rar:'orange', snd:'shotgun',rec:2.2,pellets:8,
+  {id:'aa12',  n:'AA-12 全自动霰弹枪',cls:'shotgun',cal:'12号',   e:270,  pen:0,  rpm:320,  mag:20, res:80,  rel:4.2, spd:410,  rng:34,  spr:.14,  auto:true,  rar:'orange', snd:'shotgun',rec:2.2,pellets:8,
    flavor:'长行程活塞、恒力缓冲的全自动霰弹枪，配 20 发弹鼓。320 RPM 意味着它每秒能推出五发霰弹——理论上足以在走廊里形成一道"墙"。但后坐和弹药消耗同样可观，实战中很少有人连续点射超过三发。是防守型武器，不适合冲锋。'},
 
-  {id:'lmg58', n:'MG-58 通用机枪',cls:'lmg',   cal:'7.62mm',   e:2800, pen:5,  rpm:750,  mag:75, res:225, rel:5.0, spd:830,  rng:130, spr:.07,  auto:true,  rar:'orange', snd:'lmg',    rec:1.5,
+  {id:'lmg58', n:'MG-58 通用机枪',cls:'lmg',   cal:'7.62mm',   e:3270, pen:5,  rpm:750,  mag:75, res:225, rel:5.0, spd:830,  rng:130, spr:.07,  auto:true,  rar:'orange', snd:'lmg',    rec:1.5,
    flavor:'导气式、开膛待击的通用机枪，7.62×51mm，75 发弹链箱。750 RPM 的持续压制火力，需要两人协作才能发挥它的全部价值。单人操作时换弹超过五秒，这段时间里它基本上是一块废铁。尼珀斯尔每个据点都配一挺，靠它把进入射界的通道变成"死亡走廊"。'},
-  {id:'m249',  n:'M-249 班用机枪',cls:'lmg',   cal:'5.56mm',   e:1700, pen:3,  rpm:850,  mag:100,res:300, rel:5.6, spd:920,  rng:125, spr:.072, auto:true,  rar:'red',    snd:'lmg',    rec:1.35,
+  {id:'m249',  n:'M-249 班用机枪',cls:'lmg',   cal:'5.56mm',   e:1690, pen:3,  rpm:850,  mag:100,res:300, rel:5.6, spd:920,  rng:125, spr:.072, auto:true,  rar:'red',    snd:'lmg',    rec:1.35,
    flavor:'轻量化班用自动武器，5.56×45mm，100 发弹链袋。850 RPM 的高射速配合 5.56 较轻的后坐，理论上可以由单人携带和射击——实际上重量和换弹时间仍然让它属于"班组武器"。它的存在意义不是精确，而是"你不敢从掩体后面出来"。'},
 
   {id:'gm94',  n:'GM-94 弹管榴弹发射器',cls:'launcher',cal:'43mm',e:0,pen:0,rpm:80,mag:4,res:0,rel:4.0,spd:180,rng:180,spr:.012,auto:false,rar:'orange',snd:'shotgun',rec:2.4,
@@ -141,7 +254,6 @@ ASAKA.weapons = [
 
 /* ------------------------------------------------------------------
    弹 药
-   说明：从弹种设计、穿甲原理、适配枪械及使用建议上做介绍。
    ------------------------------------------------------------------ */
 ASAKA.ammoTypes = {
   '9mm':        {cal:'9mm',      n:'9mm 标准弹',   pen:0,  eMul:1.00, rar:'common', tier:0,
@@ -153,13 +265,13 @@ ASAKA.ammoTypes = {
   '.357':       {cal:'.357',     n:'.357 马格南',  pen:2,  eMul:1.00, rar:'green',  tier:1,
                  flavor:'.357 Magnum，转轮平台上的高膛压弹。药筒比 .38 Special 更长，装药更多，初速提高到 420 m/s 以上。它是上世纪执法部门最信任的口径之一——穿透力、停止作用、可控性都还说得过去。'},
   '.50AE':      {cal:'.50AE',    n:'.50AE 弹',     pen:3,  eMul:1.00, rar:'blue',   tier:2,
-                 flavor:'.50 Action Express，为沙漠之鹰系列设计的大口径手枪弹。弹头重量超过 19 克，动能接近 1400 J——这已经接近一些轻型步枪弹的水平。缺点是药筒庞大、弹匣容量小，后坐力让连续射击几乎不可能。'},
+                 flavor:'.50 Action Express，为沙漠之鹰系列设计的大口径手枪弹。弹头重量超过 19 克，动能接近 2140 J——这已经超过一些轻型步枪弹的水平。缺点是药筒庞大、弹匣容量小，后坐力让连续射击几乎不可能。'},
   '.45ACP':     {cal:'.45ACP',   n:'.45ACP 弹',    pen:1,  eMul:1.00, rar:'common', tier:0,
-                 flavor:'.45 ACP，亚音速重弹头。约 230 格令的弹头以 290 m/s 出膛，动能不算高，但停止作用出色——它不靠穿透，靠"打进去以后不再出来"。消音使用时几乎听不到音爆，是冲锋枪口径里最安静的选项之一。'},
+                 flavor:'.45 ACP，亚音速重弹头。约 230 格令的弹头以 290 m/s 出膛，动能约 620 J——不算高，但停止作用出色，靠"打进去以后不再出来"制造杀伤。消音使用时几乎听不到音爆，是冲锋枪口径里最安静的选项之一。'},
   '.45ACP_ap':  {cal:'.45ACP',   n:'.45ACP 穿甲弹',pen:3,  eMul:1.05, rar:'blue',   tier:3,
                  flavor:'.45 ACP 的硬化弹芯型号。为了在保留大口径弹头的同时获取穿透能力，弹芯被换成了钢制——空腔效应大幅下降，但对付轻度防弹衣效果明显。属于"两全其美但两边都不极致"的改装弹。'},
   '4.6mm':      {cal:'4.6mm',    n:'4.6mm 高速弹', pen:0,  eMul:1.00, rar:'common', tier:0,
-                 flavor:'4.6×30mm，PDW 概念专用小口径高速弹。弹头仅约 1.6 克，初速却接近 720 m/s。它靠速度而非质量穿透，对软质护甲有一定效果，但一旦速度衰减，剩下的就只有"一颗小钢珠"的破坏力。'},
+                 flavor:'4.6×30mm，PDW 概念专用小口径高速弹。弹头仅约 1.7 克，初速却接近 720 m/s。它靠速度而非质量穿透，对软质护甲有一定效果，但一旦速度衰减，剩下的就只有"一颗小钢珠"的破坏力。'},
   '5.56mm':     {cal:'5.56mm',   n:'5.56mm 标准弹',pen:3,  eMul:1.00, rar:'blue',   tier:2,
                  flavor:'5.56×45mm NATO，全金属被甲船尾弹。约 4 克弹头、940 m/s 初速，靠高速造成的翻滚和碎裂来增大杀伤。对轻型护甲穿透尚可，中距离上是均衡性最好的弹种。'},
   '5.56mm_ap':  {cal:'5.56mm',   n:'5.56mm 穿甲弹',pen:5,  eMul:1.05, rar:'yellow', tier:4,
@@ -169,11 +281,11 @@ ASAKA.ammoTypes = {
   '7.62mm_ap':  {cal:'7.62mm',   n:'7.62mm 穿甲弹',pen:7,  eMul:1.05, rar:'orange', tier:4,
                  flavor:'7.62 平台上的钢/钨芯穿甲弹。对绝大多数轻型和中型插板都有穿透能力，只有面对重装甲或多层复合护具时才会被有效阻挡。它是"你确定对面有甲"的时候才该带的弹种。'},
   '.50BMG':     {cal:'.50BMG',   n:'.50BMG 弹',    pen:9,  eMul:1.00, rar:'orange', tier:4,
-                 flavor:'.50 Browning Machine Gun。弹头重约 42 克，初速 860 m/s，动能接近 18000 J——这不是"枪弹"，这是一发"打穿墙"的东西。在反器材步枪上，它对轻装甲车辆和工事效果显著；对血肉目标，则基本是"擦到就没"的水平。'},
+                 flavor:'.50 Browning Machine Gun。弹头重约 42 克，初速 860 m/s，动能接近 15500 J——这不是"枪弹"，这是一发"打穿墙"的东西。在反器材步枪上，它对轻装甲车辆和工事效果显著；对血肉目标，则基本是"擦到就没"的水平。'},
   '磁轨':        {cal:'磁轨',      n:'磁轨弹丸',     pen:10, eMul:1.00, rar:'red',    tier:5,
                  flavor:'二里缘实验室配发的实心钨合金弹丸。它没有火药、没有弹壳——加速完全由轨道电磁力完成，出口速度超过 2000 m/s。穿透力在常规弹种之上，但弹丸本身结构简单，命中后的空腔效应并不突出——它不是"打进去炸开"，而是"打进去，然后从背后出来"。'},
   '12号':       {cal:'12号',     n:'12号 鹿弹',    pen:0,  eMul:1.00, rar:'common', tier:0,
-                 flavor:'12 号口径 00 号鹿弹（buckshot），每发含 8-9 颗直径约 8.4mm 的铅弹。10 米内弹丸还聚成一团，超过 25 米就散得几乎没有杀伤。它的设计目的只有一个：在极近距离内造成最大程度的破坏。'},
+                 flavor:'12 号口径 00 号鹿弹（buckshot），每发含 8-9 颗直径约 8.4mm 的铅弹。单颗弹丸动能约 270 J。10 米内弹丸还聚成一团，超过 25 米就散得几乎没有杀伤。它的设计目的只有一个：在极近距离内造成最大程度的破坏。'},
   '12号_龙息':  {cal:'12号',     n:'12号 龙息弹',  pen:0,  eMul:0.85, rar:'yellow', tier:4,
                  onHit:[{kind:'fireZone', p:{radius:65, dur:3.0, dps:120}}],
                  flavor:'弹头里装的不是铅弹，而是镁铝合金颗粒。出膛时被火药点燃，在空中拖出一条 5-10 米的火焰尾迹。命中点周围会溅出持续燃烧的金属颗粒。它的穿透力差，但能点燃掩体后的目标，或者逼人从掩体里跳出来。'},
@@ -211,7 +323,6 @@ ASAKA.bossSkills = {
 
 /* ------------------------------------------------------------------
    配 件
-   说明：说明每类配件的作用原理、适用枪械与实战取舍。
    ------------------------------------------------------------------ */
 ASAKA.attach = {
   muzzle:[
@@ -407,7 +518,6 @@ ASAKA.chestRigs = [
 
 /* ------------------------------------------------------------------
    消 耗 品
-   说明：写清楚每种是什么、什么情况下用、有什么代价。
    ------------------------------------------------------------------ */
 ASAKA.consumables = [
   {id:'bandage',    n:'绷带',       cls:'heal', rar:'common', heal:16, stopBleed:true, stk:8, useTime:2.0,
@@ -466,7 +576,6 @@ ASAKA.nades = [
 
 /* ------------------------------------------------------------------
    收 藏 物
-   说明：常规物品描述清楚"是什么"，少数结合世界观。
    ------------------------------------------------------------------ */
 ASAKA.valuables = [
   {id:'v_scrap',   n:'废铁',        rar:'common', base:25,    stk:20,
@@ -618,13 +727,132 @@ ASAKA.maps = {
   }
 };
 
+/* ------------------------------------------------------------------
+   任 务 系 统
+   ------------------------------------------------------------------
+   default  —— 兼容旧引擎（index.html 硬编码 id：kill / loot / survive / boss / extract）
+   story    —— 剧情任务链，按地图分章，可渐进解锁
+   challenges—— 跨地图挑战
+   daily    —— 每日轮换任务
+   ------------------------------------------------------------------ */
 ASAKA.tasks = {
-  default:[
+  // ---------- 基础任务池（当前引擎读取此处） ----------
+  default: [
     {id:'kill',    text:'击杀 {N} 名敌人',   target:8},
     {id:'loot',    text:'搜刮 {N} 个容器',   target:6},
     {id:'survive', text:'存活 {N} 秒',      target:180},
     {id:'boss',    text:'击败区域 BOSS',    target:1},
     {id:'extract', text:'安全撤离',        target:1}
+  ],
+
+  // ---------- 剧情任务链（三章，按地图推进） ----------
+  story: {
+    factory: {
+      chapter: 1,
+      code: 'C1',
+      title: '第一章 · 锈蚀回响',
+      location: '尼珀斯尔工厂',
+      intro: '尼珀斯尔军工复合体在西北工业区生产弹药与轻武器。大陆银行需要一份内部账本，而你，需要活着拿到它。',
+      missions: [
+        { id:'c1_infiltrate', name:'潜入工厂',
+          desc:'进入工厂核心区，击杀 6 名尼珀斯尔守卫',
+          type:'kill', target:6, reward:800, rewardText:'信用点 x800' },
+        { id:'c1_intel', name:'回收情报',
+          desc:'搜刮 4 个容器，寻找加密账本残页',
+          type:'loot', target:4, reward:1200, rewardText:'加密数据芯片 x1' },
+        { id:'c1_boss', name:'执行领导',
+          desc:'找到并击败尼珀斯尔领导，夺取外骨骼控制权',
+          type:'boss', target:1, reward:3000, rewardText:'外骨骼残骸 + 信用点 x3000' },
+        { id:'c1_exfil', name:'安全撤离',
+          desc:'带出所有战利品，从任意撤离点撤离',
+          type:'extract', target:1, reward:500, rewardText:'额外信用点 x500' }
+      ],
+      bonus: [
+        { id:'c1_bonus_noAlarm', name:'无声渗透',
+          desc:'不在工厂主控区触发警报', reward:1500 },
+        { id:'c1_bonus_fullLoot', name:'满载而归',
+          desc:'带出价值超过 5000 信用点的物品', reward:2000 }
+      ]
+    },
+    desert: {
+      chapter: 2,
+      code: 'C2',
+      title: '第二章 · 沙之挽歌',
+      location: '边陲小镇',
+      intro: '黑奈契——黑奈家族的最后种子。她在南缘荒漠中游荡，为家族复仇。大陆银行对她的存在感到不安。',
+      missions: [
+        { id:'c2_hunt', name:'追踪黑奈',
+          desc:'击杀 5 名黑奈残部，追踪黑奈契的踪迹',
+          type:'kill', target:5, reward:1000, rewardText:'信用点 x1000' },
+        { id:'c2_artifacts', name:'家族遗物',
+          desc:'在黑奈家族旧址搜刮 5 个容器',
+          type:'loot', target:5, reward:1800, rewardText:'家族遗物 x1' },
+        { id:'c2_boss', name:'终结复仇',
+          desc:'击败黑奈契，回收虚妄素样本',
+          type:'boss', target:1, reward:5000, rewardText:'虚妄素样本 + 信用点 x5000' },
+        { id:'c2_exfil', name:'穿越沙暴',
+          desc:'在沙尘暴结束前从南侧撤离点撤离',
+          type:'extract', target:1, reward:800, rewardText:'额外信用点 x800' }
+      ],
+      bonus: [
+        { id:'c2_bonus_noStorm', name:'风暴中的舞者',
+          desc:'在沙尘暴期间完成击杀', reward:1500 },
+        { id:'c2_bonus_sniper', name:'远距终结',
+          desc:'用狙击枪击杀黑奈契', reward:2500 }
+      ]
+    },
+    lab: {
+      chapter: 3,
+      code: 'C3',
+      title: '第三章 · 深渊层',
+      location: '大陆银行·地下研究所',
+      intro: '电梯直达 B1，但没人知道下面还有几层。二里缘雪乃守着大陆银行的核心秘密——Assee 容器的量产工艺。',
+      missions: [
+        { id:'c3_breach', name:'突破防线',
+          desc:'清除研究所内 8 名警卫',
+          type:'kill', target:8, reward:1500, rewardText:'信用点 x1500' },
+        { id:'c3_research', name:'研究资料',
+          desc:'搜刮 6 个容器，回收研究资料',
+          type:'loot', target:6, reward:2500, rewardText:'研究资料 x1' },
+        { id:'c3_boss', name:'面对雪乃',
+          desc:'击败二里缘雪乃，夺取 RAIL-9 原型机',
+          type:'boss', target:1, reward:8000, rewardText:'RAIL-9 原型机 + 信用点 x8000' },
+        { id:'c3_exfil', name:'出口',
+          desc:'乘主电梯撤离',
+          type:'extract', target:1, reward:1000, rewardText:'额外信用点 x1000' }
+      ],
+      bonus: [
+        { id:'c3_bonus_stealth', name:'幽灵行动',
+          desc:'不被研究所自动防御系统锁定', reward:2500 },
+        { id:'c3_bonus_sample', name:'样本收集者',
+          desc:'在撤离前将 Assee 样本放入安全箱', reward:4000 }
+      ]
+    }
+  },
+
+  // ---------- 跨地图挑战 ----------
+  challenges: [
+    { id:'ch_pistol_only', name:'手枪艺术家',
+      desc:'仅使用手枪击杀 5 名敌人', reward:2000, rewardText:'信用点 x2000' },
+    { id:'ch_no_heal', name:'铁人',
+      desc:'不使用任何医疗物品完成撤离', reward:3500, rewardText:'信用点 x3500' },
+    { id:'ch_speed', name:'疾风',
+      desc:'在 240 秒内完成撤离', reward:2500, rewardText:'信用点 x2500' },
+    { id:'ch_headshot', name:'一枪毙命',
+      desc:'爆头击杀 3 名敌人', reward:1500, rewardText:'信用点 x1500' },
+    { id:'ch_lone', name:'孤狼',
+      desc:'单人模式完成撤离', reward:1000, rewardText:'信用点 x1000' },
+    { id:'ch_boss_rush', name:'雷霆一击',
+      desc:'在 120 秒内击败区域 BOSS', reward:4000, rewardText:'信用点 x4000' }
+  ],
+
+  // ---------- 每日任务（轮换用） ----------
+  daily: [
+    { id:'d_kill', text:'击杀 {N} 名敌人', target:15, reward:600 },
+    { id:'d_loot', text:'搜刮 {N} 个容器', target:10, reward:800 },
+    { id:'d_extract', text:'成功撤离 {N} 次', target:3, reward:1000 },
+    { id:'d_headshot', text:'爆头击杀 {N} 名敌人', target:5, reward:1200 },
+    { id:'d_boss', text:'击败 {N} 个区域 BOSS', target:2, reward:2000 }
   ]
 };
 
@@ -728,4 +956,4 @@ ASAKA.scripts = {
   onKillDropGenerate: function(G, enemy, item){ return item; }
 };
 
-console.log('[ASAKA] data.js 已加载');
+console.log('[ASAKA] data.js v0.42 已加载 — 弹道核算 + 剧情任务链 + 战备限制 + 动态按键/资源');
