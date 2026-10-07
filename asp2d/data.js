@@ -156,9 +156,29 @@ ASAKA.config = {
 
 ASAKA.assets = {
   spriteSize: 96,
-  characterPortrait: function(id){ return 'ch_' + id + '.png'; },
-  enemyPortrait: function(id){ return 'enemy_' + id + '.png'; },
-  bossPortrait: function(id){ return 'boss_' + id + '.png'; }
+  /* 角色立绘映射：id → 文件路径 */
+  _charMap: {
+    kate:    '../image/Kate_wm.png',
+    lingna:  '../image/Lingna_wm.png',
+    captain: null,                          /* 队长无立绘 */
+    buwen:   '../image/BuwenYe_wm.png'
+  },
+  /* BOSS 立绘映射：id → 文件路径 */
+  _bossMap: {
+    yukino_b: '../image/NirienYukino_wm.png',
+    krona_b:  '../image/KronaChi_wm.png'
+  },
+  characterPortrait: function(id){
+    if(id in this._charMap) return this._charMap[id];
+    return 'ch_' + id + '.png';
+  },
+  enemyPortrait: function(id){
+    return 'enemy_' + id + '.png';
+  },
+  bossPortrait: function(id){
+    if(id in this._bossMap) return this._bossMap[id];
+    return 'boss_' + id + '.png';
+  }
 };
 
 ASAKA.hitZones = [
