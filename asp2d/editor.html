@@ -1,0 +1,2002 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ASP2D Mod 开发工具 · data.js 编辑器</title>
+<style>
+:root{
+  --bg:#05070a;--bg2:#0a1018;--panel:#0e1622;--panel2:#131e2c;
+  --line:rgba(80,125,175,.22);--line2:rgba(100,160,220,.45);
+  --fg:#d8e2ee;--fg2:#8fb0cc;--fg3:#5c82a8;
+  --accent:#4aa8ff;--accent2:#8fd0ff;--ok:#5fd47a;--warn:#ffd93d;--err:#ff6b6b;
+  --gold:#ffcc33;--purple:#b98cff;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;background:var(--bg);color:var(--fg);font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;font-size:13px;overflow:hidden}
+button{cursor:pointer;font-family:inherit;border:none;background:none;color:inherit}
+input,select,textarea{font-family:inherit}
+
+/* 顶部工具栏 */
+#toolbar{
+  height:52px;display:flex;align-items:center;padding:0 14px;gap:12px;
+  background:linear-gradient(180deg,#101a26,#080e17);border-bottom:1px solid var(--line);
+  flex-shrink:0;
+}
+.brand{
+  font-size:14px;font-weight:800;letter-spacing:2px;
+  background:linear-gradient(90deg,#6ad0ff,#b98cff,#ff8fb0);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  white-space:nowrap;
+}
+.tools{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.tools button{
+  padding:7px 14px;border-radius:8px;font-size:12px;
+  background:rgba(40,70,105,.55);border:1px solid var(--line2);color:#cfe4f8;
+  transition:.15s;
+}
+.tools button:hover:not(:disabled){background:rgba(60,110,170,.7);color:#e8f4ff}
+.tools button:disabled{opacity:.35;cursor:not-allowed}
+.tools button.primary{background:linear-gradient(180deg,rgba(60,140,90,.7),rgba(30,80,50,.85));border-color:rgba(120,220,160,.6);color:#e0ffe8}
+.tools button.gold{background:linear-gradient(180deg,rgba(140,110,40,.7),rgba(70,50,15,.85));border-color:rgba(255,210,90,.6);color:#ffe8a8}
+
+/* 状态条 */
+#statusbar{
+  padding:5px 14px;font-size:11.5px;color:var(--fg2);
+  background:rgba(10,18,28,.85);border-bottom:1px solid var(--line);
+  display:flex;gap:12px;align-items:center;flex-shrink:0;
+}
+#statusbar .dot{width:7px;height:7px;border-radius:50%;background:var(--fg3);flex-shrink:0}
+#statusbar.ok .dot{background:var(--ok)}
+#statusbar.warn .dot{background:var(--warn)}
+#statusbar.err .dot{background:var(--err)}
+
+/* 主界面 3 列 */
+#main{
+  flex:1;display:grid;grid-template-columns:200px 300px 1fr;
+  height:calc(100vh - 52px - 27px);overflow:hidden;
+}
+aside{background:var(--bg2);border-right:1px solid var(--line);overflow-y:auto}
+.side-h{
+  padding:10px 14px;font-size:11px;letter-spacing:3px;color:var(--fg3);
+  border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg2);z-index:1;
+}
+#catList{padding:6px 0}
+.cat-item{
+  padding:8px 14px;font-size:12.5px;color:#b8cfe4;cursor:pointer;
+  display:flex;align-items:center;gap:8px;
+  border-left:3px solid transparent;transition:.12s;
+}
+.cat-item:hover{background:rgba(50,90,140,.25);color:#e0f0ff}
+.cat-item.on{background:rgba(60,120,185,.35);color:#e8f4ff;border-left-color:var(--accent2)}
+.cat-item .cnt{margin-left:auto;font-size:10px;color:var(--fg3);background:rgba(0,0,0,.3);padding:1px 6px;border-radius:8px}
+.cat-item.on .cnt{color:#a8e0ff;background:rgba(60,120,185,.4)}
+
+#listPane,#editorPane{
+  display:flex;flex-direction:column;overflow:hidden;background:var(--panel);
+}
+#listPane{border-right:1px solid var(--line)}
+.pane-h{
+  padding:8px 12px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:8px;background:rgba(15,25,38,.7);
+  flex-shrink:0;min-height:38px;
+}
+.pane-h>span{font-size:12px;letter-spacing:2px;color:var(--accent2);font-weight:600}
+.pane-actions{display:flex;gap:5px;margin-left:auto;align-items:center}
+.pane-actions button{
+  padding:4px 10px;border-radius:6px;font-size:11px;
+  background:rgba(60,100,150,.5);border:1px solid var(--line2);color:#cfe8ff;
+}
+.pane-actions button:hover:not(:disabled){background:rgba(80,130,190,.7)}
+.pane-actions button:disabled{opacity:.3;cursor:not-allowed}
+.pane-actions button.danger{background:rgba(120,40,40,.6);border-color:rgba(255,110,110,.5);color:#ffc8c8}
+.pane-actions button.danger:hover:not(:disabled){background:rgba(160,50,50,.8)}
+.pane-actions input[type=text]{
+  width:120px;padding:4px 8px;font-size:11px;border-radius:6px;
+  background:rgba(0,0,0,.4);border:1px solid var(--line);color:var(--fg);
+}
+.pane-actions input[type=text]:focus{outline:none;border-color:var(--accent2)}
+
+/* 列表 */
+#listBody{flex:1;overflow-y:auto;padding:6px 0}
+.list-item{
+  padding:7px 12px;font-size:12px;color:#b8cfe4;cursor:pointer;
+  display:flex;align-items:center;gap:8px;border-left:3px solid transparent;
+}
+.list-item:hover{background:rgba(50,90,140,.2)}
+.list-item.on{background:rgba(60,120,185,.32);color:#e8f4ff;border-left-color:var(--accent2)}
+.list-item .li-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.list-item .li-id{font-size:10px;color:var(--fg3);font-family:ui-monospace,Menlo,Consolas,monospace}
+.list-item.on .li-id{color:#8fb4d8}
+.list-item .li-rar{
+  width:5px;height:16px;border-radius:2px;flex-shrink:0;
+}
+.list-empty{padding:24px 12px;text-align:center;color:var(--fg3);font-size:12px}
+
+/* 编辑器 */
+#editorBody{flex:1;overflow-y:auto;padding:14px}
+.empty{padding:60px 20px;text-align:center;color:var(--fg3);font-size:13px;line-height:2}
+.field{margin-bottom:12px}
+.field label{
+  display:block;font-size:11px;color:#7fa8c8;letter-spacing:1px;margin-bottom:4px;
+  display:flex;align-items:center;gap:6px;
+}
+.field label .req{color:var(--err);font-size:13px}
+.field label .key{
+  font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;
+  color:var(--fg3);background:rgba(0,0,0,.35);padding:1px 5px;border-radius:3px;
+}
+.field input[type=text],
+.field input[type=number],
+.field select,
+.field textarea{
+  width:100%;padding:7px 10px;font-size:12.5px;
+  background:rgba(0,0,0,.42);border:1px solid var(--line);color:var(--fg);
+  border-radius:6px;transition:.12s;
+}
+.field input:focus,.field select:focus,.field textarea:focus{
+  outline:none;border-color:var(--accent2);background:rgba(0,0,0,.55);
+}
+.field textarea{min-height:60px;resize:vertical;font-family:inherit;line-height:1.55}
+.field textarea.code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px}
+.field .hint{font-size:10.5px;color:var(--fg3);margin-top:3px;line-height:1.5}
+.field .hint.err{color:#ff9090}
+.field .hint.warn{color:#ffc060}
+.field .hint.ok{color:#7be0a0}
+.field.check label{display:flex;gap:8px;align-items:center;cursor:pointer;margin-bottom:0}
+.field.check input[type=checkbox]{
+  width:16px;height:16px;accent-color:#4aa8ff;
+}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.field.wide{grid-column:1/-1}
+
+.section-sep{
+  margin:18px 0 12px;padding-top:12px;border-top:1px dashed var(--line);
+  font-size:11px;letter-spacing:3px;color:var(--fg3);font-weight:600;
+}
+
+.editor-actions{
+  display:flex;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid var(--line);
+  flex-wrap:wrap;
+}
+.editor-actions button{
+  padding:8px 16px;border-radius:7px;font-size:12px;
+  background:rgba(60,100,150,.55);border:1px solid var(--line2);color:#cfe8ff;
+}
+.editor-actions button:hover{background:rgba(80,130,190,.7)}
+.editor-actions button.danger{background:rgba(120,40,40,.6);border-color:rgba(255,110,110,.5);color:#ffc8c8}
+
+/* 预览 */
+#previewOverlay,#helpOverlay{
+  position:fixed;inset:0;background:rgba(4,8,14,.96);z-index:100;
+  display:none;flex-direction:column;
+}
+#previewOverlay.on,#helpOverlay.on{display:flex}
+#previewContent{
+  flex:1;overflow:auto;padding:16px;
+  font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;
+  line-height:1.55;color:#cfe8ff;white-space:pre;tab-size:2;
+  background:rgba(0,0,0,.35);
+}
+#helpBody{
+  flex:1;overflow-y:auto;padding:24px 32px;line-height:1.85;font-size:13px;
+  max-width:860px;margin:0 auto;width:100%;color:#c8ddf0;
+}
+#helpBody h3{color:var(--accent2);font-size:15px;margin:20px 0 8px;letter-spacing:2px}
+#helpBody h4{color:#a8c8e6;font-size:13px;margin:14px 0 6px}
+#helpBody p{margin-bottom:8px}
+#helpBody ul{margin:6px 0 12px 22px}
+#helpBody li{margin-bottom:4px}
+#helpBody code{
+  background:rgba(80,140,200,.18);padding:1px 6px;border-radius:4px;
+  font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:#a8e0ff;
+}
+#helpBody kbd{
+  display:inline-block;padding:1px 7px;border-radius:4px;font-size:11.5px;
+  background:linear-gradient(180deg,rgba(60,95,140,.7),rgba(30,55,85,.9));
+  border:1px solid rgba(120,180,240,.4);color:#e0f0ff;
+  font-family:ui-monospace,Menlo,Consolas,monospace;
+}
+#helpBody .tip{
+  background:rgba(30,60,90,.45);border-left:3px solid var(--accent);
+  padding:10px 14px;border-radius:0 8px 8px 0;margin:10px 0;font-size:12.5px;
+}
+
+/* 提示气泡 */
+.tip-bubble{
+  position:absolute;z-index:200;max-width:280px;
+  background:rgba(20,35,55,.98);border:1px solid var(--line2);
+  padding:8px 12px;border-radius:8px;font-size:11.5px;line-height:1.6;
+  color:#c8ddf0;box-shadow:0 6px 22px rgba(0,0,0,.7);pointer-events:none;
+  display:none;
+}
+.tip-bubble.on{display:block}
+
+/* 滚动条 */
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:rgba(0,0,0,.2)}
+::-webkit-scrollbar-thumb{background:rgba(100,170,240,.45);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:rgba(130,200,255,.7)}
+
+/* 响应式 */
+@media(max-width:900px){
+  #main{grid-template-columns:160px 220px 1fr}
+  .field-row{grid-template-columns:1fr}
+  .field-row-3{grid-template-columns:1fr 1fr}
+}
+@media(max-width:640px){
+  #main{grid-template-columns:1fr;grid-template-rows:auto auto 1fr;height:calc(100vh - 52px - 27px)}
+  aside{max-height:120px;border-right:none;border-bottom:1px solid var(--line)}
+  #catList{display:flex;flex-wrap:wrap;padding:4px}
+  .cat-item{padding:6px 10px;border-left:none;border-bottom:2px solid transparent;font-size:11.5px}
+  .cat-item.on{border-left:none;border-bottom-color:var(--accent2)}
+  .cat-item .cnt{display:none}
+  #listPane{max-height:150px;border-right:none;border-bottom:1px solid var(--line)}
+}
+
+/* 校验徽章 */
+.badge{
+  display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;
+  font-weight:600;letter-spacing:.5px;
+}
+.badge.err{background:rgba(255,90,90,.2);color:#ff9a9a;border:1px solid rgba(255,90,90,.5)}
+.badge.warn{background:rgba(255,210,60,.18);color:#ffd76b;border:1px solid rgba(255,210,60,.45)}
+.badge.ok{background:rgba(90,220,140,.18);color:#7be0a0;border:1px solid rgba(90,220,140,.45)}
+
+/* 主内容容器 */
+#app{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <header id="toolbar">
+    <div class="brand">⚙ ASP2D Mod 开发工具</div>
+    <div class="tools">
+      <button id="btnOpen">📂 打开 data.js</button>
+      <button id="btnDownload" disabled>💾 导出 data.js</button>
+      <button id="btnPreview" disabled>👁 源码预览</button>
+      <button id="btnValidate" disabled>✓ 校验全部</button>
+      <button id="btnHelp">? 帮助</button>
+    </div>
+  </header>
+
+  <div id="statusbar"><span class="dot"></span><span id="statusText">等待加载 data.js …</span></div>
+
+  <div id="main" style="display:none">
+    <aside>
+      <div class="side-h">数 据 类 别</div>
+      <div id="catList"></div>
+    </aside>
+
+    <div id="listPane">
+      <div class="pane-h">
+        <span id="listTitle">—</span>
+        <div class="pane-actions">
+          <button id="btnAdd" title="新增条目">+ 新增</button>
+          <input id="listFilter" type="text" placeholder="筛选..." />
+        </div>
+      </div>
+      <div id="listBody"></div>
+    </div>
+
+    <div id="editorPane">
+      <div class="pane-h">
+        <span id="editorTitle">选择条目以编辑</span>
+        <div class="pane-actions">
+          <button id="btnDup" disabled>复制</button>
+          <button id="btnDel" class="danger" disabled>删除</button>
+        </div>
+      </div>
+      <div id="editorBody">
+        <div class="empty">
+          <div style="font-size:32px;opacity:.35;margin-bottom:12px">📦</div>
+          请从左侧列表选择类别与条目<br>
+          <span style="font-size:11px;color:var(--fg3)">或点击「打开 data.js」加载文件</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 源码预览 -->
+<div id="previewOverlay">
+  <div class="pane-h">
+    <span>源码预览 · data.js</span>
+    <div class="pane-actions">
+      <button id="btnCopySrc">📋 复制</button>
+      <button id="btnClosePreview">关闭</button>
+    </div>
+  </div>
+  <pre id="previewContent"></pre>
+</div>
+
+<!-- 帮助 -->
+<div id="helpOverlay">
+  <div class="pane-h">
+    <span>使用帮助</span>
+    <div class="pane-actions"><button id="btnCloseHelp">关闭</button></div>
+  </div>
+  <div id="helpBody">
+    <h3>ASP2D Mod 开发工具</h3>
+    <p>这是一个纯前端、单文件的 <code>data.js</code> 可视化编辑器。用于修改 <b>Asaka Straight Project 2D</b> 游戏数据。</p>
+
+    <h3>基本流程</h3>
+    <ul>
+      <li>点击顶部 <b>「📂 打开 data.js」</b>，选择你项目里的 <code>data.js</code> 文件。</li>
+      <li>左侧选择 <b>数据类别</b>（武器 / 弹药 / 护甲 …）。</li>
+      <li>中间列表选择具体条目，右侧表单编辑。</li>
+      <li>修改会自动保存在内存中；随时可点 <b>「👁 源码预览」</b> 查看生成结果。</li>
+      <li>点击 <b>「💾 导出 data.js」</b> 下载新文件，替换项目里的 <code>data.js</code> 即可。</li>
+    </ul>
+
+    <h3>校验与提示</h3>
+    <p>每次编辑都会做实时校验：</p>
+    <ul>
+      <li><b>必填字段</b>（红点标记）为空会红框提示。</li>
+      <li><b>ID 冲突</b>（同一类别里 ID 重复）会给出错误提示，无法正常导出。</li>
+      <li><b>数值越界</b>（比如穿透 &gt; 10、射速为负数）会给黄色警告，但仍可导出。</li>
+      <li>每个字段下方会显示一行小提示，说明该字段的常规取值参考。</li>
+    </ul>
+
+    <h3>数据类别</h3>
+    <ul>
+      <li><b>基础数据</b>：config、assets、hitZones、damageModel、rarity、valueTable</li>
+      <li><b>武器系统</b>：weapons、ammoTypes、attach（枪口 / 瞄具 / 弹匣 / 握把）、playerSkills、bossSkills</li>
+      <li><b>防具系统</b>：helmetShells、helmetVisors、helmetEars、vestFibers、vestPlates、backpacks、chestRigs</li>
+      <li><b>物品</b>：consumables、nades、valuables</li>
+      <li><b>角色与敌人</b>：characters、enemyTypes、aiTypes、initialLoadout</li>
+      <li><b>关卡与玩法</b>：maps、tasks、chatLines、killStreakTiers、events、difficulty、killDrops</li>
+      <li><b>高级</b>：scripts（脚本钩子）、其他未归类数据（JSON 编辑器）</li>
+    </ul>
+
+    <h3>关于「复制 / 删除 / 新增」</h3>
+    <ul>
+      <li><b>新增</b>：会以当前类别默认字段创建一个空条目，ID 自动生成 <code>new_xxx_1</code>，请手动修改。</li>
+      <li><b>复制</b>：复制当前条目，ID 自动加 <code>_copy</code> 后缀，避免冲突。</li>
+      <li><b>删除</b>：直接删除当前条目，有二次确认。删除后按 <kbd>Ctrl</kbd>+<kbd>Z</kbd> 可撤销一次。</li>
+    </ul>
+
+    <h3>注意事项</h3>
+    <div class="tip">
+      <b>⚠ 函数不会被 JSON 化。</b> 脚本钩子（如 <code>ASAKA.scripts.onTick</code>）是真正的 JS 函数，本工具会以文本形式保留其源码并原样写回。如果函数源码里含注释，格式化时可能会丢失，建议重要脚本手动备份。
+    </div>
+    <div class="tip">
+      <b>⚠ 不会自动加载。</b> 本工具需要你手动选择 <code>data.js</code> 文件。因为浏览器的安全策略，除非你把它和 data.js 放在同一个本地服务器下，否则无法自动读取。
+    </div>
+    <div class="tip">
+      <b>⚠ 保留原文件。</b> 导出前请务必备份原 <code>data.js</code>。本工具会重新生成整个文件（除头部注释外），可能丢失手工添加的注释。
+    </div>
+
+    <h3>快捷键</h3>
+    <ul>
+      <li><kbd>Ctrl</kbd>+<kbd>S</kbd>：源码预览</li>
+      <li><kbd>Ctrl</kbd>+<kbd>E</kbd>：导出</li>
+      <li><kbd>Ctrl</kbd>+<kbd>Z</kbd>：撤销上一次删除</li>
+      <li><kbd>Esc</kbd>：关闭弹层</li>
+    </ul>
+  </div>
+</div>
+
+<input type="file" id="fileInput" accept=".js,.txt,text/javascript" hidden>
+
+<script>
+(function(){
+'use strict';
+
+/* ============================================================
+   状态
+   ============================================================ */
+const state = {
+  rawSource: '',
+  header: '',
+  data: null,
+  currentCategory: null,
+  currentId: null,
+  lastDeleted: null,
+  errors: [],
+  warnings: [],
+};
+
+/* ============================================================
+   常量：字段选项
+   ============================================================ */
+const RARITY_OPTS = ['common','green','blue','yellow','orange','red','bronze','silver','gold','inc'];
+const CLS_OPTS    = ['pistol','smg','rifle','sniper','shotgun','lmg','launcher'];
+const SND_OPTS    = ['pistol','smg','rifle','sniper','shotgun','lmg'];
+const CONS_CLS    = ['heal','armor','coupling'];
+const NADE_EFFECT = ['flash','smoke','stun','frag','fire','thermo'];
+
+/* ============================================================
+   类别定义（schema）
+   ============================================================ */
+const CATEGORIES = [
+  /* ---- 武器 ---- */
+  {
+    path:'weapons', label:'🔫 武器', icon:'🔫', kind:'array', idKey:'id', nameKey:'n',
+    fields:[
+      {k:'id',   label:'ID',   type:'text', req:true, hint:'唯一标识符，推荐英文小写数字，如 ak762 / p9'},
+      {k:'n',    label:'名称', type:'text', req:true, hint:'显示名称，如「AK-762 突击步枪」'},
+      {k:'cls',  label:'类别', type:'select', opts:CLS_OPTS, hint:'决定瞄准行为与可用配件槽'},
+      {k:'cal',  label:'口径', type:'text', hint:'必须匹配 ammoTypes 里的某个 cal（如 9mm / 5.56mm）'},
+      {k:'e',    label:'动能 (J)', type:'number', hint:'E = ½mv²。9mm≈520，.45ACP≈630，5.56≈1770，7.62≈2100，.50BMG≈15500'},
+      {k:'pen',  label:'穿透', type:'number', hint:'0-10。0=纯软目标；3=轻甲；5=中甲；9=反器材'},
+      {k:'rpm',  label:'射速 RPM', type:'number', hint:'手枪 200-400，冲锋枪 700-1200，步枪 600-900，狙击 30-120'},
+      {k:'mag',  label:'弹匣', type:'number', hint:'一个弹匣的子弹数'},
+      {k:'res',  label:'备弹', type:'number', hint:'初始携带的总备弹数'},
+      {k:'rel',  label:'换弹 (s)', type:'number', hint:'基础换弹时间（秒）'},
+      {k:'spd',  label:'初速 (m/s)', type:'number', hint:'手枪 290-470，步枪 700-1000，磁轨 2400'},
+      {k:'rng',  label:'射程 (m)', type:'number', hint:'超过此距离动能快速衰减'},
+      {k:'spr',  label:'散布', type:'number', hint:'越小越准。0.001=极准，0.05=中等，0.14=霰弹'},
+      {k:'auto', label:'全自动', type:'checkbox'},
+      {k:'rar',  label:'稀有度', type:'select', opts:RARITY_OPTS},
+      {k:'snd',  label:'枪声音效', type:'select', opts:SND_OPTS},
+      {k:'rec',  label:'后坐', type:'number', hint:'0.5=轻微，1.4=中等，2.4=栓动，3.4=反器材'},
+      {k:'pellets', label:'弹丸数', type:'number', hint:'仅霰弹枪使用，一次射击散射的弹丸数量，默认 1'},
+      {k:'isLauncher', label:'榴弹发射器', type:'checkbox', hint:'弹管式武器，只能装填 43mm 榴弹'},
+      {k:'flavor', label:'风味文本', type:'textarea', wide:true, hint:'显示在物品详情里的描述文本'},
+    ]
+  },
+
+  /* ---- 弹药 ---- */
+  {
+    path:'ammoTypes', label:'🔸 弹药', icon:'🔸', kind:'dict', nameKey:'n',
+    fields:[
+      {k:'cal',  label:'口径', type:'text', hint:'同一口径下的不同弹种靠 key 区分（如 9mm / 9mm_ap）'},
+      {k:'n',    label:'名称', type:'text', req:true},
+      {k:'pen',  label:'穿透', type:'number', hint:'覆盖武器的 pen 值'},
+      {k:'eMul', label:'动能倍率', type:'number', hint:'覆盖武器动能。标准弹 1.00，穿甲弹 1.05，龙息 0.85'},
+      {k:'rar',  label:'稀有度', type:'select', opts:RARITY_OPTS},
+      {k:'tier', label:'出现等级', type:'number', hint:'0=普通掉落，4=高级掉落，5=极稀有'},
+      {k:'flavor', label:'风味文本', type:'textarea', wide:true},
+    ]
+  },
+
+  /* ---- 配件 ---- */
+  {
+    path:'attach.muzzle', label:'⚙ 枪口配件', icon:'⚙', kind:'array', idKey:'id', nameKey:'n',
+    fields:[
+      {k:'id', label:'ID', type:'text', req:true, hint:'如 m_sup / m_comp / m_brk'},
+      {k:'n',  label:'名称', type:'text', req:true},
+      {k:'rar', label:'稀有度', type:'select', opts:RARITY_OPTS},
+      {k:'d',  label:'属性修正', type:'json', wide:true,
+       hint:'JSON 对象，可用键：e（动能倍率 +）、spr（散布修正，负=更准）、rec（后坐，负=更稳）、sndMod（音效）'},
+      {k:'flavor', label:'风味文本', type:'textarea', wide:true},
+    ]
+  },
+  {
+    path:'attach.sight', label:'🔭 瞄具', icon:'🔭', kind:'array', idKey:'id', nameKey:'n',
+    fields:[
+      {k:'id', label:'ID', type:'text', req:true, hint:'如 s_iron / s_red / s_holo / s_scope4'},
+      {k:'n',  label:'名称', type:'text', req:true},
+      {k:'rar', label:'稀有度', type:'select', opts:RARITY_OPTS},
+      {k:'d',  label:'属性修正', type:'json', wide:true,
+       hint:'可用键：spr（散布，负=更准）、rng（射程倍率）、zoom（倍镜倍率，如 2.5）'},
+      {k:'flavor', label:'风味文本', type:'textarea', wide:true},
+    ]
+  },
+  {
+    path:'attach.mag', label:'📦 弹匣', icon:'📦', kind:'array', idKey:'id', nameKey:'n',
+    fields:[
+      {k:'id', label:'ID', type:'text', req:true, hint:'如 g_ext / g_quick / g_drum'},
+      {k:'n',  label:'名称', type:'text', req:true},
+      {k:'rar', label:'稀有度', type:'select', opts:RARITY_OPTS},
+      {k:'d',  label:'属性修正', type:'json', wide:true,
+       hint:'可用键：mag（弹匣容量倍率，如 +0.5）、rel（换弹时间，负=更快）'},
+      {k:'flavor', label:'风味文本', type:'textarea', wide:true},
+    ]
+  },
+  {
+    path:'attach.grip', label:'✊ 握把', icon:'✊', kind:'array', idKey:'id', nameKey:'n',
+    fields:[
+      {k:'id', label:'ID', type:'text', req:true, hint:'如 h_vert / h_ang / h_ergo'},
+      {k:'n',  label:'名称', type:'text', req:true},
+      {k:'rar', label:'稀有度', type:'select', opts:RARITY_OPTS},
+      {k:'d',  label:'属性修正', type:'json', wide:true,
+       hint:'可用键：rec（后坐，负=更稳）、spr（散布）、rel（换弹）'},
+      {k:'flavor', label:'风味文本', type:'textarea', wide:true},
+    ]
+  },
+
+  /* ---- 护甲 ---- */
+  {
+    path:'helmetShells', label:'⛑ 头盔壳', icon:'⛑', kind:'array', idKey:'id', nameKey:'n',
+    fields:[
+      {k:'id', label:'ID', type:'text', req:true, hint:'如 hs0（无）/ hs1 … hs8（Incredible）'},
+      {k:'n',  label:'名称', type:'text', req:true},
+      {k:'lv', label:'等级', type:'number', hint:'0-8'},
+      {k:'rar', label:'稀有度', type:'select', opts:RARITY_OPTS},
+      {k:'red', label:'减伤率', type:'number', hint:'0-1，如 0.52 表示吸收 52% 动能'},
+      {k:'energyPerPct', label:'每点耐久吸收能量', type:'number', hint:'越大越耐用'},
+      {k:'flavor', label:'风味文本', type:'textarea', wide:true},
+    ]
+  },
+  {
+    path:'helmetVisors', label:'🕶 面罩', icon:'🕶', kind:'array', idKey:'id', nameKey:'n',
+    fields:[
+      {k:'id', label:'ID', type:'text', req:true, hint:'如 hv0 … hv8'},
+      {k:'n',  label:'名称', type:'text', req:true},
+      {k:'lv', label:'等级', type:'number'},
+      {k:'rar', label:'稀有度', type:'select', opts:RARITY_OPTS},
+      {k:'red', label:'减伤率', type:'number'},
+      {k:'energyPerPct', label:'每点耐久吸收能量', type:'number'},
+      {k:'visionPenalty', label:'视野惩罚', type:'number', hint:'0-0.1'},
+      {k:'flavor', label:'风味文本', type:'textarea', wide:true},
+    ]
+  },
+  {
+    path:'helmetEars', label:'🎧 耳机', icon:'🎧', kind:'array', idKey:'id', nameKey:'n',
+    fields:[
+      {k:'id', label:'ID', type:'text', req:true, hint:'如 he0 … he8'},
+      {k:'n',  label:'名称', type:'text', req:true},
+      {k:'lv', label:'等级', type:'number'},
+      {k:'rar', label:'稀有度', type:'select', opts:RARITY_OPTS},
+      {k:'hearingMul', label:'拾音倍率', type:'number', hint:'1.0=基础；2.0=精锐；2.8=Incredible'},
+      {k:'flashResist', label:'闪光抗性', type:'number', hint:'0-1，如 0.4 表示闪光时间减少 40%'},
+      {k:'flavor', label:'风味文本', type:'textarea', wide:true},
+    ]
+  },
+  {
+    path:'vestFibers', label:'🦺 纤维层', icon:'🦺', kind:'array', idKey:'id', nameKey:'n',
+    fields:[
+      {k:'id', label:'ID', type:'text', req:true, hint:'如 vf0 … vf8'},
+      {k:'n',  label:'名称', type:'text', req:true},
+      {k:'lv', label:'等级', type:'number'},
+      {k:'rar', label:'稀有度', type:'select', opts:RARITY_OPTS},
+      {k:'red', label:'减伤率', type:'number'},
+      {k:'energyPerPct', label:'每点耐久吸收能量', type:'number'},
+      {k:'flavor', label:'风味文本', type:'textarea', wide:true},
+    ]
+  },
+  {
+    path:'vestPlates', label:'🛡 插板', icon:'🛡', kind:'array', idKey:'id', nameKey:'n',
+    fields:[
+      {k:'id', label:'ID', type:'text', req:true, hint:'如 vp0 … vp8'},
+      {k:'n',  label:'名称', type:'text', req:true},
+      {k:'lv', label:'等级', type:'number'},
+      {k:'rar', label:'稀有度', type:'select', opts:RARITY_OPTS},
+      {k:'red', label:'减伤率', type:'number'},
+      {k:'energyPerPct', label:'每点耐久吸收能量', type:'number'},
+      {k:'flavor', label:'风味文本', type:'textarea', wide:true},
+    ]
+  },
+
+  /* ---- 容器 ---- */
+  {
+    path:'backpacks', label:'🎒 背包', icon:'🎒', kind:'array', idKey:'id', nameKey:'n',
+    fields:[
+      {k:'id', label:'ID', type:'text', req:true, hint:'如 bp0 … bp8'},
+      {k:'n',  label:'名称', type:'text', req:true},
+      {k:'lv', label:'等级', type:'number'},
+      {k:'rar', label:'稀有度', type:'select', opts:RARITY_OPTS},
+      {k:'cap', label:'容量 (格)', type:'number', hint:'每格 1 件物品'},
+      {k:'stk', label:'堆叠加成', type:'number', hint:'保留字段，通常为 0'},
+      {k:'flavor', label:'风味文本', type:'textarea', wide:true},
+    ]
+  },
+  {
+    path:'chestRigs', label:'🧥 胸挂', icon:'🧥', kind:'array', idKey:'id', nameKey:'n',
+    fields:[
+      {k:'id', label:'ID', type:'text', req:true, hint:'如 cr0 … cr8'},
+      {k:'n',  label:'名称', type:'text', req:true},
+      {k:'lv', label:'等级', type:'number'},
+      {k:'rar', label:'稀有度', type:'select', opts:RARITY_OPTS},
+      {k:'cap', label:'容量 (格)', type:'number'},
+      {k:'stk', label:'堆叠加成', type:'number'},
+      {k:'flavor', label:'风味文本', type:'textarea', wide:true},
+    ]
+  },
+
+  /* ---- 物品 ---- */
+  {
+    path:'consumables', label:'💊 消耗品', icon:'💊', kind:'array', idKey:'id', nameKey:'n',
+    fields:[
+      {k:'id', label:'ID', type:'text', req:true, hint:'如 bandage / medkit / surgery'},
+      {k:'n',  label:'名称', type:'text', req:true},
+      {k:'cls', label:'类别', type:'select', opts:CONS_CLS, hint:'heal=治疗；armor=护甲修复；coupling=耦合补充'},
+      {k:'rar', label:'稀有度', type:'select', opts:RARITY_OPTS},
+      {k:'heal', label:'治疗量', type:'number'},
+      {k:'stopBleed', label:'止血', type:'checkbox'},
+      {k:'fixLimbs', label:'修复所有断裂', type:'checkbox'},
+      {k:'fixLimbOne', label:'修复一处断裂', type:'checkbox'},
+      {k:'repairPlate', label:'插板修复量', type:'number', hint:'0-999'},
+      {k:'coupling', label:'耦合恢复量', type:'number'},
+      {k:'stk', label:'堆叠上限', type:'number'},
+      {k:'useTime', label:'使用时间 (s)', type:'number'},
+      {k:'buff', label:'Buff 效果', type:'text', hint:'noPain / speed / stamina'},
+      {k:'flavor', label:'风味文本', type:'textarea', wide:true},
+    ]
+  },
+  {
+    path:'nades', label:'💣 投掷物', icon:'💣', kind:'array', idKey:'id', nameKey:'n',
+    fields:[
+      {k:'id', label:'ID', type:'text', req:true, hint:'如 frag / flash / smoke / thermo_43'},
+      {k:'n',  label:'名称', type:'text', req:true},
+      {k:'rar', label:'稀有度', type:'select', opts:RARITY_OPTS},
+      {k:'fuse', label:'引信 (s)', type:'number'},
+      {k:'radius', label:'半径', type:'number'},
+      {k:'effect', label:'效果', type:'select', opts:NADE_EFFECT},
+      {k:'damage', label:'伤害', type:'number'},
+      {k:'duration', label:'持续时间 (s)', type:'number'},
+      {k:'stk', label:'堆叠上限', type:'number'},
+      {k:'onlyLauncher', label:'仅榴弹发射器', type:'checkbox', hint:'手抛无法使用'},
+      {k:'flavor', label:'风味文本', type:'textarea', wide:true},
+    ]
+  },
+  {
+    path:'valuables', label:'💎 收藏物', icon:'💎', kind:'array', idKey:'id', nameKey:'n',
+    fields:[
+      {k:'id', label:'ID', type:'text', req:true, hint:'如 v_scrap / v_coin / v_core'},
+      {k:'n',  label:'名称', type:'text', req:true},
+      {k:'rar', label:'稀有度', type:'select', opts:RARITY_OPTS},
+      {k:'base', label:'基准价值', type:'number', hint:'单位 cp，实际价值会在 ±15% 波动'},
+      {k:'stk', label:'堆叠上限', type:'number'},
+      {k:'flavor', label:'风味文本', type:'textarea', wide:true},
+    ]
+  },
+
+  /* ---- 敌人 ---- */
+  {
+    path:'enemyTypes', label:'👹 敌人', icon:'👹', kind:'dict', nameKey:'n',
+    fields:[
+      {k:'n',  label:'名称', type:'text', req:true},
+      {k:'hp', label:'血量', type:'number'},
+      {k:'wpn', label:'主武器 ID', type:'text', hint:'必须匹配 weapons 里的某个 id'},
+      {k:'side', label:'副武器 ID', type:'text'},
+      {k:'shell', label:'头盔 ID', type:'text'},
+      {k:'visor', label:'面罩 ID', type:'text'},
+      {k:'ear', label:'耳机 ID', type:'text'},
+      {k:'fiber', label:'纤维 ID', type:'text'},
+      {k:'plate', label:'插板 ID', type:'text'},
+      {k:'bp', label:'背包 ID', type:'text'},
+      {k:'cr', label:'胸挂 ID', type:'text'},
+      {k:'acc', label:'命中精度', type:'number', hint:'0-1'},
+      {k:'rng', label:'视野/射程', type:'number'},
+      {k:'react', label:'反应时间', type:'number'},
+      {k:'spd', label:'移动速度', type:'number'},
+      {k:'col', label:'颜色', type:'text'},
+      {k:'pen', label:'穿透', type:'number'},
+      {k:'amt', label:'弹药量', type:'number'},
+      {k:'elite', label:'精英', type:'checkbox'},
+      {k:'super', label:'重装', type:'checkbox'},
+      {k:'boss', label:'BOSS', type:'checkbox'},
+      {k:'prazer', label:'Prazer', type:'checkbox'},
+      {k:'bossSkills', label:'BOSS 技能列表', type:'json', wide:true, hint:'数组，如 ["shieldwall","missiles"]'},
+      {k:'meleeDmg', label:'近战伤害', type:'number'},
+      {k:'meleeRange', label:'近战范围', type:'number'},
+    ]
+  },
+  {
+    path:'aiTypes', label:'🤖 人机 AI', icon:'🤖', kind:'dict', nameKey:'n',
+    fields:[
+      {k:'n',  label:'名称', type:'text', req:true},
+      {k:'hp', label:'血量', type:'number'},
+      {k:'acc', label:'命中', type:'number', hint:'0-1'},
+      {k:'spd', label:'移动速度', type:'number'},
+      {k:'wpn', label:'主武器 ID', type:'text'},
+      {k:'side', label:'副武器 ID', type:'text'},
+      {k:'shell', label:'头盔 ID', type:'text'},
+      {k:'visor', label:'面罩 ID', type:'text'},
+      {k:'ear', label:'耳机 ID', type:'text'},
+      {k:'fiber', label:'纤维 ID', type:'text'},
+      {k:'plate', label:'插板 ID', type:'text'},
+      {k:'bp', label:'背包 ID', type:'text'},
+      {k:'cr', label:'胸挂 ID', type:'text'},
+      {k:'aggr', label:'攻击性', type:'number', hint:'0-1'},
+      {k:'loot', label:'搜刮倾向', type:'number', hint:'0-1'},
+      {k:'col', label:'颜色', type:'text'},
+      {k:'pen', label:'穿透', type:'number'},
+      {k:'amt', label:'弹药量', type:'number'},
+    ]
+  },
+
+  /* ---- 角色 ---- */
+  {
+    path:'characters', label:'🐾 角色', icon:'🐾', kind:'dict', nameKey:'name',
+    fields:[
+      {k:'name', label:'名字', type:'text', req:true},
+      {k:'prazer', label:'Prazer', type:'checkbox'},
+      {k:'A', label:'Aselevel', type:'number', hint:'Prazer 的耦合等级。人类为 0'},
+      {k:'age', label:'年龄', type:'number'},
+      {k:'hp', label:'血量', type:'number'},
+      {k:'speed', label:'移速', type:'number'},
+      {k:'fur', label:'毛发主色', type:'text', hint:'CSS 颜色，如 #ff9ec4'},
+      {k:'fur2', label:'毛发副色', type:'text'},
+      {k:'eye', label:'眼睛颜色', type:'text'},
+      {k:'weapon', label:'主武器 ID', type:'text'},
+      {k:'sidearm', label:'副武器 ID', type:'text'},
+      {k:'voicePitch', label:'音高', type:'number', hint:'0.8=低沉，1.4=高扬'},
+      {k:'skills', label:'技能列表', type:'json', wide:true, hint:'数组，如 ["jump","aimbuff"]'},
+      {k:'heavyArmor', label:'重装', type:'checkbox'},
+      {k:'neutral', label:'中立', type:'checkbox'},
+      {k:'nonPlayable', label:'不可选', type:'checkbox', hint:'BOSS 专用'},
+    ]
+  },
+
+  /* ---- 地图 ---- */
+  {
+    path:'maps', label:'🗺 地图', icon:'🗺', kind:'dict', nameKey:'label',
+    fields:[
+      {k:'seed', label:'生成种子', type:'text', hint:'地图生成的随机种子，改变它地图布局就会改变'},
+      {k:'label', label:'显示名', type:'text', req:true},
+      {k:'boss', label:'BOSS ID', type:'text', hint:'匹配 enemyTypes 中的 boss 类型 id'},
+      {k:'desc', label:'简介', type:'textarea', wide:true},
+      {k:'story', label:'剧情文本', type:'textarea', wide:true, hint:'进入地图时显示的剧情简报，支持 \n 换行'},
+    ]
+  },
+
+  /* ---- 难度 ---- */
+  {
+    path:'difficulty', label:'⚖ 难度', icon:'⚖', kind:'dict', nameKey:'label',
+    fields:[
+      {k:'label', label:'显示名', type:'text', req:true},
+      {k:'enemyDmg', label:'敌人伤害倍率', type:'number', hint:'1.0=普通，1.8=噩梦'},
+      {k:'enemyAcc', label:'敌人命中倍率', type:'number'},
+      {k:'enemyHp',  label:'敌人血量倍率', type:'number'},
+      {k:'enemyAgg', label:'敌人攻击性倍率', type:'number'},
+      {k:'eliteCount', label:'精英数量', type:'number'},
+      {k:'superCount', label:'重装数量', type:'number'},
+      {k:'aiCount',    label:'人机数量', type:'number'},
+      {k:'lootBonus',  label:'掉落加成', type:'number', hint:'0-0.5'},
+      {k:'lootCount',  label:'容器数量', type:'number'},
+      {k:'enemyCount', label:'敌人数量', type:'number'},
+    ]
+  },
+
+  /* ---- 事件 ---- */
+  {
+    path:'events', label:'🌪 事件', icon:'🌪', kind:'array', idKey:'id', nameKey:'name',
+    fields:[
+      {k:'id', label:'ID', type:'text', req:true, hint:'如 supply / praze / sandstorm'},
+      {k:'name', label:'名称', type:'text', req:true},
+      {k:'dur', label:'持续 (s)', type:'number'},
+      {k:'text', label:'提示文本', type:'text', wide:true, hint:'屏幕上显示的事件横幅文字'},
+      {k:'visionMul', label:'视野倍率', type:'number', hint:'0.55=沙尘暴能见度'},
+      {k:'onStart', label:'触发效果', type:'json', wide:true, hint:'如 {"kind":"spawnContainers","p":{"count":3}}'},
+      {k:'onTick',  label:'每帧效果', type:'json', wide:true},
+    ]
+  },
+
+  /* ---- 掉落表 ---- */
+  {
+    path:'killDrops', label:'🎁 击杀掉落', icon:'🎁', kind:'object',
+    fields:[
+      {k:'chance', label:'掉落概率', type:'number', hint:'0-1'},
+      {k:'always', label:'必定掉落', type:'json', wide:true},
+      {k:'table',  label:'随机表',   type:'json', wide:true, hint:'[{roll:[0,0.3], item:{kind:"cons", id:"bandage"}}]'},
+      {k:'bossAlways', label:'BOSS 必掉', type:'json', wide:true},
+    ]
+  },
+
+  /* ---- 稀有度 / 价值 ---- */
+  {
+    path:'rarity', label:'🌈 稀有度', icon:'🌈', kind:'array', idKey:'key', nameKey:'name',
+    fields:[
+      {k:'key', label:'键名', type:'text', req:true, hint:'如 common / green / blue / inc'},
+      {k:'name', label:'显示名', type:'text', req:true},
+      {k:'col', label:'颜色', type:'text', hint:'CSS 颜色，如 #5fd47a'},
+    ]
+  },
+  {
+    path:'valueTable', label:'💰 价值表', icon:'💰', kind:'object',
+    fields:[
+      {k:'common', label:'普通', type:'number'},
+      {k:'green',  label:'精良', type:'number'},
+      {k:'blue',   label:'稀有', type:'number'},
+      {k:'yellow', label:'史诗', type:'number'},
+      {k:'orange', label:'传说', type:'number'},
+      {k:'red',    label:'遗物', type:'number'},
+      {k:'bronze', label:'铜',   type:'number'},
+      {k:'silver', label:'银',   type:'number'},
+      {k:'gold',   label:'金',   type:'number'},
+      {k:'inc',    label:'INCREDIBLE', type:'number'},
+    ]
+  },
+];
+
+/* 通用 JSON 类别：未在 CATEGORIES 里显式定义，但存在于 ASAKA 里的键 */
+const FALLBACK_CATS = [
+  {path:'config',       label:'⚙ config',       icon:'⚙'},
+  {path:'assets',       label:'🖼 assets',       icon:'🖼'},
+  {path:'hitZones',     label:'🎯 hitZones',     icon:'🎯'},
+  {path:'damageModel',  label:'🧮 damageModel',  icon:'🧮'},
+  {path:'playerSkills', label:'✨ playerSkills', icon:'✨'},
+  {path:'bossSkills',   label:'👑 bossSkills',   icon:'👑'},
+  {path:'initialLoadout', label:'🎒 initialLoadout', icon:'🎒'},
+  {path:'tasks',        label:'📋 tasks',        icon:'📋'},
+  {path:'chatLines',    label:'💬 chatLines',    icon:'💬'},
+  {path:'killStreakTiers', label:'🔥 killStreakTiers', icon:'🔥'},
+  {path:'scripts',      label:'🔧 scripts',      icon:'🔧'},
+];
+
+/* ============================================================
+   路径访问
+   ============================================================ */
+function getByPath(obj, path){
+  if(!obj || !path) return undefined;
+  return path.split('.').reduce(function(o, k){
+    return (o == null) ? undefined : o[k];
+  }, obj);
+}
+function setByPath(obj, path, val){
+  var keys = path.split('.');
+  var last = keys.pop();
+  var t = obj;
+  for (var i = 0; i < keys.length; i++){
+    if (!t[keys[i]] || typeof t[keys[i]] !== 'object') t[keys[i]] = {};
+    t = t[keys[i]];
+  }
+  t[last] = val;
+}
+
+/* ============================================================
+   data.js 解析
+   ============================================================ */
+function parseDataJS(source){
+  /* 保存原始头部（到第一个 ASAKA.config 之前） */
+  var idx = source.indexOf('\nASAKA.config');
+  if (idx < 0) idx = source.indexOf('\nwindow.ASAKA');
+  var header = (idx > 0) ? source.slice(0, idx) : source.slice(0, Math.min(source.length, 400));
+
+  /* 去掉严格模式，让 ASAKA.xxx = ... 能隐式创建全局变量 */
+  var cleaned = source.replace(/^\s*["']use strict["'];?\s*/m, '');
+
+  var saved = window.ASAKA;
+  try { window.ASAKA = undefined; } catch(_) {}
+  var result = null;
+  try {
+    /* 用 Function 构造器隔离作用域（仍能访问全局） */
+    var fn = new Function(cleaned + '\nreturn window.ASAKA;');
+    result = fn();
+  } finally {
+    if (saved !== undefined) { try { window.ASAKA = saved; } catch(_) {} }
+    else { try { delete window.ASAKA; } catch(_) {} }
+  }
+  if (!result || typeof result !== 'object') throw new Error('未找到 window.ASAKA 对象');
+  return { asaka: result, header: header };
+}
+
+/* ============================================================
+   序列化器
+   ============================================================ */
+function isPlainIdent(k){
+  return /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(k);
+}
+
+function serialize(value, indent){
+  indent = indent | 0;
+  var pad = '  '.repeat(indent);
+  var pad2 = '  '.repeat(indent + 1);
+
+  if (value === null) return 'null';
+  if (value === undefined) return 'undefined';
+
+  var t = typeof value;
+  if (t === 'number') {
+    if (!isFinite(value)) return '0';
+    /* 避免浮点误差显示成 0.30000000000000004 */
+    var s = String(value);
+    if (s.length > 14 && s.indexOf('.') >= 0) s = String(parseFloat(value.toPrecision(12)));
+    return s;
+  }
+  if (t === 'boolean') return String(value);
+  if (t === 'string')  return JSON.stringify(value);
+
+  if (t === 'function') {
+    var src = value.toString();
+    /* 简单的函数缩进对齐（保留首行） */
+    var lines = src.split('\n');
+    if (lines.length <= 1) return src;
+    var minIndent = Infinity;
+    for (var li = 1; li < lines.length; li++){
+      if (!lines[li].trim()) continue;
+      var m = lines[li].match(/^(\s*)/);
+      var len = m ? m[1].length : 0;
+      if (len < minIndent) minIndent = len;
+    }
+    if (minIndent === Infinity) minIndent = 0;
+    var out = [lines[0]];
+    for (var lj = 1; lj < lines.length; lj++){
+      out.push(pad + lines[lj].slice(minIndent));
+    }
+    return out.join('\n');
+  }
+
+  if (Array.isArray(value)){
+    if (value.length === 0) return '[]';
+    /* 纯基本类型数组，短则内联 */
+    var allPrim = value.every(function(v){
+      return v === null || typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean';
+    });
+    if (allPrim){
+      var inline = '[' + value.map(function(v){ return serialize(v, 0); }).join(', ') + ']';
+      if (inline.length + indent * 2 < 90) return inline;
+    }
+    var items = value.map(function(v){ return pad2 + serialize(v, indent + 1); });
+    return '[\n' + items.join(',\n') + '\n' + pad + ']';
+  }
+
+  if (t === 'object'){
+    var keys = Object.keys(value).filter(function(k){ return value[k] !== undefined; });
+    if (keys.length === 0) return '{}';
+    var parts = keys.map(function(k){
+      var keyStr = isPlainIdent(k) ? k : JSON.stringify(k);
+      return pad2 + keyStr + ': ' + serialize(value[k], indent + 1);
+    });
+    return '{\n' + parts.join(',\n') + '\n' + pad + '}';
+  }
+
+  return 'null';
+}
+
+/* 生成完整 data.js */
+var ORDER_KEYS = [
+  'config','assets','hitZones','damageModel',
+  'weapons','ammoTypes','playerSkills','bossSkills',
+  'attach',
+  'helmetShells','helmetVisors','helmetEars',
+  'vestFibers','vestPlates','backpacks','chestRigs',
+  'consumables','nades','valuables',
+  'enemyTypes','aiTypes','characters','initialLoadout',
+  'maps','tasks','chatLines','killStreakTiers',
+  'events','difficulty','killDrops',
+  'rarity','valueTable','scripts'
+];
+
+function generateSource(){
+  var data = state.data;
+  var header = state.header || ('"use strict";\nwindow.ASAKA = window.ASAKA || {};');
+  var parts = [header.trimEnd()];
+
+  var used = {};
+  ORDER_KEYS.forEach(function(k){
+    if (!(k in data)) return;
+    used[k] = true;
+    parts.push('');
+    parts.push('ASAKA.' + k + ' = ' + serialize(data[k], 0) + ';');
+  });
+
+  /* 未在 ORDER_KEYS 中的键，按原顺序补在后面 */
+  Object.keys(data).forEach(function(k){
+    if (used[k]) return;
+    parts.push('');
+    parts.push('ASAKA.' + k + ' = ' + serialize(data[k], 0) + ';');
+  });
+
+  parts.push('');
+  parts.push("console.log('[ASAKA] data.js 已加载');");
+  parts.push('');
+
+  return parts.join('\n');
+}
+
+/* ============================================================
+   状态栏
+   ============================================================ */
+function setStatus(text, level){
+  var el = document.getElementById('statusText');
+  el.textContent = text;
+  var bar = document.getElementById('statusbar');
+  bar.className = '';
+  if (level) bar.classList.add(level);
+}
+
+/* ============================================================
+   UI：类别列表
+   ============================================================ */
+function renderCategories(){
+  var container = document.getElementById('catList');
+  container.innerHTML = '';
+  var data = state.data;
+
+  /* 先渲染有定义的类别 */
+  CATEGORIES.forEach(function(cat){
+    var val = getByPath(data, cat.path);
+    if (val === undefined) return;
+    var count = Array.isArray(val) ? val.length : (typeof val === 'object' ? Object.keys(val).length : 0);
+    container.appendChild(makeCatItem(cat.path, cat.label, count));
+  });
+
+  /* 再渲染 fallback */
+  FALLBACK_CATS.forEach(function(cat){
+    if (CATEGORIES.some(function(c){ return c.path === cat.path; })) return;
+    var val = getByPath(data, cat.path);
+    if (val === undefined) return;
+    var count = Array.isArray(val) ? val.length : (typeof val === 'object' ? Object.keys(val).length : 0);
+    container.appendChild(makeCatItem(cat.path, cat.label, count));
+  });
+
+  /* 兜底：其它未知键 */
+  Object.keys(data).forEach(function(k){
+    if (CATEGORIES.some(function(c){ return c.path === k || c.path.split('.')[0] === k; })) return;
+    if (FALLBACK_CATS.some(function(c){ return c.path === k; })) return;
+    var val = data[k];
+    var count = Array.isArray(val) ? val.length : (typeof val === 'object' ? Object.keys(val).length : 0);
+    container.appendChild(makeCatItem(k, '📄 ' + k, count));
+  });
+}
+
+function makeCatItem(path, label, count){
+  var div = document.createElement('div');
+  div.className = 'cat-item';
+  div.dataset.path = path;
+  div.innerHTML = '<span>' + label + '</span><span class="cnt">' + count + '</span>';
+  div.addEventListener('click', function(){
+    state.currentCategory = path;
+    state.currentId = null;
+    document.querySelectorAll('.cat-item').forEach(function(x){ x.classList.remove('on'); });
+    div.classList.add('on');
+    renderList();
+    renderEditor();
+  });
+  return div;
+}
+
+/* ============================================================
+   获取某类别的 schema
+   ============================================================ */
+function getCategorySchema(path){
+  var found = CATEGORIES.find(function(c){ return c.path === path; });
+  if (found) return found;
+  return { path: path, label: path, kind: 'object', fields: [] };
+}
+
+/* ============================================================
+   UI：条目列表
+   ============================================================ */
+function getEntries(catPath){
+  var val = getByPath(state.data, catPath);
+  var schema = getCategorySchema(catPath);
+  var entries = [];
+
+  if (Array.isArray(val)){
+    val.forEach(function(item, i){
+      var id = (schema.idKey && item[schema.idKey]) || (item.id) || ('#' + i);
+      var name = (schema.nameKey && item[schema.nameKey]) || item.n || item.name || id;
+      entries.push({ id: String(id), key: String(id), index: i, item: item, name: name });
+    });
+  } else if (val && typeof val === 'object'){
+    Object.keys(val).forEach(function(k){
+      var item = val[k];
+      var name = (schema.nameKey && item && item[schema.nameKey]) || (item && (item.n || item.name)) || k;
+      entries.push({ id: k, key: k, index: null, item: item, name: name });
+    });
+  }
+  return entries;
+}
+
+function renderList(){
+  var container = document.getElementById('listBody');
+  var title = document.getElementById('listTitle');
+  var path = state.currentCategory;
+  if (!path){
+    title.textContent = '—';
+    container.innerHTML = '<div class="list-empty">请先选择类别</div>';
+    return;
+  }
+  var schema = getCategorySchema(path);
+  var entries = getEntries(path);
+  title.textContent = schema.label + ' · ' + entries.length + ' 项';
+
+  var filter = (document.getElementById('listFilter').value || '').toLowerCase();
+  if (filter){
+    entries = entries.filter(function(e){
+      return (e.id && e.id.toLowerCase().indexOf(filter) >= 0) ||
+             (e.name && String(e.name).toLowerCase().indexOf(filter) >= 0);
+    });
+  }
+
+  if (entries.length === 0){
+    container.innerHTML = '<div class="list-empty">' +
+      (filter ? '没有匹配项' : '此类别为空，点击上方「+ 新增」创建第一条') +
+      '</div>';
+    return;
+  }
+
+  container.innerHTML = '';
+  entries.forEach(function(e){
+    var div = document.createElement('div');
+    div.className = 'list-item';
+    var rar = e.item && (e.item.rar || e.item.rarity);
+    var rarCol = rar ? rarityColor(rar) : 'transparent';
+    div.innerHTML =
+      '<span class="li-rar" style="background:' + rarCol + '"></span>' +
+      '<span class="li-name">' + escapeHtml(e.name) + '</span>' +
+      '<span class="li-id">' + escapeHtml(e.id) + '</span>';
+    if (e.id === state.currentId) div.classList.add('on');
+    div.addEventListener('click', function(){
+      state.currentId = e.id;
+      document.querySelectorAll('.list-item').forEach(function(x){ x.classList.remove('on'); });
+      div.classList.add('on');
+      renderEditor();
+    });
+    container.appendChild(div);
+  });
+}
+
+function rarityColor(rar){
+  var map = {
+    common:'rgba(235,242,250,.7)', green:'#5fd47a', blue:'#4aa8ff', yellow:'#ffd93d',
+    orange:'#ff9a3c', red:'#ff5252', bronze:'#cd7f32', silver:'#cfd8e3',
+    gold:'#ffcc33', inc:'#eaf6ff'
+  };
+  return map[rar] || '#888';
+}
+
+/* ============================================================
+   UI：编辑器
+   ============================================================ */
+function renderEditor(){
+  var body = document.getElementById('editorBody');
+  var title = document.getElementById('editorTitle');
+  var btnDup = document.getElementById('btnDup');
+  var btnDel = document.getElementById('btnDel');
+
+  var path = state.currentCategory;
+  var id = state.currentId;
+  if (!path || !id){
+    title.textContent = '选择条目以编辑';
+    btnDup.disabled = true;
+    btnDel.disabled = true;
+    body.innerHTML = '<div class="empty"><div style="font-size:32px;opacity:.35;margin-bottom:12px">📦</div>请从左侧列表选择条目</div>';
+    return;
+  }
+
+  var schema = getCategorySchema(path);
+  var container = getByPath(state.data, path);
+  var item = null;
+
+  if (Array.isArray(container)){
+    item = container.find(function(it){
+      return String(it[schema.idKey] || it.id) === String(id);
+    });
+  } else if (container && typeof container === 'object'){
+    item = container[id];
+  }
+
+  if (!item){
+    body.innerHTML = '<div class="empty">条目不存在</div>';
+    return;
+  }
+
+  title.textContent = (schema.label || path) + ' · ' + (item[schema.nameKey] || id);
+  btnDup.disabled = false;
+  btnDel.disabled = false;
+
+  /* 若 schema 无字段，则使用通用 JSON 编辑器 */
+  if (!schema.fields || !schema.fields.length){
+    renderGenericEditor(body, item, path, id);
+    return;
+  }
+
+  /* 渲染字段表单 */
+  body.innerHTML = '';
+  var frag = document.createDocumentFragment();
+
+  schema.fields.forEach(function(f){
+    if (f.k === schema.idKey && schema.kind === 'array'){
+      /* 数组类别的 ID 字段特殊处理：直接绑定 item.id */
+      var row = makeField(f, function(){ return item[f.k]; }, function(v){
+        var oldVal = item[f.k];
+        item[f.k] = v;
+        /* 更新 currentId */
+        if (oldVal === state.currentId) state.currentId = v;
+      }, path, item);
+      frag.appendChild(row);
+    } else {
+      var row2 = makeField(f, function(){ return item[f.k]; }, function(v){
+        if (v === undefined) delete item[f.k];
+        else item[f.k] = v;
+      }, path, item);
+      frag.appendChild(row2);
+    }
+  });
+
+  /* 底部操作 */
+  var actions = document.createElement('div');
+  actions.className = 'editor-actions';
+  var btnSave = document.createElement('button');
+  btnSave.textContent = '✓ 保存条目';
+  btnSave.addEventListener('click', function(){
+    /* 触发一次全量重建 */
+    renderList();
+    renderCategories();
+    setStatus('条目已更新', 'ok');
+    setTimeout(function(){ setStatus(state.data ? '已加载 data.js · ' + (state.rawSource.length / 1024).toFixed(1) + ' KB' : '就绪'); }, 1500);
+  });
+  actions.appendChild(btnSave);
+
+  var btnDup2 = document.createElement('button');
+  btnDup2.textContent = '⎘ 复制';
+  btnDup2.addEventListener('click', function(){ duplicateCurrent(); });
+  actions.appendChild(btnDup2);
+
+  var btnDel2 = document.createElement('button');
+  btnDel2.className = 'danger';
+  btnDel2.textContent = '✕ 删除';
+  btnDel2.addEventListener('click', function(){ deleteCurrent(); });
+  actions.appendChild(btnDel2);
+
+  frag.appendChild(actions);
+  body.appendChild(frag);
+}
+
+function makeField(f, getter, setter, catPath, item){
+  var wrap = document.createElement('div');
+  wrap.className = 'field';
+  if (f.wide) wrap.classList.add('wide');
+  if (f.type === 'checkbox') wrap.classList.add('check');
+
+  var val = getter();
+
+  if (f.type === 'checkbox'){
+    var lab = document.createElement('label');
+    var cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = !!val;
+    cb.addEventListener('change', function(){
+      setter(cb.checked);
+      validateField(wrap, f, cb.checked, catPath, item);
+      onDataChange();
+    });
+    var sp = document.createElement('span');
+    sp.innerHTML = escapeHtml(f.label) + (f.req ? ' <span class="req">*</span>' : '') +
+      ' <span class="key">' + f.k + '</span>';
+    lab.appendChild(cb); lab.appendChild(sp);
+    wrap.appendChild(lab);
+    if (f.hint) wrap.appendChild(makeHint(f.hint));
+    validateField(wrap, f, cb.checked, catPath, item);
+    return wrap;
+  }
+
+  var label = document.createElement('label');
+  label.innerHTML = escapeHtml(f.label) + (f.req ? ' <span class="req">*</span>' : '') +
+    ' <span class="key">' + f.k + '</span>';
+  wrap.appendChild(label);
+
+  var input;
+  if (f.type === 'select'){
+    input = document.createElement('select');
+    var opts = f.opts || [];
+    if (val !== undefined && opts.indexOf(val) < 0){
+      var optX = document.createElement('option');
+      optX.value = val; optX.textContent = val + ' （自定义）';
+      input.appendChild(optX);
+    }
+    opts.forEach(function(o){
+      var opt = document.createElement('option');
+      opt.value = o; opt.textContent = o;
+      if (o === val) opt.selected = true;
+      input.appendChild(opt);
+    });
+    if (val === undefined){
+      var opt0 = document.createElement('option');
+      opt0.value = ''; opt0.textContent = '— 未设置 —';
+      opt0.selected = true;
+      input.insertBefore(opt0, input.firstChild);
+    }
+    input.addEventListener('change', function(){
+      setter(input.value === '' ? undefined : input.value);
+      validateField(wrap, f, input.value, catPath, item);
+      onDataChange();
+    });
+  } else if (f.type === 'number'){
+    input = document.createElement('input');
+    input.type = 'text';
+    input.inputMode = 'decimal';
+    input.value = (val === undefined || val === null) ? '' : val;
+    input.addEventListener('input', function(){
+      var s = input.value.trim();
+      if (s === ''){ setter(undefined); }
+      else {
+        var n = parseFloat(s);
+        if (!isNaN(n)) setter(n);
+      }
+      validateField(wrap, f, input.value, catPath, item);
+      onDataChange();
+    });
+  } else if (f.type === 'textarea'){
+    input = document.createElement('textarea');
+    input.value = val || '';
+    input.rows = 3;
+    input.addEventListener('input', function(){
+      setter(input.value === '' ? undefined : input.value);
+      onDataChange();
+    });
+  } else if (f.type === 'json'){
+    input = document.createElement('textarea');
+    input.className = 'code';
+    input.rows = 4;
+    if (val !== undefined && val !== null){
+      try { input.value = JSON.stringify(val, null, 2); }
+      catch(e){ input.value = String(val); }
+    }
+    input.addEventListener('input', function(){
+      var s = input.value.trim();
+      if (s === ''){ setter(undefined); return; }
+      try {
+        var parsed = JSON.parse(s);
+        setter(parsed);
+        input.style.borderColor = '';
+        var hint = wrap.querySelector('.hint');
+        if (hint) hint.classList.remove('err');
+      } catch(e){
+        input.style.borderColor = 'rgba(255,90,90,.6)';
+        var hint2 = wrap.querySelector('.hint');
+        if (hint2) hint2.classList.add('err');
+      }
+      onDataChange();
+    });
+  } else if (f.type === 'code'){
+    input = document.createElement('textarea');
+    input.className = 'code';
+    input.rows = 5;
+    input.value = (typeof val === 'function') ? val.toString() : (val || '');
+    input.addEventListener('input', function(){
+      setter(input.value);
+      onDataChange();
+    });
+  } else {
+    /* text */
+    input = document.createElement('input');
+    input.type = 'text';
+    input.value = (val === undefined || val === null) ? '' : String(val);
+    input.addEventListener('input', function(){
+      setter(input.value === '' ? undefined : input.value);
+      validateField(wrap, f, input.value, catPath, item);
+      onDataChange();
+    });
+  }
+
+  wrap.appendChild(input);
+  if (f.hint) wrap.appendChild(makeHint(f.hint));
+  validateField(wrap, f, val, catPath, item);
+  return wrap;
+}
+
+function makeHint(text, level){
+  var d = document.createElement('div');
+  d.className = 'hint' + (level ? ' ' + level : '');
+  d.textContent = text;
+  return d;
+}
+
+/* 字段级校验：必填 / 范围 */
+function validateField(wrap, f, value, catPath, item){
+  var hint = wrap.querySelector('.hint');
+  if (!hint) return;
+
+  /* 移除之前的状态 */
+  hint.classList.remove('err', 'warn', 'ok');
+
+  if (f.req && (value === undefined || value === null || value === '')){
+    hint.classList.add('err');
+    hint.textContent = '⚠ 必填字段不能为空';
+    return;
+  }
+
+  /* ID 冲突检查 */
+  if (f.k === 'id' && typeof value === 'string' && value.trim()){
+    var container = getByPath(state.data, catPath);
+    if (Array.isArray(container)){
+      var dup = container.filter(function(it){ return it !== item && it.id === value; });
+      if (dup.length > 0){
+        hint.classList.add('err');
+        hint.textContent = '⚠ ID 已被占用：' + value;
+        return;
+      }
+    }
+  }
+
+  /* 数字范围提示 */
+  if (f.type === 'number' && typeof value === 'number'){
+    var warn = null;
+    if (f.k === 'pen' && (value < 0 || value > 10)) warn = '穿透通常在 0-10 之间';
+    if (f.k === 'rpm' && value < 0) warn = '射速不能为负';
+    if (f.k === 'lv' && (value < 0 || value > 8)) warn = '等级通常在 0-8 之间';
+    if (f.k === 'red' && (value < 0 || value > 1)) warn = '减伤率应在 0-1 之间';
+    if (f.k === 'acc' && (value < 0 || value > 1)) warn = '命中精度应在 0-1 之间';
+    if (f.k === 'e' && value < 0) warn = '动能不能为负';
+    if (warn){
+      hint.classList.add('warn');
+      hint.textContent = '⚠ ' + warn;
+      return;
+    }
+  }
+
+  if (f.hint) hint.textContent = f.hint;
+}
+
+/* 数据变化后的统一处理 */
+var _changeTimer = null;
+function onDataChange(){
+  clearTimeout(_changeTimer);
+  _changeTimer = setTimeout(function(){
+    /* 刷新列表里的显示名 */
+    renderListLight();
+    /* 更新状态为「有未导出改动」 */
+    setStatus('已修改 · 记得点击「💾 导出 data.js」保存', 'warn');
+    /* 启用导出按钮 */
+    document.getElementById('btnDownload').disabled = false;
+    document.getElementById('btnPreview').disabled = false;
+    document.getElementById('btnValidate').disabled = false;
+  }, 250);
+}
+
+/* 轻量刷新列表：只更新显示名 / ID */
+function renderListLight(){
+  var path = state.currentCategory;
+  if (!path) return;
+  var schema = getCategorySchema(path);
+  var container = getByPath(state.data, path);
+  var entries = getEntries(path);
+  var items = document.querySelectorAll('#listBody .list-item');
+  items.forEach(function(node, i){
+    var e = entries[i];
+    if (!e) return;
+    var nameEl = node.querySelector('.li-name');
+    var idEl = node.querySelector('.li-id');
+    if (nameEl) nameEl.textContent = e.name;
+    if (idEl) idEl.textContent = e.id;
+    if (e.id === state.currentId) node.classList.add('on');
+    else node.classList.remove('on');
+  });
+}
+
+/* ============================================================
+   通用 JSON 编辑器（用于没有 schema 的类别）
+   ============================================================ */
+function renderGenericEditor(body, item, path, id){
+  body.innerHTML = '';
+  var wrap = document.createElement('div');
+  wrap.className = 'field';
+  var lab = document.createElement('label');
+  lab.innerHTML = '原始 JSON <span class="key">' + path + '[' + id + ']</span>';
+  wrap.appendChild(lab);
+  var ta = document.createElement('textarea');
+  ta.className = 'code';
+  ta.rows = 20;
+  try { ta.value = JSON.stringify(item, null, 2); }
+  catch(e){ ta.value = String(item); }
+  var hint = makeHint('编辑 JSON 数据。失焦时才会应用修改。错误的 JSON 不会被保存。');
+  wrap.appendChild(ta);
+  wrap.appendChild(hint);
+  ta.addEventListener('blur', function(){
+    try {
+      var parsed = JSON.parse(ta.value);
+      /* 用引用替换 */
+      var container = getByPath(state.data, path);
+      if (Array.isArray(container)){
+        var idx = container.findIndex(function(it, i){ return String(it.id || i) === String(id); });
+        if (idx >= 0) container[idx] = parsed;
+      } else if (container && typeof container === 'object'){
+        container[id] = parsed;
+      }
+      hint.classList.remove('err');
+      hint.textContent = '✓ 已应用';
+      hint.classList.add('ok');
+      onDataChange();
+    } catch(e){
+      hint.classList.add('err');
+      hint.textContent = '⚠ JSON 语法错误：' + e.message;
+    }
+  });
+  body.appendChild(wrap);
+
+  var actions = document.createElement('div');
+  actions.className = 'editor-actions';
+  var btnDup2 = document.createElement('button');
+  btnDup2.textContent = '⎘ 复制';
+  btnDup2.addEventListener('click', duplicateCurrent);
+  actions.appendChild(btnDup2);
+  var btnDel2 = document.createElement('button');
+  btnDel2.className = 'danger';
+  btnDel2.textContent = '✕ 删除';
+  btnDel2.addEventListener('click', deleteCurrent);
+  actions.appendChild(btnDel2);
+  body.appendChild(actions);
+}
+
+/* ============================================================
+   增 / 删 / 复制
+   ============================================================ */
+function makeDefaultItem(schema){
+  var obj = {};
+  if (!schema.fields || !schema.fields.length) return { id: 'new_entry' };
+  schema.fields.forEach(function(f){
+    if (f.type === 'checkbox') obj[f.k] = false;
+    else if (f.type === 'number') obj[f.k] = 0;
+    else if (f.type === 'select') obj[f.k] = f.opts ? f.opts[0] : '';
+    else if (f.type === 'json') obj[f.k] = undefined;
+    else obj[f.k] = '';
+  });
+  return obj;
+}
+
+function addNewEntry(){
+  var path = state.currentCategory;
+  if (!path){ alert('请先选择类别'); return; }
+  var schema = getCategorySchema(path);
+  var container = getByPath(state.data, path);
+
+  if (Array.isArray(container)){
+    var obj = makeDefaultItem(schema);
+    /* 生成唯一 ID */
+    if (schema.idKey){
+      var base = 'new_' + (schema.idKey === 'id' ? 'item' : schema.idKey);
+      var n = 1;
+      var existing = container.map(function(it){ return String(it[schema.idKey]); });
+      while (existing.indexOf(base + '_' + n) >= 0) n++;
+      obj[schema.idKey] = base + '_' + n;
+    }
+    container.push(obj);
+    state.currentId = String(obj[schema.idKey]);
+  } else if (container && typeof container === 'object'){
+    var base2 = 'new_entry';
+    var n2 = 1;
+    while (container[base2 + '_' + n2] !== undefined) n2++;
+    var newKey = base2 + '_' + n2;
+    container[newKey] = makeDefaultItem(schema);
+    state.currentId = newKey;
+  } else {
+    alert('当前类别不支持新增');
+    return;
+  }
+
+  renderList();
+  renderCategories();
+  renderEditor();
+  onDataChange();
+  setStatus('已新增条目', 'ok');
+}
+
+function deleteCurrent(){
+  var path = state.currentCategory;
+  var id = state.currentId;
+  if (!path || !id) return;
+  var schema = getCategorySchema(path);
+  var container = getByPath(state.data, path);
+
+  var name = id;
+  if (Array.isArray(container)){
+    var item = container.find(function(it){ return String(it[schema.idKey] || it.id) === String(id); });
+    if (item) name = item[schema.nameKey] || id;
+  } else if (container && container[id]){
+    name = container[id][schema.nameKey] || id;
+  }
+
+  if (!confirm('确定删除「' + name + '」？\n此操作可在导出前通过 Ctrl+Z 撤销一次。')) return;
+
+  if (Array.isArray(container)){
+    var idx = container.findIndex(function(it){ return String(it[schema.idKey] || it.id) === String(id); });
+    if (idx >= 0){
+      state.lastDeleted = { path: path, index: idx, item: container[idx] };
+      container.splice(idx, 1);
+    }
+  } else if (container && typeof container === 'object'){
+    if (container[id] !== undefined){
+      state.lastDeleted = { path: path, key: id, item: container[id] };
+      delete container[id];
+    }
+  }
+
+  state.currentId = null;
+  renderList();
+  renderCategories();
+  renderEditor();
+  onDataChange();
+  setStatus('已删除「' + name + '」 · Ctrl+Z 撤销', 'warn');
+}
+
+function duplicateCurrent(){
+  var path = state.currentCategory;
+  var id = state.currentId;
+  if (!path || !id) return;
+  var schema = getCategorySchema(path);
+  var container = getByPath(state.data, path);
+
+  var clone = null;
+  if (Array.isArray(container)){
+    var idx = container.findIndex(function(it){ return String(it[schema.idKey] || it.id) === String(id); });
+    if (idx < 0) return;
+    clone = deepClone(container[idx]);
+    /* 生成新 ID */
+    if (schema.idKey){
+      var oldId = String(clone[schema.idKey]);
+      var newId = oldId + '_copy';
+      var n = 2;
+      var existing = container.map(function(it){ return String(it[schema.idKey]); });
+      while (existing.indexOf(newId) >= 0){ newId = oldId + '_copy' + n; n++; }
+      clone[schema.idKey] = newId;
+    }
+    container.push(clone);
+    state.currentId = String(clone[schema.idKey]);
+  } else if (container && typeof container === 'object'){
+    clone = deepClone(container[id]);
+    var newKey = id + '_copy';
+    var n2 = 2;
+    while (container[newKey] !== undefined){ newKey = id + '_copy' + n2; n2++; }
+    container[newKey] = clone;
+    state.currentId = newKey;
+  }
+
+  renderList();
+  renderCategories();
+  renderEditor();
+  onDataChange();
+  setStatus('已复制', 'ok');
+}
+
+function undoDelete(){
+  var d = state.lastDeleted;
+  if (!d) return false;
+  var container = getByPath(state.data, d.path);
+  if (Array.isArray(container) && d.item !== undefined){
+    container.splice(d.index, 0, d.item);
+  } else if (container && d.key !== undefined){
+    container[d.key] = d.item;
+  }
+  state.lastDeleted = null;
+  renderList();
+  renderCategories();
+  renderEditor();
+  onDataChange();
+  setStatus('已撤销删除', 'ok');
+  return true;
+}
+
+function deepClone(v){
+  /* 保留函数 */
+  if (v === null || typeof v !== 'object') return v;
+  if (Array.isArray(v)) return v.map(deepClone);
+  var o = {};
+  Object.keys(v).forEach(function(k){ o[k] = deepClone(v[k]); });
+  return o;
+}
+
+/* ============================================================
+   文件加载 / 导出 / 预览
+   ============================================================ */
+function openFile(){
+  document.getElementById('fileInput').click();
+}
+
+document.getElementById('fileInput').addEventListener('change', function(e){
+  var f = e.target.files && e.target.files[0];
+  if (!f) return;
+  var reader = new FileReader();
+  reader.onload = function(ev){
+    try {
+      var src = String(ev.target.result);
+      var parsed = parseDataJS(src);
+      state.rawSource = src;
+      state.header = parsed.header;
+      state.data = parsed.asaka;
+      state.currentCategory = null;
+      state.currentId = null;
+      state.lastDeleted = null;
+
+      document.getElementById('main').style.display = 'grid';
+      document.getElementById('btnDownload').disabled = false;
+      document.getElementById('btnPreview').disabled = false;
+      document.getElementById('btnValidate').disabled = false;
+
+      renderCategories();
+      /* 自动选中第一个类别 */
+      var first = document.querySelector('.cat-item');
+      if (first) first.click();
+
+      setStatus('已加载 ' + f.name + ' · ' + (src.length / 1024).toFixed(1) + ' KB', 'ok');
+    } catch(err){
+      console.error(err);
+      setStatus('解析失败：' + err.message, 'err');
+      alert('解析 data.js 失败：\n' + err.message + '\n\n请确认文件是完整的 data.js。');
+    }
+  };
+  reader.onerror = function(){ setStatus('读取文件失败', 'err'); };
+  reader.readAsText(f, 'utf-8');
+  e.target.value = '';
+});
+
+function downloadDataJS(){
+  try {
+    var src = generateSource();
+    var blob = new Blob([src], { type: 'text/javascript;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'data.js';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function(){
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 200);
+    setStatus('已导出 data.js · ' + (src.length / 1024).toFixed(1) + ' KB', 'ok');
+  } catch(e){
+    console.error(e);
+    alert('导出失败：' + e.message);
+  }
+}
+
+function showPreview(){
+  try {
+    var src = generateSource();
+    document.getElementById('previewContent').textContent = src;
+    document.getElementById('previewOverlay').classList.add('on');
+  } catch(e){
+    alert('生成源码失败：' + e.message);
+  }
+}
+
+/* ============================================================
+   全量校验
+   ============================================================ */
+function validateAll(){
+  var errors = [];
+  var warnings = [];
+
+  /* 1. 武器 ID 唯一性 */
+  if (Array.isArray(state.data.weapons)){
+    var seen = {};
+    state.data.weapons.forEach(function(w, i){
+      if (!w.id){ errors.push('weapons[' + i + '] 缺少 id'); return; }
+      if (seen[w.id]) errors.push('weapons 中 ID 重复：' + w.id);
+      seen[w.id] = true;
+      if (w.cal && state.data.ammoTypes){
+        var hasAmmo = Object.keys(state.data.ammoTypes).some(function(k){
+          return state.data.ammoTypes[k].cal === w.cal;
+        });
+        if (!hasAmmo) warnings.push('武器 ' + w.id + ' 的口径 ' + w.cal + ' 在 ammoTypes 中没有对应弹种');
+      }
+    });
+  }
+
+  /* 2. 敌人武器引用 */
+  if (state.data.enemyTypes && Array.isArray(state.data.weapons)){
+    var wIds = state.data.weapons.map(function(w){ return w.id; });
+    Object.keys(state.data.enemyTypes).forEach(function(k){
+      var e = state.data.enemyTypes[k];
+      if (e.wpn && wIds.indexOf(e.wpn) < 0){
+        warnings.push('敌人 ' + k + ' 的主武器 ' + e.wpn + ' 不存在');
+      }
+      if (e.side && wIds.indexOf(e.side) < 0){
+        warnings.push('敌人 ' + k + ' 的副武器 ' + e.side + ' 不存在');
+      }
+    });
+  }
+
+  /* 3. 角色武器引用 */
+  if (state.data.characters && Array.isArray(state.data.weapons)){
+    var wIds2 = state.data.weapons.map(function(w){ return w.id; });
+    Object.keys(state.data.characters).forEach(function(k){
+      var c = state.data.characters[k];
+      if (c.weapon && wIds2.indexOf(c.weapon) < 0) warnings.push('角色 ' + k + ' 的主武器 ' + c.weapon + ' 不存在');
+      if (c.sidearm && wIds2.indexOf(c.sidearm) < 0) warnings.push('角色 ' + k + ' 的副武器 ' + c.sidearm + ' 不存在');
+    });
+  }
+
+  /* 4. 弹药 cal 非空 */
+  if (state.data.ammoTypes){
+    Object.keys(state.data.ammoTypes).forEach(function(k){
+      var a = state.data.ammoTypes[k];
+      if (!a.cal) warnings.push('ammoTypes.' + k + ' 缺少 cal 字段');
+      if (!a.n) errors.push('ammoTypes.' + k + ' 缺少显示名 n');
+    });
+  }
+
+  /* 5. 配件挂载 */
+  if (state.data.attach){
+    ['muzzle','sight','mag','grip'].forEach(function(slot){
+      if (!Array.isArray(state.data.attach[slot])) return;
+      var seen2 = {};
+      state.data.attach[slot].forEach(function(a, i){
+        if (!a.id){ errors.push('attach.' + slot + '[' + i + '] 缺少 id'); return; }
+        if (seen2[a.id]) errors.push('attach.' + slot + ' 中 ID 重复：' + a.id);
+        seen2[a.id] = true;
+      });
+    });
+  }
+
+  /* 6. 护甲 ID 前缀 */
+  [['helmetShells','hs'],['helmetVisors','hv'],['helmetEars','he'],['vestFibers','vf'],['vestPlates','vp'],['backpacks','bp'],['chestRigs','cr']].forEach(function(pair){
+    var arr = state.data[pair[0]];
+    if (!Array.isArray(arr)) return;
+    var seen3 = {};
+    arr.forEach(function(a){
+      if (!a.id) return;
+      if (seen3[a.id]) errors.push(pair[0] + ' 中 ID 重复：' + a.id);
+      seen3[a.id] = true;
+    });
+  });
+
+  /* 显示 */
+  var lines = [];
+  lines.push('校验完成：' + errors.length + ' 个错误 · ' + warnings.length + ' 个警告');
+  lines.push('');
+  if (errors.length){
+    lines.push('【错误】（必须修复才能正常游戏）');
+    errors.slice(0, 50).forEach(function(e){ lines.push('  ✗ ' + e); });
+    if (errors.length > 50) lines.push('  … 还有 ' + (errors.length - 50) + ' 条');
+    lines.push('');
+  }
+  if (warnings.length){
+    lines.push('【警告】（可能影响体验）');
+    warnings.slice(0, 80).forEach(function(w){ lines.push('  ⚠ ' + w); });
+    if (warnings.length > 80) lines.push('  … 还有 ' + (warnings.length - 80) + ' 条');
+  }
+  if (!errors.length && !warnings.length) lines.push('✓ 一切正常');
+
+  alert(lines.join('\n'));
+
+  if (errors.length) setStatus('校验：' + errors.length + ' 错误 / ' + warnings.length + ' 警告', 'err');
+  else if (warnings.length) setStatus('校验：' + warnings.length + ' 警告', 'warn');
+  else setStatus('校验通过', 'ok');
+}
+
+/* ============================================================
+   工具函数
+   ============================================================ */
+function escapeHtml(s){
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/* ============================================================
+   事件绑定
+   ============================================================ */
+document.getElementById('btnOpen').addEventListener('click', openFile);
+document.getElementById('btnDownload').addEventListener('click', downloadDataJS);
+document.getElementById('btnPreview').addEventListener('click', showPreview);
+document.getElementById('btnValidate').addEventListener('click', validateAll);
+document.getElementById('btnAdd').addEventListener('click', addNewEntry);
+document.getElementById('btnDup').addEventListener('click', duplicateCurrent);
+document.getElementById('btnDel').addEventListener('click', deleteCurrent);
+
+document.getElementById('btnClosePreview').addEventListener('click', function(){
+  document.getElementById('previewOverlay').classList.remove('on');
+});
+document.getElementById('btnCopySrc').addEventListener('click', function(){
+  var src = document.getElementById('previewContent').textContent;
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(src).then(function(){
+      setStatus('源码已复制到剪贴板', 'ok');
+    }).catch(function(){ fallbackCopy(src); });
+  } else {
+    fallbackCopy(src);
+  }
+});
+function fallbackCopy(text){
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); setStatus('源码已复制', 'ok'); }
+  catch(e){ alert('复制失败，请手动选择'); }
+  document.body.removeChild(ta);
+}
+
+document.getElementById('btnHelp').addEventListener('click', function(){
+  document.getElementById('helpOverlay').classList.add('on');
+});
+document.getElementById('btnCloseHelp').addEventListener('click', function(){
+  document.getElementById('helpOverlay').classList.remove('on');
+});
+
+document.getElementById('listFilter').addEventListener('input', function(){
+  renderList();
+});
+
+/* 快捷键 */
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape'){
+    document.getElementById('previewOverlay').classList.remove('on');
+    document.getElementById('helpOverlay').classList.remove('on');
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key === 's'){
+    if (state.data){ e.preventDefault(); showPreview(); }
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'e'){
+    if (state.data){ e.preventDefault(); downloadDataJS(); }
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'z'){
+    if (state.lastDeleted){ e.preventDefault(); undoDelete(); }
+  }
+});
+
+/* 拖拽加载 */
+document.addEventListener('dragover', function(e){
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'copy';
+});
+document.addEventListener('drop', function(e){
+  e.preventDefault();
+  var f = e.dataTransfer.files && e.dataTransfer.files[0];
+  if (!f) return;
+  if (!/\.(js|txt)$/i.test(f.name) && f.type.indexOf('javascript') < 0){
+    if (!confirm('文件 ' + f.name + ' 可能不是 data.js，确定继续？')) return;
+  }
+  var reader = new FileReader();
+  reader.onload = function(ev){
+    try {
+      var src = String(ev.target.result);
+      var parsed = parseDataJS(src);
+      state.rawSource = src;
+      state.header = parsed.header;
+      state.data = parsed.asaka;
+      state.currentCategory = null;
+      state.currentId = null;
+      state.lastDeleted = null;
+      document.getElementById('main').style.display = 'grid';
+      document.getElementById('btnDownload').disabled = false;
+      document.getElementById('btnPreview').disabled = false;
+      document.getElementById('btnValidate').disabled = false;
+      renderCategories();
+      var first = document.querySelector('.cat-item');
+      if (first) first.click();
+      setStatus('已加载 ' + f.name + ' · ' + (src.length / 1024).toFixed(1) + ' KB', 'ok');
+    } catch(err){
+      setStatus('解析失败：' + err.message, 'err');
+      alert('解析失败：' + err.message);
+    }
+  };
+  reader.readAsText(f, 'utf-8');
+});
+
+/* 窗口大小变化时刷新 */
+window.addEventListener('resize', function(){
+  /* 无需特别处理，CSS Grid 自动适应 */
+});
+
+/* ============================================================
+   初始化
+   ============================================================ */
+setStatus('等待加载 data.js … 点击左上角「📂 打开 data.js」开始');
+
+/* 若浏览器支持，尝试自动探测同目录下的 data.js */
+(function tryAutoLoad(){
+  if (typeof fetch !== 'function') return;
+  /* 只在 http(s) 下尝试，且仅作提示，不自动加载 */
+  if (location.protocol === 'http:' || location.protocol === 'https:'){
+    fetch('data.js', { method: 'HEAD' })
+      .then(function(r){
+        if (r.ok){
+          setStatus('检测到同目录 data.js · 点击「📂 打开 data.js」或在控制台执行 autoLoad()', 'warn');
+        }
+      })
+      .catch(function(){ /* 忽略 */ });
+  }
+})();
+
+/* 暴露一个全局方法方便调试 */
+window.autoLoadData = function(){
+  fetch('data.js').then(function(r){ return r.text(); }).then(function(src){
+    var parsed = parseDataJS(src);
+    state.rawSource = src;
+    state.header = parsed.header;
+    state.data = parsed.asaka;
+    state.currentCategory = null;
+    state.currentId = null;
+    document.getElementById('main').style.display = 'grid';
+    document.getElementById('btnDownload').disabled = false;
+    document.getElementById('btnPreview').disabled = false;
+    document.getElementById('btnValidate').disabled = false;
+    renderCategories();
+    var first = document.querySelector('.cat-item');
+    if (first) first.click();
+    setStatus('已自动加载 data.js · ' + (src.length / 1024).toFixed(1) + ' KB', 'ok');
+  }).catch(function(e){
+    alert('自动加载失败：' + e.message + '\n请手动点击「📂 打开 data.js」');
+  });
+};
+
+})();
+</script>
+</body>
+</html>

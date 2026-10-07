@@ -24,7 +24,7 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;color:inhe
 .sw{width:44px;height:24px;border-radius:12px;background:#243447;position:relative;transition:.2s;flex-shrink:0;touch-action:manipulation}
 .sw.on{background:#2f7fc4}.sw::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:#e6f0fa;top:3px;left:3px;transition:.2s}
 .sw.on::after{left:23px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:7px}.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}.grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:7px}.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}.grid4{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:5px}
 .diffbtn{padding:11px 4px;border-radius:9px;text-align:center;font-size:12px;background:rgba(24,38,56,.6);border:1px solid rgba(80,125,175,.16);color:#8aa8c4;cursor:pointer;touch-action:manipulation}
 .diffbtn.on{background:rgba(60,120,185,.55);color:#e8f4ff;border-color:rgba(120,190,255,.5)}
 .diffbtn small{display:block;font-size:8px;opacity:.65;margin-top:2px}
@@ -78,6 +78,9 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;color:inhe
 #taskList .task{margin-bottom:3px;line-height:1.5}
 #taskList .task.done{color:#5fd47a;text-decoration:line-through}
 #taskList .task .p{color:#ffd93d}
+#taskList .task.src-daily{color:#ffd76b}
+#taskList .task.src-challenge{color:#d4a4ff}
+#taskList .task.src-challenge.done{color:#5fd47a}
 #bossBar{position:absolute;left:50%;top:8px;transform:translateX(-50%);width:70%;max-width:520px;display:none;z-index:8;pointer-events:none}
 #bossBar .bn{display:flex;justify-content:space-between;font-size:12px;color:#ffdd88;text-shadow:0 1px 3px #000;margin-bottom:3px;letter-spacing:1px}
 #bossBar .bb{height:14px;background:rgba(0,0,0,.75);border-radius:7px;overflow:hidden;border:1px solid rgba(255,180,60,.7);position:relative}
@@ -189,6 +192,7 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;color:inhe
 .alert-btn{position:absolute;left:50%;bottom:90px;transform:translateX(-50%);padding:10px 22px;border-radius:20px;background:rgba(50,120,200,.85);border:2px solid rgba(140,200,255,.6);color:#fff;font-size:12px;z-index:9;pointer-events:auto;display:none;cursor:pointer;touch-action:manipulation}
 .alert-btn.on{display:block}
 .alert-btn.rescue{background:rgba(200,80,50,.9);border-color:rgba(255,160,120,.7)}
+.alert-btn.pickup{background:rgba(60,160,100,.9);border-color:rgba(140,255,180,.7)}
 #rescueBar{position:absolute;left:50%;bottom:140px;transform:translateX(-50%);width:200px;height:12px;background:rgba(0,0,0,.7);border-radius:6px;overflow:hidden;display:none;z-index:9;border:1px solid rgba(255,180,100,.5)}
 #rescueBar i{display:block;height:100%;background:linear-gradient(90deg,#ff9a3c,#ffd93d);width:0%}
 #nadeHint{position:absolute;left:50%;bottom:250px;transform:translateX(-50%);padding:8px 20px;border-radius:20px;background:rgba(255,180,60,.9);color:#000;font-size:13px;font-weight:700;z-index:9;display:none;letter-spacing:2px}
@@ -272,8 +276,6 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;color:inhe
 #fireWarn.on{display:block}
 #fireWarn::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at center,transparent 30%,rgba(200,60,0,.35) 100%);animation:firePulse .8s ease-in-out infinite alternate}
 @keyframes firePulse{from{opacity:.6}to{opacity:1}}
-
-/* ========== 仓库：左配装右仓库 ========== */
 #stashov{background:rgba(4,8,14,.97);z-index:32;padding:16px;justify-content:flex-start;overflow-y:auto;align-items:stretch}
 #stashov h2{margin-top:10px;margin-bottom:10px;text-align:center}
 .stash-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:0 auto 14px;max-width:1400px;width:100%}
@@ -281,27 +283,11 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;color:inhe
 .stash-card .k{font-size:9px;color:#5c82a8;letter-spacing:2px;margin-bottom:3px}
 .stash-card .v{font-size:16px;color:#ffe08a;font-weight:700}
 .stash-cols{display:flex;gap:12px;max-width:1400px;margin:0 auto;width:100%;align-items:flex-start}
-
-/* 左侧：固定高度 + 滚动条
-   ★ 面板本身 touch-action:auto（可滚动）
-   ★ 面板内的所有 .slot 一律 touch-action:none（保证拖拽）
-   ★ 标题栏 h3 也 touch-action:auto（额外滚动起点） */
-.stash-left{
-  flex:0 0 46%;min-width:340px;
-  display:flex;flex-direction:column;gap:6px;
-  max-height:calc(100vh - 200px);
-  overflow-y:auto;overflow-x:hidden;
-  padding-right:8px;
-  scrollbar-width:thin;
-  scrollbar-color:rgba(100,170,240,.55) rgba(0,0,0,.25);
-  touch-action:auto;
-  -webkit-overflow-scrolling:touch;
-}
+.stash-left{flex:0 0 46%;min-width:340px;display:flex;flex-direction:column;gap:6px;max-height:calc(100vh - 200px);overflow-y:auto;overflow-x:hidden;padding-right:8px;scrollbar-width:thin;scrollbar-color:rgba(100,170,240,.55) rgba(0,0,0,.25);touch-action:auto;-webkit-overflow-scrolling:touch}
 .stash-left::-webkit-scrollbar{width:8px}
 .stash-left::-webkit-scrollbar-track{background:rgba(0,0,0,.25);border-radius:4px}
 .stash-left::-webkit-scrollbar-thumb{background:rgba(100,170,240,.55);border-radius:4px;border:1px solid rgba(0,0,0,.3)}
 .stash-left::-webkit-scrollbar-thumb:hover{background:rgba(130,200,255,.85)}
-
 .stash-right{flex:1;min-width:320px;display:flex;flex-direction:column;gap:8px;max-height:calc(100vh - 200px);overflow:hidden}
 .stash-panel{background:rgba(10,18,30,.85);border:1px solid rgba(100,170,240,.3);border-radius:10px;padding:8px 10px;flex-shrink:0}
 .stash-panel h3{font-size:11px;letter-spacing:2px;color:#8fd0ff;margin-bottom:6px;display:flex;justify-content:space-between;align-items:baseline;touch-action:auto;cursor:grab}
@@ -319,8 +305,6 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;color:inhe
 .stash-actions button{padding:8px 14px;border-radius:7px;background:rgba(40,80,130,.7);border:1px solid rgba(110,180,255,.5);color:#cfe8ff;font-size:11px;cursor:pointer;touch-action:manipulation}
 .stash-actions button.danger{background:rgba(120,40,40,.7);border-color:rgba(255,110,110,.6);color:#ffc8c8}
 .stash-empty{color:#5c82a8;font-size:11px;padding:20px;text-align:center}
-
-/* 左侧紧凑化 */
 .stash-left .stash-panel{padding:7px 9px;border-radius:8px}
 .stash-left .stash-panel h3{font-size:10.5px;margin-bottom:5px;letter-spacing:2px;touch-action:auto}
 .stash-left .equip-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
@@ -338,7 +322,6 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;color:inhe
 .stash-left .bag-grid .slot .item-qty{font-size:6.5px;top:1px;right:2px}
 .stash-left .bag-grid .slot .item-dur{bottom:0;height:1.5px}
 .stash-left .bag-grid .slot .slot-hint{font-size:7px}
-
 @media(max-width:768px){
   .stash-cols{flex-direction:column}
   .stash-left,.stash-right{flex:1 1 auto;min-width:0;width:100%}
@@ -349,7 +332,6 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;color:inhe
   .stash-left .bag-grid .slot{min-height:36px}
   .stash-left .equip-grid .slot{min-height:42px}
 }
-
 #equipPicker{display:none;position:fixed;z-index:70;background:rgba(10,18,30,.98);border:1.5px solid rgba(100,180,255,.5);border-radius:8px;padding:4px;min-width:150px;box-shadow:0 6px 22px rgba(0,0,0,.8)}
 .ep-item{padding:9px 14px;font-size:12px;color:#cfe4f8;cursor:pointer;border-radius:5px;transition:.1s;white-space:nowrap}
 .ep-item:hover{background:rgba(60,100,150,.55);color:#e0f0ff}
@@ -376,57 +358,39 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;color:inhe
 <div id="menu" class="screen on">
 <div class="mwrap">
   <div class="mtitle">Asaka Straight Project 2D</div>
-  <div class="msub" id="versionLine">v0.42.6 · 2026 ZpycuA · CC BY-NC 4.0</div>
-
+  <div class="msub" id="versionLine">v0.43.0 · 2026 ZpycuA · CC BY-NC 4.0</div>
   <div class="savepanel" id="saveSummary">
     <div class="row1"><span>账户：<b id="accName">指挥官</b></span><span>信用点</span></div>
     <div class="row1"><span style="font-size:10px;color:#5c82a8" id="accDays">登录天数 1 · 制式券 0</span><span class="val" id="accCredits">0</span></div>
     <div class="row2">
-      <div><b id="accRuns">0</b>出勤</div>
-      <div><b id="accEx">0</b>撤离</div>
-      <div><b id="accKills">0</b>击杀</div>
-      <div><b id="accStash">0</b>仓库值</div>
+      <div><b id="accRuns">0</b>出勤</div><div><b id="accEx">0</b>撤离</div>
+      <div><b id="accKills">0</b>击杀</div><div><b id="accStash">0</b>仓库值</div>
     </div>
   </div>
-
   <button class="mbtn gold" id="stashBtn">📦 仓 库 · 配 装</button>
-
   <div class="sect">平 台</div>
   <div class="grid2" id="platRow">
     <div class="diffbtn on" data-plat="touch">移动端<small>触屏</small></div>
     <div class="diffbtn" data-plat="pc">PC端<small>键鼠</small></div>
   </div>
-
   <div class="sect">模 式</div>
   <div class="grid3" id="modeRow">
     <div class="diffbtn on" data-mode="solo">单人生存<small>搜索撤离</small></div>
     <div class="diffbtn" data-mode="duo">双人队<small>你+1AI</small></div>
     <div class="diffbtn" data-mode="squad">三人队<small>你+2AI</small></div>
   </div>
-
   <div class="sect">地 图</div>
   <div class="grid3" id="mapRow"></div>
   <div class="mapdesc" id="mapDesc"></div>
-
   <div class="sect">难 度</div>
-  <div class="grid4" id="diffRow">
-    <div class="diffbtn" data-d="easy">简单</div>
-    <div class="diffbtn on" data-d="normal">普通</div>
-    <div class="diffbtn" data-d="hard">较难</div>
-    <div class="diffbtn" data-d="nightmare">噩梦</div>
-  </div>
-
+  <div class="grid4" id="diffRow"></div>
   <div class="sect">角 色</div>
   <div class="grid3" id="charRow"></div>
-
   <div id="deployInfo" style="font-size:10.5px;color:#8fb0c8;text-align:center;margin:6px 0;line-height:1.6;padding:6px 10px;background:rgba(14,22,34,.5);border-radius:6px;border:1px solid rgba(80,125,175,.2)"></div>
-
   <button class="mbtn" id="startbtn">进 入 战 区</button>
   <button class="mbtn ghost" id="trainBtn">训 练 场</button>
-
   <div class="sect">剧 情</div>
   <div class="opt"><span>剧情任务模式（分章节推进）</span><div class="sw on" data-a="storyMode"></div></div>
-
   <div class="sect">辅 助</div>
   <div class="opt"><span>小地图</span><div class="sw on" data-a="minimap"></div></div>
   <div class="opt"><span>敌方血条</span><div class="sw on" data-a="enemyHP"></div></div>
@@ -441,14 +405,12 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;color:inhe
   <div class="opt"><span>声纹条带</span><div class="sw on" data-a="soundRipples"></div></div>
   <div class="opt"><span>击杀播报</span><div class="sw on" data-a="killFeed"></div></div>
   <div class="opt"><span>音效</span><div class="sw on" data-a="sound"></div></div>
-
   <div class="sect">DEBUG</div>
   <div class="opt"><span>无阴影视野</span><div class="sw" data-a="dbgNoFog"></div></div>
   <div class="opt"><span>无限生命</span><div class="sw" data-a="dbgInfHP"></div></div>
   <div class="opt"><span>无限子弹</span><div class="sw" data-a="dbgInfAmmo"></div></div>
   <div class="opt"><span>恒定移速</span><div class="sw" data-a="dbgConstSpeed"></div></div>
   <div class="opt"><span>启用控制台（局内 ~ 键）</span><div class="sw" data-a="dbgConsole"></div></div>
-
   <div class="sect">存 档</div>
   <div class="grid2">
     <button class="mbtn ghost" id="exportSaveBtn">导出存档</button>
@@ -510,6 +472,7 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;color:inhe
   </div>
   <div id="rescueBar"><i id="rescuePf"></i></div>
   <div class="alert-btn" id="lootBtn">搜 索 容 器</div>
+  <div class="alert-btn pickup" id="pickupBtn">拾 取 物 品</div>
   <div class="alert-btn rescue" id="rescueBtn">按住救 援</div>
   <div id="callHelp">呼 叫 救 援</div>
   <div id="giveUpBtn">放 弃</div>
@@ -596,40 +559,17 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;color:inhe
   <div class="stash-summary" id="stashSummary"></div>
   <div class="stash-cols">
     <div class="stash-left" id="stashLeftCol">
-      <div class="stash-panel">
-        <h3><span>装备槽（6）</span><span class="val" id="equipHint">0 / 6</span></h3>
-        <div class="equip-grid" id="spEquipGrid"></div>
-      </div>
-      <div class="stash-panel">
-        <h3><span>胸挂</span><span class="val" id="spChestCount">0 / 0</span></h3>
-        <div class="bag-grid" id="spChestGrid"></div>
-      </div>
-      <div class="stash-panel">
-        <h3><span>口袋</span><span class="val" id="spPocketCount">0 / 4</span></h3>
-        <div class="bag-grid" id="spPocketGrid"></div>
-      </div>
-      <div class="stash-panel">
-        <h3><span>背包</span><span class="val" id="spBagCount">0 / 0</span></h3>
-        <div class="bag-grid" id="spBagGrid"></div>
-      </div>
-      <div class="stash-panel">
-        <h3><span>安全箱</span><span class="val" id="spSafeCount">0 / 3</span><span class="hint">（撤离失败时保留）</span></h3>
-        <div class="bag-grid" id="spSafeGrid"></div>
-      </div>
-      <div class="stash-panel">
-        <div class="stash-actions">
-          <button id="equipAutoBtn">快速配装</button>
-          <button id="equipClearBtn" class="danger">清空配装</button>
-          <button id="stashCloseBtn">关闭</button>
-        </div>
-      </div>
+      <div class="stash-panel"><h3><span>装备槽（6）</span><span class="val" id="equipHint">0 / 6</span></h3><div class="equip-grid" id="spEquipGrid"></div></div>
+      <div class="stash-panel"><h3><span>胸挂</span><span class="val" id="spChestCount">0 / 0</span></h3><div class="bag-grid" id="spChestGrid"></div></div>
+      <div class="stash-panel"><h3><span>口袋</span><span class="val" id="spPocketCount">0 / 4</span></h3><div class="bag-grid" id="spPocketGrid"></div></div>
+      <div class="stash-panel"><h3><span>背包</span><span class="val" id="spBagCount">0 / 0</span></h3><div class="bag-grid" id="spBagGrid"></div></div>
+      <div class="stash-panel"><h3><span>安全箱</span><span class="val" id="spSafeCount">0 / 3</span><span class="hint">（撤离失败时保留）</span></h3><div class="bag-grid" id="spSafeGrid"></div></div>
+      <div class="stash-panel"><div class="stash-actions"><button id="equipAutoBtn">快速配装</button><button id="equipClearBtn" class="danger">清空配装</button><button id="stashCloseBtn">关闭</button></div></div>
     </div>
     <div class="stash-right">
       <div class="stash-panel">
         <h3><span>仓库物品</span><span class="val" id="stashTotalVal">0 cp</span></h3>
-        <div class="stash-grid-wrap">
-          <div class="stash-grid" id="stashGrid"></div>
-        </div>
+        <div class="stash-grid-wrap"><div class="stash-grid" id="stashGrid"></div></div>
         <div style="margin-top:6px;font-size:10px;color:#6a8ca8;text-align:center">把物品拖到左侧槽位配装 / 点击查看详情或出售</div>
       </div>
     </div>
@@ -651,16 +591,17 @@ button{cursor:pointer;font-family:inherit;border:none;background:none;color:inhe
 <script>
 "use strict";
 /* ============================================================
-   ASP2D v0.42.6 — 主程序
+   ASP2D v0.43.0 — 主程序
    
-   v0.42.6（本次）：
-   - ★ 彻底修复配装仓库拖拽在触屏上失效的问题
-     根本原因：可滚动容器里的 .slot 使用了 touch-action:auto，
-     导致浏览器在 pointerdown 后抢走 pointermove → pointercancel，
-     拖拽被强制中止（"一瞬间拖出来又消失"）。
-     修复：所有 .slot 一律 touch-action:none；
-     面板标题栏 h3 与 stash-grid-wrap 空白区保留 touch-action:auto/pan-y 作为滚动起点。
-   —— 除 CSS 中 touch-action 相关的少量行，其余 v0.42.5 内容一字未动。
+   v0.43.0（本次）：
+   - ★ 修复 Maximum call stack size exceeded（背包自环递归爆栈）
+     · itemValue / attachValue 加 _depth 上限 + _seen 引用环检测
+     · setEquipItem 的 backpack / chestRig 分支：
+       深拷贝内容物 + 剔除「背包自己」，从源头切断自环
+     · itemDesc 里遍历 _stored 限制显示条数（最多 20 条）
+   - ★ 敌方副武器近战切换
+     · enemyFireAt 开头：若副武器是近战且距离够近，AI 切刀砍人
+     · 黑奈的 krona_night 现在会真的用起来
    ============================================================ */
 window.addEventListener('error',function(ev){
   var el=document.getElementById('err');
@@ -765,6 +706,8 @@ var PLAYER_SKILLS=ASAKA.playerSkills||{};
 var BOSS_SKILLS=ASAKA.bossSkills||{};
 var KILL_DROPS=ASAKA.killDrops||{};
 
+var MAIN_ATTACH_KEYS=['muzzle','sight','mag','grip'];
+
 function GAME_CFG(){return DATA_CONFIG}
 function AI_CFG(){return DATA_CONFIG.ai||{}}
 function CFG_INTERACTION(){return DATA_CONFIG.interaction||{pickupRadius:60,pickupRadiusBoss:90,searchTime:2.5}}
@@ -773,12 +716,9 @@ function CFG_SPAWN(){return DATA_CONFIG.spawnDist||{normal:620,elite:900,super:1
 function CFG_BURN(){return DATA_CONFIG.burn||{tickInterval:0.35}}
 function CFG_TRAIN(){return DATA_CONFIG.training||{dummyCount:5,dummyHp:200}}
 function CFG_DEPLOY_LIMIT(mapId,diffKey){
-  var dl=DATA_CONFIG.deployLimit;
-  if(!dl) return null;
-  var m=dl[mapId];
-  if(!m) return null;
-  var v=m[diffKey];
-  if(v===undefined||v===null) return null;
+  var dl=DATA_CONFIG.deployLimit;if(!dl) return null;
+  var m=dl[mapId];if(!m) return null;
+  var v=m[diffKey];if(v===undefined||v===null) return null;
   if(typeof v==='number') return {min:0,max:v};
   return {min:safeNum(v.min,0),max:safeNum(v.max,Infinity)};
 }
@@ -803,8 +743,73 @@ function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a
 function makeRng(seedStr){return mulberry32(strHash(String(seedStr)))}
 
 /* 物品工厂 */
-function mkWeapon(id){var b=null;for(var i=0;i<WEAPONS.length;i++)if(WEAPONS[i].id===id){b=WEAPONS[i];break}if(!b)b=WEAPONS[0];if(!b)return null;var w={id:b.id,n:b.n,cls:b.cls,cal:b.cal,e:b.e,pen:b.pen,rpm:b.rpm,mag:b.mag,res:b.res,rel:b.rel,spd:b.spd*PX_PER_M,rng:b.rng*PX_PER_M,spr:b.spr,auto:b.auto,rar:b.rar,snd:b.snd,rec:b.rec,pellets:b.pellets||1,flavor:b.flavor||'',attach:{muzzle:null,sight:null,mag:null,grip:null},ammo:b.mag,reserve:b.res,dmgMul:1,sprMul:1,recMul:1,relMul:1,magMul:1,rngMul:1,zoom:1,sndMod:null,magCap:b.mag,isLauncher:!!b.isLauncher,loadedAmmoType:b.cal,gm:b.isLauncher?[null,null,null,null]:null};if(b.isLauncher){w.magCap=4;w.ammo=0;w.reserve=0}recalcWeapon(w);if(!b.isLauncher)w.ammo=Math.min(w.ammo,w.magCap);return w}
-function recalcWeapon(w){if(!w)return;w.dmgMul=1;w.sprMul=1;w.recMul=1;w.relMul=1;w.magMul=1;w.rngMul=1;w.zoom=1;w.sndMod=null;var at=w.attach||{};for(var k in at){var a=at[k];if(!a)continue;var d=a.d||{};if(d.e)w.dmgMul+=d.e;if(d.spr)w.sprMul+=d.spr;if(d.rec)w.recMul+=d.rec;if(d.rel)w.relMul+=d.rel;if(d.mag)w.magMul+=d.mag;if(d.rng)w.rngMul+=d.rng;if(d.zoom)w.zoom=d.zoom;if(d.sndMod)w.sndMod=d.sndMod}if(!isFinite(w.dmgMul))w.dmgMul=1;if(!isFinite(w.sprMul))w.sprMul=1;if(!isFinite(w.recMul))w.recMul=1;if(!isFinite(w.relMul))w.relMul=1;if(!isFinite(w.magMul))w.magMul=1;if(!isFinite(w.rngMul))w.rngMul=1;if(!isFinite(w.zoom)||w.zoom<=0)w.zoom=1;w.sprMul=Math.max(.12,w.sprMul);w.recMul=Math.max(.25,w.recMul);w.relMul=Math.max(.4,w.relMul);w.magMul=Math.max(.5,w.magMul);if(w.isLauncher)return;var old=w.magCap||0;w.magCap=Math.round(w.mag*w.magMul);if(old&&w.ammo>w.magCap)w.ammo=w.magCap}
+function mkWeapon(id){
+  var b=null;
+  for(var i=0;i<WEAPONS.length;i++) if(WEAPONS[i].id===id){b=WEAPONS[i];break}
+  if(!b) b=WEAPONS[0];
+  if(!b) return null;
+  var w={
+    id:b.id,n:b.n,cls:b.cls,cal:b.cal,e:b.e,pen:b.pen,rpm:b.rpm,mag:b.mag,res:b.res,rel:b.rel,
+    spd:(b.spd||0)*PX_PER_M, rng:(b.rng||0)*PX_PER_M, spr:b.spr, auto:b.auto, rar:b.rar, snd:b.snd, rec:b.rec,
+    pellets:b.pellets||1, flavor:b.flavor||'',
+    attach:{muzzle:null,sight:null,mag:null,grip:null},
+    ammo:b.mag,reserve:b.res,
+    dmgMul:1,sprMul:1,recMul:1,relMul:1,magMul:1,rngMul:1,zoom:1,sndMod:null,
+    magCap:b.mag,isLauncher:!!b.isLauncher,
+    isMelee:!!b.isMelee,
+    meleeRange:b.meleeRange||0,
+    meleeArc:b.meleeArc||1.2,
+    loadedAmmoType:b.cal,
+    gm:b.isLauncher?[null,null,null,null]:null
+  };
+  if(b.isLauncher){w.magCap=4;w.ammo=0;w.reserve=0}
+  if(w.isMelee){w.magCap=0;w.ammo=0;w.reserve=0}
+  recalcWeapon(w);
+  if(!b.isLauncher && !w.isMelee) w.ammo=Math.min(w.ammo,w.magCap);
+  return w;
+}
+function applyAttachEffects(w, a){
+  if(!a) return;
+  var d=a.d||{};
+  if(d.e) w.dmgMul+=d.e;
+  if(d.spr) w.sprMul+=d.spr;
+  if(d.rec) w.recMul+=d.rec;
+  if(d.rel) w.relMul+=d.rel;
+  if(d.mag) w.magMul+=d.mag;
+  if(d.rng) w.rngMul+=d.rng;
+  if(d.zoom) w.zoom=d.zoom;
+  if(d.sndMod) w.sndMod=d.sndMod;
+}
+function recalcWeapon(w){
+  if(!w) return;
+  w.dmgMul=1;w.sprMul=1;w.recMul=1;w.relMul=1;w.magMul=1;w.rngMul=1;w.zoom=1;w.sndMod=null;
+  var at=w.attach||{};
+  for(var k in at){
+    var a=at[k]; if(!a) continue;
+    applyAttachEffects(w, a);
+    if(a.inner){
+      for(var sk in a.inner){
+        var sub=a.inner[sk];
+        if(sub) applyAttachEffects(w, sub);
+      }
+    }
+  }
+  if(!isFinite(w.dmgMul)) w.dmgMul=1;
+  if(!isFinite(w.sprMul)) w.sprMul=1;
+  if(!isFinite(w.recMul)) w.recMul=1;
+  if(!isFinite(w.relMul)) w.relMul=1;
+  if(!isFinite(w.magMul)) w.magMul=1;
+  if(!isFinite(w.rngMul)) w.rngMul=1;
+  if(!isFinite(w.zoom)||w.zoom<=0) w.zoom=1;
+  w.sprMul=Math.max(.12,w.sprMul);
+  w.recMul=Math.max(.25,w.recMul);
+  w.relMul=Math.max(.4,w.relMul);
+  w.magMul=Math.max(.5,w.magMul);
+  if(w.isLauncher||w.isMelee) return;
+  var old=w.magCap||0;
+  w.magCap=Math.round(w.mag*w.magMul);
+  if(old&&w.ammo>w.magCap) w.ammo=w.magCap;
+}
 function mkHelmetShell(id){var d=null;for(var i=0;i<HELMET_SHELLS.length;i++)if(HELMET_SHELLS[i].id===id){d=HELMET_SHELLS[i];break}if(!d)d=HELMET_SHELLS[0];if(!d)return null;return {id:d.id,n:d.n,lv:d.lv,rar:d.rar,red:d.red,energyPerPct:d.energyPerPct,dur:100,durMax:100,flavor:d.flavor||''}}
 function mkHelmetVisor(id){var d=null;for(var i=0;i<HELMET_VISORS.length;i++)if(HELMET_VISORS[i].id===id){d=HELMET_VISORS[i];break}if(!d)d=HELMET_VISORS[0];if(!d)return null;return {id:d.id,n:d.n,lv:d.lv,rar:d.rar,red:d.red,energyPerPct:d.energyPerPct,visionPenalty:d.visionPenalty||0,dur:100,durMax:100,flavor:d.flavor||''}}
 function mkHelmetEar(id){var d=null;for(var i=0;i<HELMET_EARS.length;i++)if(HELMET_EARS[i].id===id){d=HELMET_EARS[i];break}if(!d)d=HELMET_EARS[0];if(!d)return null;return {id:d.id,n:d.n,lv:d.lv,rar:d.rar,hearingMul:d.hearingMul,flashResist:d.flashResist,dur:100,durMax:100,on:true,flavor:d.flavor||''}}
@@ -821,7 +826,28 @@ function mkFiberItem(id){var d=mkVestFiber(id);if(!d)return null;return {t:'vest
 function mkPlateItem(id){var d=mkVestPlate(id);if(!d)return null;return {t:'vestPlate',id:id,data:d,qty:1}}
 function mkBackpackItem(id){var d=backpackById(id);if(!d)return null;return {t:'backpack',id:id,data:deepCopy(d),qty:1}}
 function mkChestRigItem(id){var d=chestRigById(id);if(!d)return null;return {t:'chestRig',id:id,data:deepCopy(d),qty:1}}
-function mkAttachItem(k,id){var list=ATTACH[k];if(!list)return null;var d=null;for(var i=0;i<list.length;i++)if(list[i].id===id){d=list[i];break}if(!d)return null;return {t:'attach',k:k,id:id,data:{id:d.id,n:d.n,rar:d.rar,d:d.d,flavor:d.flavor||''},qty:1}}
+function mkAttachItem(k, id){
+  var list = ATTACH[k];
+  if(!list) return null;
+  var d = null;
+  for(var i=0;i<list.length;i++) if(list[i].id===id){d=list[i];break}
+  if(!d) return null;
+  var item = {
+    t:'attach', k:k, id:id,
+    data:{
+      id:d.id, n:d.n, rar:d.rar, d:d.d, flavor:d.flavor||'',
+      subSlots: (d.subSlots||[]).slice()
+    },
+    qty:1
+  };
+  if(item.data.subSlots && item.data.subSlots.length){
+    item.data.inner = {};
+    for(var si=0; si<item.data.subSlots.length; si++){
+      item.data.inner[item.data.subSlots[si]] = null;
+    }
+  }
+  return item;
+}
 function mkAmmoItem(cal,pen,qty,tid){return {t:'ammo',cal:cal,pen:pen||0,qty:qty||1,tid:tid||cal}}
 
 function itemName(it){
@@ -846,7 +872,11 @@ function itemRar(it){
 }
 function itemIcon(it){
   if(!it)return '';
-  if(it.t==='weapon')return (it.data&&it.data.isLauncher)?'🚀':'🔫';
+  if(it.t==='weapon'){
+    if(it.data&&it.data.isMelee) return '🔪';
+    if(it.data&&it.data.isLauncher) return '🚀';
+    return '🔫';
+  }
   if(it.t==='cons')return '💊';
   if(it.t==='attach')return '⚙';
   if(it.t==='nade'){if(it.data&&it.data.effect==='thermo')return '🔥';if(it.data&&it.data.onlyLauncher)return '💥';if(it.data&&it.data.effect==='fire')return '🔥';return '💣'}
@@ -861,20 +891,35 @@ function itemIcon(it){
   if(it.t==='chestRig')return '🧥';
   return '?';
 }
-function itemValue(it){
+
+/* ★ v0.43.0：itemValue 加 _depth + _seen 防环 */
+function itemValue(it, _depth, _seen){
   if(!it)return 0;
+  _depth = _depth || 0;
+  if(_depth > 8) return 0;
+  _seen = _seen || [];
+  for(var si=0; si<_seen.length; si++) if(_seen[si]===it) return 0;
+  _seen.push(it);
+
   var v=0;
-  if(it.t==='valuable'){v=safeNum(it.data&&it.data.base,0)*safeNum(it.data&&it.data.fluct,1)}
+  if(it.t==='valuable'){
+    v=safeNum(it.data&&it.data.base,0)*safeNum(it.data&&it.data.fluct,1);
+  }
   else if(it.t==='weapon'){
     v=VALUE_TABLE[it.data.rar]||100;
     var at=it.data.attach||{};
-    for(var k in at)if(at[k])v+=250;
+    for(var k in at){
+      var a=at[k];
+      if(!a) continue;
+      v += attachValue(a, _depth+1, _seen);
+    }
     v+=(it.data.ammo||0)*2;
     if(it.data.isLauncher)v+=800;
     if(it.data.gm)for(var gi=0;gi<it.data.gm.length;gi++)if(it.data.gm[gi])v+=120;
+    if(it.data.isMelee) v+=150;
   }
   else if(it.t==='cons'){v=(VALUE_TABLE[it.data.rar]||20)*safeNum(it.qty,1)}
-  else if(it.t==='attach'){v=VALUE_TABLE[it.data.rar]||50}
+  else if(it.t==='attach'){v=attachValue(it.data, _depth+1, _seen)}
   else if(it.t==='nade'){v=(VALUE_TABLE[it.data.rar]||30)*safeNum(it.qty,1)}
   else if(it.t==='ammo'){
     var ar=it.tid&&AMMO_TYPES[it.tid]?(AMMO_TYPES[it.tid].rar||'common'):bulletRarity(it.pen);
@@ -888,10 +933,34 @@ function itemValue(it){
   else if(it.t==='backpack'||it.t==='chestRig'){
     var base2=VALUE_TABLE[it.data.rar]||80;
     v=Math.round(base2*(1+safeNum(it.data.cap,0)/30));
+    if(Array.isArray(it.data._stored)){
+      for(var sj=0;sj<it.data._stored.length;sj++){
+        var inner=it.data._stored[sj];
+        if(inner) v += itemValue(inner, _depth+1, _seen);
+      }
+    }
   }
   var f=SCR('onItemValue');if(f)v=f(it,v);
   v=safeNum(v,0);
   return Math.round(Math.max(0,v));
+}
+/* ★ v0.43.0：attachValue 加 _depth + _seen 防环 */
+function attachValue(a, _depth, _seen){
+  if(!a) return 0;
+  _depth = _depth || 0;
+  if(_depth > 8) return 0;
+  _seen = _seen || [];
+  for(var i=0;i<_seen.length;i++) if(_seen[i]===a) return 0;
+  _seen.push(a);
+
+  var base = VALUE_TABLE[a.rar]||50;
+  if(a.inner){
+    for(var sk in a.inner){
+      var sub=a.inner[sk];
+      if(sub) base += attachValue(sub, _depth+1, _seen);
+    }
+  }
+  return base;
 }
 function itemDurPct(it){
   if(!it)return -1;
@@ -900,16 +969,21 @@ function itemDurPct(it){
   return Math.round(clamp(safeNum(it.data.dur,0)/it.data.durMax*100,0,100));
 }
 function isEmptyEquipData(data){if(!data||!data.id)return true;return data.id==='hs0'||data.id==='hv0'||data.id==='he0'||data.id==='vf0'||data.id==='vp0'||data.id==='bp0'||data.id==='cr0'}
+
 function itemDesc(it){
   if(!it)return '';
   var h='',flavor='';
   if(it.t==='weapon'){
     var w=it.data;
     h+='<b style="color:'+RCOL(w.rar)+'">'+w.n+' ['+RNAME(w.rar)+']</b><br>';
-    if(w.isLauncher){
+    if(w.isMelee){
+      h+='近战 · 挥砍距离 '+((w.meleeRange||80)/PX_PER_M).toFixed(1)+' m<br>';
+      h+='扇形 '+(w.meleeArc||1.2).toFixed(2)+' rad · 挥速 '+w.rpm+' /min<br>';
+      h+='伤害 '+Math.round(w.e)+'（固定值）';
+    } else if(w.isLauncher){
       var gmCnt=0;for(var gi=0;gi<w.gm.length;gi++)if(w.gm[gi])gmCnt++;
       h+='弹管式发射器 · '+gmCnt+' / 4 发弹管<br>口径 '+w.cal+' 射程 '+(w.rng/PX_PER_M).toFixed(0)+' m';
-    }else{
+    } else {
       var curDef=AMMO_TYPES[w.loadedAmmoType]||AMMO_TYPES[w.cal];
       h+='口径 '+w.cal+' 当前弹种 '+(curDef?curDef.n:w.loadedAmmoType)+'<br>';
       h+='穿透 '+(curDef&&curDef.pen!==undefined?curDef.pen:w.pen)+' 射速 '+w.rpm+' RPM<br>';
@@ -918,27 +992,47 @@ function itemDesc(it){
     }
     flavor=w.flavor;
   }
-  else if(it.t==='attach'){var a=it.data;h+='<b style="color:'+RCOL(a.rar)+'">'+a.n+'</b><br>槽位 '+it.k;flavor=a.flavor}
+  else if(it.t==='attach'){
+    var a=it.data;
+    h+='<b style="color:'+RCOL(a.rar)+'">'+a.n+'</b><br>槽位 '+it.k;
+    if(a.subSlots&&a.subSlots.length){
+      var cnt=0; if(a.inner){for(var s in a.inner){if(a.inner[s]) cnt++;}}
+      h+='<br><span style="color:#c8a8ff">内层子槽 '+a.subSlots.length+' · 已装 '+cnt+'</span>';
+    }
+    if(a.d){
+      var parts=[];
+      if(a.d.e) parts.push('动能'+(a.d.e>0?'+':'')+(a.d.e*100).toFixed(0)+'%');
+      if(a.d.spr) parts.push('散布'+(a.d.spr>0?'+':'')+(a.d.spr*100).toFixed(0)+'%');
+      if(a.d.rec) parts.push('后坐'+(a.d.rec>0?'+':'')+(a.d.rec*100).toFixed(0)+'%');
+      if(a.d.rel) parts.push('换弹'+(a.d.rel>0?'+':'')+(a.d.rel*100).toFixed(0)+'%');
+      if(a.d.mag) parts.push('弹匣'+(a.d.mag>0?'+':'')+(a.d.mag*100).toFixed(0)+'%');
+      if(a.d.rng) parts.push('射程'+(a.d.rng>0?'+':'')+(a.d.rng*100).toFixed(0)+'%');
+      if(a.d.zoom) parts.push('倍率 '+a.d.zoom.toFixed(1)+'x');
+      if(parts.length) h+='<br><span style="color:#8fd0ff">'+parts.join(' · ')+'</span>';
+    }
+    flavor=a.flavor;
+  }
   else if(it.t==='cons'){var c=it.data;h+='<b style="color:'+RCOL(c.rar)+'">'+c.n+' ×'+safeNum(it.qty,1)+'</b><br>使用 '+c.useTime+'s';flavor=c.flavor}
   else if(it.t==='nade'){var n=it.data;h+='<b style="color:'+RCOL(n.rar)+'">'+n.n+' ×'+safeNum(it.qty,1)+'</b><br>引信 '+n.fuse+'s 半径 '+n.radius;flavor=n.flavor}
   else if(it.t==='valuable'){var v=it.data;h+='<b style="color:'+RCOL(v.rar)+'">'+v.n+' ['+RNAME(v.rar)+']</b><br>价值 <span style="color:#7fd0ff">'+itemValue(it)+' cp</span>';flavor=v.flavor}
-  else if(it.t==='ammo'){
-    var def=it.tid&&AMMO_TYPES[it.tid];
-    var rar=def?(def.rar||bulletRarity(it.pen)):bulletRarity(it.pen);
-    h+='<b style="color:'+RCOL(rar)+'">'+(def?def.n:(it.cal||'弹药'))+' ×'+safeNum(it.qty,1)+'</b><br>口径 '+it.cal+' 穿透 '+(it.pen||0);
-    if(def&&def.flavor)flavor=def.flavor;
-  }
+  else if(it.t==='ammo'){var def=it.tid&&AMMO_TYPES[it.tid];var rar=def?(def.rar||bulletRarity(it.pen)):bulletRarity(it.pen);h+='<b style="color:'+RCOL(rar)+'">'+(def?def.n:(it.cal||'弹药'))+' ×'+safeNum(it.qty,1)+'</b><br>口径 '+it.cal+' 穿透 '+(it.pen||0);if(def&&def.flavor)flavor=def.flavor}
   else if(it.t==='helmetShell'||it.t==='helmetVisor'||it.t==='helmetEar'||it.t==='vestFiber'||it.t==='vestPlate'){
-    var a2=it.data;
-    h+='<b style="color:'+RCOL(a2.rar)+'">'+a2.n+' ['+RNAME(a2.rar)+']</b><br>Lv'+a2.lv+'<br>';
+    var a2=it.data;h+='<b style="color:'+RCOL(a2.rar)+'">'+a2.n+' ['+RNAME(a2.rar)+']</b><br>Lv'+a2.lv+'<br>';
     if(a2.red!=null&&a2.red>0)h+='减伤 '+(a2.red*100).toFixed(0)+'%<br>';
-    h+='耐久 '+Math.round(safeNum(a2.dur,0))+' / '+a2.durMax+' ('+itemDurPct(it)+'%)';
-    flavor=a2.flavor;
+    h+='耐久 '+Math.round(safeNum(a2.dur,0))+' / '+a2.durMax+' ('+itemDurPct(it)+'%)';flavor=a2.flavor;
   }
   else if(it.t==='backpack'||it.t==='chestRig'){
-    var a3=it.data;
-    h+='<b style="color:'+RCOL(a3.rar)+'">'+a3.n+' ['+RNAME(a3.rar)+']</b><br>Lv'+a3.lv+' · 容量 <span style="color:#7fd0ff">'+a3.cap+'</span> 格';
-    if(Array.isArray(a3._stored)&&a3._stored.length>0)h+='<br><span style="color:#c8a8ff">内含 '+a3._stored.length+' 件物品</span>';
+    var a3=it.data;h+='<b style="color:'+RCOL(a3.rar)+'">'+a3.n+' ['+RNAME(a3.rar)+']</b><br>Lv'+a3.lv+' · 容量 <span style="color:#7fd0ff">'+a3.cap+'</span> 格';
+    if(Array.isArray(a3._stored)&&a3._stored.length>0){
+      /* ★ v0.43.0：显示上限 20 条，防止巨量内容刷屏 */
+      var showN = Math.min(a3._stored.length, 20);
+      h+='<br><span style="color:#c8a8ff">内含 '+a3._stored.length+' 件物品</span>';
+      for(var ii=0; ii<showN; ii++){
+        var inner=a3._stored[ii];
+        if(inner) h+='<br><span style="font-size:9px;color:#7fa8c8">· '+itemName(inner)+(inner.qty>1?' ×'+inner.qty:'')+'</span>';
+      }
+      if(a3._stored.length > showN) h+='<br><span style="font-size:9px;color:#5c82a8">…还有 '+(a3._stored.length-showN)+' 件</span>';
+    }
     flavor=a3.flavor;
   }
   h+='<div style="font-size:11px;color:#7fd0ff;margin-top:5px;font-weight:600">价值 '+itemValue(it)+' cp</div>';
@@ -964,11 +1058,7 @@ function armorAbsorb(armor,energy,pen){
   var durModifier=0.35+0.65*durRatio;
   var effRed=clamp((armor.red||0)*pierceFactor*durModifier,0,0.95);
   var absorbed=energy*effRed;var remaining=energy-absorbed;var wear=0;
-  if(armor.energyPerPct>0){
-    var wearBase=absorbed/armor.energyPerPct;var wearBonus;
-    if(penDiff>=3)wearBonus=2.8;else if(penDiff>=1)wearBonus=1+penDiff*0.45;else if(penDiff===0)wearBonus=1;else if(penDiff>=-2)wearBonus=1+penDiff*0.18;else wearBonus=Math.max(0.4,1+penDiff*0.10);
-    wear=wearBase*wearBonus;
-  }
+  if(armor.energyPerPct>0){var wearBase=absorbed/armor.energyPerPct;var wearBonus;if(penDiff>=3)wearBonus=2.8;else if(penDiff>=1)wearBonus=1+penDiff*0.45;else if(penDiff===0)wearBonus=1;else if(penDiff>=-2)wearBonus=1+penDiff*0.18;else wearBonus=Math.max(0.4,1+penDiff*0.10);wear=wearBase*wearBonus}
   absorbed=safeNum(absorbed,0);remaining=safeNum(remaining,0);wear=safeNum(wear,0);
   if(wear>armor.dur)wear=armor.dur;
   armor.dur=clamp(armor.dur-wear,0,durMax);
@@ -1068,7 +1158,7 @@ function mkEntInventory(typeDef,DI,tierBonus){
   var cal=weaponCal(typeDef.wpn),pen=weaponPen(typeDef.wpn);
   var wdef=weaponById(typeDef.wpn)||WEAPONS[0];
   var chest=[],bag=[],pocket=[];
-  if(crCap>0&&wdef){
+  if(crCap>0&&wdef&&!wdef.isMelee){
     var magSize=wdef.mag||15;
     chest.push(mkAmmoItem(cal,pen,Math.max(magSize,randi(magSize,magSize*3)),cal));
     if(Math.random()<0.6)chest.push(mkConsItem('bandage',randi(1,2)));
@@ -1087,7 +1177,7 @@ function mkEntInventory(typeDef,DI,tierBonus){
     for(var k=0;k<n;k++){
       var r2=Math.random();
       if(r2<0.24)bag.push(mkConsItem(pick(['bandage','medkit','armorplate','repairkit']),1));
-      else if(r2<0.44)bag.push(mkAmmoItem(cal,pen,randi(20,60),cal));
+      else if(r2<0.44 && !wdef.isMelee)bag.push(mkAmmoItem(cal,pen,randi(20,60),cal));
       else if(r2<0.68)bag.push(mkValuableItem(pick(['v_scrap','v_wire','v_can','v_chip','v_battery','v_tool','v_lighter'])));
       else if(r2<0.84)bag.push(mkNadeItem(pick(['frag','smoke','flash']),1));
       else bag.push(mkConsItem('stim',1));
@@ -1122,13 +1212,12 @@ function mkEnemy(typeId,x,y,DI){
   };
   var inv=mkEntInventory(t,DI,t.elite?2:(t.super?3:(t.boss?4:0)));
   e.chest=inv.chest||[];e.bag=inv.bag||[];e.pocket=inv.pocket||[];
+  if(t.bp){var bpd=backpackById(t.bp);if(bpd) e.backpack = deepCopy(bpd);}
+  if(t.cr){var crd=chestRigById(t.cr);if(crd) e.chestRig = deepCopy(crd);}
   if(IMG[typeId])e.spImg=typeId;
   if(e.weapon&&e.weapon.isLauncher){
     var preset=['he_43','thermo_43','he_43','thermo_43'];
-    for(var si=0;si<e.weapon.gm.length;si++){
-      var nid=preset[si]||'he_43';
-      for(var ni=0;ni<NADES.length;ni++){if(NADES[ni].id===nid){e.weapon.gm[si]={t:'nade',id:NADES[ni].id,data:NADES[ni],qty:1};break}}
-    }
+    for(var si=0;si<e.weapon.gm.length;si++){var nid=preset[si]||'he_43';for(var ni=0;ni<NADES.length;ni++){if(NADES[ni].id===nid){e.weapon.gm[si]={t:'nade',id:NADES[ni].id,data:NADES[ni],qty:1};break}}}
     e.weapon.ammo=e.weapon.gm.filter(function(x){return !!x}).length;
   }
   return e;
@@ -1149,6 +1238,8 @@ function mkAI(typeId,x,y,DI){
     nadeCd:rand(7,16),pickupCd:rand(3,8),_lastLogTime:0,summonedBy:null};
   var inv=mkEntInventory(t,DI,1);
   a.chest=inv.chest||[];a.bag=inv.bag||[];a.pocket=inv.pocket||[];
+  if(t.bp){var bpd=backpackById(t.bp);if(bpd)a.backpack=deepCopy(bpd)}
+  if(t.cr){var crd=chestRigById(t.cr);if(crd)a.chestRig=deepCopy(crd)}
   return a;
 }
 function mkAlly(charId,x,y){
@@ -1193,12 +1284,7 @@ window.addEventListener('keydown',function(e){
   if(k===KEYBINDS.help)callHelp();
   var si=SKILL_KEYS.indexOf(k);
   if(si>=0){useSkill(si);return}
-  if(e.key==='Escape'){
-    if(bagOpen)toggleBag();
-    else if(G&&G.player&&G.player.nadeAiming)cancelNadeAiming();
-    else if(G&&G.player&&G.player.usingItem)cancelUseItem();
-    else togglePause();
-  }
+  if(e.key==='Escape'){if(bagOpen)toggleBag();else if(G&&G.player&&G.player.nadeAiming)cancelNadeAiming();else if(G&&G.player&&G.player.usingItem)cancelUseItem();else togglePause()}
 });
 window.addEventListener('keyup',function(e){
   if(consoleOpen)return;
@@ -1223,7 +1309,7 @@ window.addEventListener('mouseup',function(){mouse.down=false});
 
 var jlBase=document.getElementById('jlBase'),jlKnob=document.getElementById('jlKnob');
 var jrBase=document.getElementById('jrBase'),jrKnob=document.getElementById('jrKnob');
-function isOnButton(x,y){var btns=document.querySelectorAll('.tbtn,#pausebtn,#lootBtn,#rescueBtn,#callHelp,#giveUpBtn,.qbtn,.pbtn,#trainToggle,#btnNadeCancel,.skill-btn');for(var i=0;i<btns.length;i++){var b=btns[i];if(!b||b.offsetParent===null)continue;var r=b.getBoundingClientRect();if(x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom)return true}return false}
+function isOnButton(x,y){var btns=document.querySelectorAll('.tbtn,#pausebtn,#lootBtn,#pickupBtn,#rescueBtn,#callHelp,#giveUpBtn,.qbtn,.pbtn,#trainToggle,#btnNadeCancel,.skill-btn');for(var i=0;i<btns.length;i++){var b=btns[i];if(!b||b.offsetParent===null)continue;var r=b.getBoundingClientRect();if(x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom)return true}return false}
 function touchStart(e){if(consoleOpen)return;SFX.init();for(var i=0;i<e.changedTouches.length;i++){var t=e.changedTouches[i],x=t.clientX,y=t.clientY;if(isOnButton(x,y))continue;if(x<VW*.45){if(!touchState.move){touchState.move={id:t.identifier,ox:x,oy:y,x:x,y:y};if(jlBase)jlBase.style.left=x+'px';if(jlBase)jlBase.style.top=y+'px';if(jlKnob)jlKnob.style.left=x+'px';if(jlKnob)jlKnob.style.top=y+'px';var jl=document.getElementById('joyL');if(jl)jl.classList.add('on')}}else if(x>VW*.45&&!touchState.aim){touchState.aim={id:t.identifier,ox:x,oy:y,x:x,y:y};if(jrBase)jrBase.style.left=x+'px';if(jrBase)jrBase.style.top=y+'px';if(jrKnob)jrKnob.style.left=x+'px';if(jrKnob)jrKnob.style.top=y+'px';var jr=document.getElementById('joyR');if(jr)jr.classList.add('on')}}e.preventDefault()}
 function touchMove(e){for(var i=0;i<e.changedTouches.length;i++){var t=e.changedTouches[i];if(touchState.move&&touchState.move.id===t.identifier){touchState.move.x=t.clientX;touchState.move.y=t.clientY;var j=touchState.move,dx=j.x-j.ox,dy=j.y-j.oy;var d=Math.sqrt(dx*dx+dy*dy)||1,maxR=48,k=Math.min(d,maxR)/d;if(jlKnob){jlKnob.style.left=(j.ox+dx*k)+'px';jlKnob.style.top=(j.oy+dy*k)+'px'}}if(touchState.aim&&touchState.aim.id===t.identifier){touchState.aim.x=t.clientX;touchState.aim.y=t.clientY;var j2=touchState.aim,dx2=j2.x-j2.ox,dy2=j2.y-j2.oy;var d2=Math.sqrt(dx2*dx2+dy2*dy2)||1,maxR2=48,k2=Math.min(d2,maxR2)/d2;if(jrKnob){jrKnob.style.left=(j2.ox+dx2*k2)+'px';jrKnob.style.top=(j2.oy+dy2*k2)+'px'}}}e.preventDefault()}
 function touchEnd(e){for(var i=0;i<e.changedTouches.length;i++){var t=e.changedTouches[i];if(touchState.move&&touchState.move.id===t.identifier){touchState.move=null;var jl=document.getElementById('joyL');if(jl)jl.classList.remove('on')}if(touchState.aim&&touchState.aim.id===t.identifier){touchState.aim=null;var jr=document.getElementById('joyR');if(jr)jr.classList.remove('on')}}e.preventDefault()}
@@ -1239,6 +1325,7 @@ __el=document.getElementById('btnMelee');if(__el)__el.addEventListener('pointerd
 __el=document.getElementById('btnNadeCancel');if(__el)__el.addEventListener('pointerdown',function(e){e.preventDefault();e.stopPropagation();if(G&&G.player&&G.player.nadeAiming)cancelNadeAiming()});
 __el=document.getElementById('trainToggle');if(__el)__el.addEventListener('click',function(){var p=document.getElementById('trainPanel');if(p)p.classList.toggle('on');if(G&&G.trainingMode)refreshTrainPanelSelects()});
 (function(){var rb=document.getElementById('rescueBtn');if(!rb)return;rb.addEventListener('pointerdown',function(e){e.preventDefault();e.stopPropagation();if(G&&G.nearDowned&&!G.nearDowned.revived)G.rescuing=true});rb.addEventListener('pointerup',function(e){e.preventDefault();e.stopPropagation();if(G)G.rescuing=false});rb.addEventListener('pointercancel',function(){if(G)G.rescuing=false});rb.addEventListener('pointerleave',function(){if(G)G.rescuing=false})})();
+(function(){var pb=document.getElementById('pickupBtn');if(!pb)return;pb.addEventListener('click',function(e){e.stopPropagation();pickUpGroundNearby();});})();
 document.querySelectorAll('.pbtn').forEach(function(btn){var lv=btn.dataset.l;btn.addEventListener('pointerdown',function(e){e.preventDefault();e.stopPropagation();tryProtect(lv)});btn.addEventListener('pointerup',function(e){e.preventDefault();e.stopPropagation();releaseProtect()});btn.addEventListener('pointercancel',function(){releaseProtect()});btn.addEventListener('pointerleave',function(){releaseProtect()})});
 function tryProtect(lv){if(!G||!G.player||!G.player.isPrazer)return;var p=G.player;if(p.coupling<=1||p.downed)return;p.protection=lv;p.protectionHold=true}
 function releaseProtect(){if(G&&G.player)G.player.protectionHold=false}
@@ -1246,69 +1333,83 @@ function releaseProtect(){if(G&&G.player)G.player.protectionHold=false}
 function renderSkillBar(){var el=document.getElementById('skillBar');if(!el)return;var p=G&&G.player;if(!p||!p.skills||!p.skills.length){el.innerHTML='';return}var html='';for(var i=0;i<p.skills.length;i++){var s=p.skills[i];var label=SKILL_KEYS_LABEL[i]||String(i+1);var costTag=s.cost>0?'<span class="sk-cost">'+s.cost+'</span>':'';html+='<div class="skill-btn" data-si="'+i+'" data-key="'+label+'">'+costTag+s.name+'<span class="sk-key">'+label+'</span></div>'}el.innerHTML=html;el.querySelectorAll('.skill-btn').forEach(function(btn){btn.addEventListener('pointerdown',function(e){e.preventDefault();e.stopPropagation();useSkill(+btn.dataset.si)})})}
 function updateSkillBar(){var el=document.getElementById('skillBar');if(!el)return;var p=G&&G.player;if(!p||!p.skills)return;var btns=el.querySelectorAll('.skill-btn');for(var i=0;i<btns.length;i++){var btn=btns[i];var si=+btn.dataset.si;var s=p.skills[si];if(!s)continue;var key=btn.dataset.key||'';if(!s.ready)btn.classList.add('cool');else btn.classList.remove('cool');var costTag=s.cost>0?'<span class="sk-cost">'+s.cost+'</span>':'';var cdTxt=s.ready?'':(' '+Math.ceil(s.cd)+'s');btn.innerHTML=costTag+s.name+'<span class="sk-key">'+key+cdTxt+'</span>'}}
 
-function curWeapon(){var p=G&&G.player;var empty={n:'空手',cal:'9mm',e:20,pen:0,rpm:60,mag:1,res:0,rel:1,spd:300,rng:60,spr:0,auto:false,rar:'common',snd:'pistol',rec:.5,dmgMul:1,sprMul:1,recMul:1,relMul:1,magMul:1,rngMul:1,zoom:1,magCap:0,ammo:0,reserve:0,attach:{},isLauncher:false,gm:null,loadedAmmoType:'9mm'};if(!p)return empty;if(p.usingSidearm)return p.sidearm||empty;return p.weapon||empty}
+function curWeapon(){var p=G&&G.player;var empty={n:'空手',cal:'9mm',e:20,pen:0,rpm:60,mag:1,res:0,rel:1,spd:300,rng:60,spr:0,auto:false,rar:'common',snd:'pistol',rec:.5,dmgMul:1,sprMul:1,recMul:1,relMul:1,magMul:1,rngMul:1,zoom:1,magCap:0,ammo:0,reserve:0,attach:{},isLauncher:false,isMelee:false,gm:null,loadedAmmoType:'9mm'};if(!p)return empty;if(p.usingSidearm)return p.sidearm||empty;return p.weapon||empty}
 function switchWeapon(){if(!G||!G.player||!G.player.alive||G.player.downed)return;var p=G.player;if(p.reloading>0)return;if(!p.sidearm){addLog('无副武器','y');return}p.usingSidearm=!p.usingSidearm;p.fireCd=Math.max(p.fireCd,.35);SFX.ui()}
 function hasLauncherAmmoInBag(p){if(!p)return false;var arrs=[p.chest,p.pocket,p.bag,p.safe];for(var a=0;a<arrs.length;a++){var arr=arrs[a];if(!arr)continue;for(var j=0;j<arr.length;j++){var it=arr[j];if(it&&it.t==='nade'&&it.data)return true}}return false}
 function fillLauncherAmmo(p,w){if(!p||!w||!w.gm)return;var arrs=[p.chest,p.pocket,p.bag,p.safe];for(var s=0;s<w.gm.length;s++){if(w.gm[s])continue;var found=null,foundArr=null,foundIdx=-1;for(var a=0;a<arrs.length&&!found;a++){var arr=arrs[a];if(!arr)continue;for(var j=0;j<arr.length;j++){var it=arr[j];if(it&&it.t==='nade'&&it.data){found=it;foundArr=arr;foundIdx=j;break}}}if(!found)break;w.gm[s]={t:'nade',id:found.id,data:deepCopy(found.data),qty:1};if(found.qty>1)found.qty--;else foundArr.splice(foundIdx,1)}w.ammo=w.gm.filter(function(x){return !!x}).length}
 function fillLauncherAmmoForEnt(ent,w){if(!ent||!w||!w.gm)return;var arrs=[ent.chest,ent.pocket,ent.bag];if(ent.safe)arrs.push(ent.safe);for(var s=0;s<w.gm.length;s++){if(w.gm[s])continue;var found=null,foundArr=null,foundIdx=-1;for(var a=0;a<arrs.length&&!found;a++){var arr=arrs[a];if(!arr)continue;for(var j=0;j<arr.length;j++){var it=arr[j];if(it&&it.t==='nade'&&it.data){found=it;foundArr=arr;foundIdx=j;break}}}if(!found)break;w.gm[s]={t:'nade',id:found.id,data:deepCopy(found.data),qty:1};if(found.qty>1)found.qty--;else foundArr.splice(foundIdx,1)}w.ammo=w.gm.filter(function(x){return !!x}).length}
 function startReload(){
   if(!G||!G.player||!G.player.alive||G.player.downed)return;
-  var p=G.player,w=curWeapon();
-  if(p.reloading>0)return;
+  var p=G.player,w=curWeapon();if(p.reloading>0)return;
+  if(w.isMelee) return;
   var fReload=SCR('onReloadStart');if(fReload&&fReload(G,p,w)===false)return;
   if(w.isLauncher){if(!hasLauncherAmmoInBag(p)){addLog('背包里没有可装填的榴弹','r');return}var rel=w.rel*w.relMul;p.reloading=rel;p.reloadMax=rel;SFX.reload();return}
   if(w.ammo>=w.magCap)return;
   if(w.reserve<=0&&!(G.infiniteAmmo)&&!(CFG.assists.dbgInfAmmo))return;
-  var rel=w.rel*w.relMul*(p.charId==='lingna'?.75:1);
-  p.reloading=rel;p.reloadMax=rel;SFX.reload();
+  var rel=w.rel*w.relMul*(p.charId==='lingna'?.75:1);p.reloading=rel;p.reloadMax=rel;SFX.reload();
 }
 function fireWeapon(){
   var p=G.player,w=curWeapon();
   var fFire=SCR('onWeaponFire');if(fFire)fFire(G,w,true);
+
+  if(w.isMelee){
+    if(p.fireCd>0) return;
+    p.fireCd = 60/(w.rpm||120);
+    var range = w.meleeRange || 80;
+    var arc = w.meleeArc || 1.2;
+    var dmg = w.e||800;
+    var hitAny = false;
+    for(var i=0;i<G.enemies.length;i++){
+      var e=G.enemies[i]; if(!e.alive) continue;
+      var d=dist(p.x,p.y,e.x,e.y);
+      if(d<range && Math.abs(angDiff(Math.atan2(e.y-p.y,e.x-p.x), p.angle))<arc){
+        hitEnemy(e, dmg, e.x, e.y, 'player', w.pen||0, 'melee'); hitAny=true;
+      }
+    }
+    for(var j=0;j<G.aiPlayers.length;j++){
+      var a=G.aiPlayers[j];
+      if(!a.alive||a.isAlly||a.isRemotePlayer) continue;
+      var d2=dist(p.x,p.y,a.x,a.y);
+      if(d2<range && Math.abs(angDiff(Math.atan2(a.y-p.y,a.x-p.x), p.angle))<arc){
+        hitAI(a, dmg, w.pen||0, true, 'melee'); hitAny=true;
+      }
+    }
+    SFX.metal();
+    return;
+  }
+
   if(w.isLauncher){
-    var slot=-1;for(var i=0;i<w.gm.length;i++){if(w.gm[i]){slot=i;break}}
+    var slot=-1;for(var i2=0;i2<w.gm.length;i2++){if(w.gm[i2]){slot=i2;break}}
     if(slot<0){addLog('弹管已空','r');p.fireCd=0.4;return}
     var g=w.gm[slot];if(!g||!g.data){w.gm[slot]=null;p.fireCd=0.4;return}
     w.gm[slot]=null;w.ammo=w.gm.filter(function(x){return !!x}).length;
     p.fireCd=60/w.rpm;var ang=p.angle;var v0=2000;
     G.nades.push({x:p.x+Math.cos(ang)*30,y:p.y+Math.sin(ang)*30,vx:Math.cos(ang)*v0,vy:Math.sin(ang)*v0,type:g.id,fuse:g.data.fuse,life:g.data.fuse,data:g.data,angle:ang,thrown:false,fromLauncher:true,owner:p});
     SFX.shot(w.sndMod==='sup'?'shotgun':w.snd);addShake(3.2,.15);
-    p.vx-=Math.cos(p.angle)*w.rec*22;p.vy-=Math.sin(p.angle)*w.rec*22;
-    return;
+    p.vx-=Math.cos(p.angle)*w.rec*22;p.vy-=Math.sin(p.angle)*w.rec*22;return;
   }
+
   p.fireCd=60/w.rpm;
-  var spread=w.spr*w.sprMul;
-  var aiming=touchState.aiming||keys['shift'];
-  if(aiming)spread*=.3;
-  if(p.aimBuffT>0)spread=0;
+  var spread=w.spr*w.sprMul;var aiming=touchState.aiming||keys['shift'];
+  if(aiming)spread*=.3;if(p.aimBuffT>0)spread=0;
   if(p.parts.larm.broken||p.parts.rarm.broken)spread*=1.8;
   if(p.charId==='kate'&&Math.sqrt(p.vx*p.vx+p.vy*p.vy)<25&&p.kateStill>2.5)spread*=.72;
   var ammoTypeId=w.loadedAmmoType||w.cal;
   var ammoDef=AMMO_TYPES[ammoTypeId]||AMMO_TYPES[w.cal]||null;
   var eMul=(ammoDef&&ammoDef.eMul!==undefined)?ammoDef.eMul:1;
   var pen=(ammoDef&&ammoDef.pen!==undefined)?ammoDef.pen:(w.pen||0);
-  if(!isFinite(eMul))eMul=1;
-  if(!isFinite(pen))pen=0;
-  var suppressActive=p.suppressT>0;
-  var suppressMul=suppressActive?0.8:1;
+  if(!isFinite(eMul))eMul=1;if(!isFinite(pen))pen=0;
+  var suppressActive=p.suppressT>0;var suppressMul=suppressActive?0.8:1;
   var pellets=w.pellets||1;
-  for(var pi=0;pi<pellets;pi++){
-    var a=p.angle+rand(-spread,spread)*(pellets>1?.9:1);
-    var en=safeNum(w.e*w.dmgMul*eMul*suppressMul,0);
-    G.bullets.push({x:p.x+Math.cos(p.angle)*22,y:p.y+Math.sin(p.angle)*22,vx:Math.cos(a)*w.spd,vy:Math.sin(a)*w.spd,baseEnergy:en,energy:en,range:w.rng*w.rngMul,traveled:0,from:'player',dmgType:'ballistic',life:3,pen:pen,ammoType:ammoTypeId});
-  }
+  for(var pi=0;pi<pellets;pi++){var a=p.angle+rand(-spread,spread)*(pellets>1?.9:1);var en=safeNum(w.e*w.dmgMul*eMul*suppressMul,0);G.bullets.push({x:p.x+Math.cos(p.angle)*22,y:p.y+Math.sin(p.angle)*22,vx:Math.cos(a)*w.spd,vy:Math.sin(a)*w.spd,baseEnergy:en,energy:en,range:w.rng*w.rngMul,traveled:0,from:'player',dmgType:'ballistic',life:3,pen:pen,ammoType:ammoTypeId})}
   if(!suppressActive)w.ammo--;
   if(G.infiniteAmmo||CFG.assists.dbgInfAmmo)w.ammo=w.magCap;
-  G.stats.shots+=pellets;
-  SFX.shot(w.sndMod==='sup'?'pistol':w.snd);
-  var rec=w.rec*w.recMul*(aiming?.7:1);
-  p.vx-=Math.cos(p.angle)*rec*14;p.vy-=Math.sin(p.angle)*rec*14;
-  addShake(rec*1.4,.09);
+  G.stats.shots+=pellets;SFX.shot(w.sndMod==='sup'?'pistol':w.snd);
+  var rec=w.rec*w.recMul*(aiming?.7:1);p.vx-=Math.cos(p.angle)*rec*14;p.vy-=Math.sin(p.angle)*rec*14;addShake(rec*1.4,.09);
 }
 function useSkill(idx){
   if(!G||!G.player||!G.player.alive||G.player.downed)return;
-  var p=G.player;var sk=p.skills&&p.skills[idx];
-  if(!sk||!sk.ready)return;
+  var p=G.player;var sk=p.skills&&p.skills[idx];if(!sk||!sk.ready)return;
   if(sk.cost>0&&p.coupling<sk.cost)return;
   var fSkill=SCR('onSkillUse');if(fSkill&&fSkill(G,p,sk,idx)===false)return;
   if(p.usingItem)cancelUseItem();
@@ -1318,34 +1419,12 @@ function useSkill(idx){
   var hook=SCR('onSkillExecute');if(hook)detail=hook(G,p,sk,detail)||detail;
   addLog('【'+sk.name+'】'+(detail?' '+detail:''),'p');SFX.ui();
 }
-function addLog(t,c){
-  if(!G)return;
-  if(!G.logLines)G.logLines=[];
-  G.logLines.push({t:t,c:c||''});
-  if(G.logLines.length>6)G.logLines.shift();
-  var el=document.getElementById('log'),html='';
-  for(var i=0;i<G.logLines.length;i++)html+='<div class="'+G.logLines[i].c+'">'+G.logLines[i].t+'</div>';
-  if(el)el.innerHTML=html;
-}
-function logDamageOut(enemy,amount,part,weaponName,armorWear,pierced){
-  var p=G&&G.player;if(!p||!enemy)return;
-  amount=safeNum(amount,0);if(amount<=0)return;
-  armorWear=clamp(safeNum(armorWear,0),0,100);
-  p.damageLog.push({time:G.time,type:'out',amount:amount,enemyName:enemy.name||'?',enemyHp:Math.max(0,enemy.hp||0),enemyMaxHp:enemy.maxHp||100,weapon:weaponName||(curWeapon()&&curWeapon().n)||'—',part:part||'thorax',armorWear:armorWear,pierced:!!pierced});
-  if(p.damageLog.length>300)p.damageLog.shift();
-}
-function logDamageToAI(ai,amount,part,srcName,fromPlayer){
-  var p=G&&G.player;if(!p||!ai)return;
-  amount=safeNum(amount,0);if(amount<=0)return;
-  if(G.time-(ai._lastLogTime||0)<0.15)return;
-  ai._lastLogTime=G.time;
-  p.damageLog.push({time:G.time,type:fromPlayer?'ai-out':'ai-in',amount:amount,aiName:ai.name||'?',aiHp:Math.max(0,ai.hp||0),aiMaxHp:ai.maxHp||100,part:part||'thorax',srcName:srcName||'?'});
-  if(p.damageLog.length>300)p.damageLog.shift();
-}
+function addLog(t,c){if(!G)return;if(!G.logLines)G.logLines=[];G.logLines.push({t:t,c:c||''});if(G.logLines.length>6)G.logLines.shift();var el=document.getElementById('log'),html='';for(var i=0;i<G.logLines.length;i++)html+='<div class="'+G.logLines[i].c+'">'+G.logLines[i].t+'</div>';if(el)el.innerHTML=html}
+function logDamageOut(enemy,amount,part,weaponName,armorWear,pierced){var p=G&&G.player;if(!p||!enemy)return;amount=safeNum(amount,0);if(amount<=0)return;armorWear=clamp(safeNum(armorWear,0),0,100);p.damageLog.push({time:G.time,type:'out',amount:amount,enemyName:enemy.name||'?',enemyHp:Math.max(0,enemy.hp||0),enemyMaxHp:enemy.maxHp||100,weapon:weaponName||(curWeapon()&&curWeapon().n)||'—',part:part||'thorax',armorWear:armorWear,pierced:!!pierced});if(p.damageLog.length>300)p.damageLog.shift()}
+function logDamageToAI(ai,amount,part,srcName,fromPlayer){var p=G&&G.player;if(!p||!ai)return;amount=safeNum(amount,0);if(amount<=0)return;if(G.time-(ai._lastLogTime||0)<0.15)return;ai._lastLogTime=G.time;p.damageLog.push({time:G.time,type:fromPlayer?'ai-out':'ai-in',amount:amount,aiName:ai.name||'?',aiHp:Math.max(0,ai.hp||0),aiMaxHp:ai.maxHp||100,part:part||'thorax',srcName:srcName||'?'});if(p.damageLog.length>300)p.damageLog.shift()}
 function pushKill(){if(!G||!CFG.assists.killFeed)return;G.streak.count++;G.streak.t=5.0;for(var i=KILL_TIERS.length-1;i>=0;i--){if(G.streak.count>=KILL_TIERS[i].n&&G.streak.tierShown<KILL_TIERS[i].n){G.streak.tierShown=KILL_TIERS[i].n;setTxt('ksNum',KILL_TIERS[i].n);setTxt('ksTxt',KILL_TIERS[i].txt);setCls('killStreak','on',true);setTimeout(function(){setCls('killStreak','on',false)},1800);SFX.killDing(i);addLog('★ '+KILL_TIERS[i].txt+' ★','kill');break}}}
 function updateStreak(dt){if(!G)return;if(G.streak.t>0){G.streak.t-=dt;if(G.streak.t<=0){G.streak.count=0;G.streak.tierShown=0}}}
-var NADE_DECAY_PER_SEC=0.08;
-var NADE_K=-Math.log(NADE_DECAY_PER_SEC);
+var NADE_DECAY_PER_SEC=0.08;var NADE_K=-Math.log(NADE_DECAY_PER_SEC);
 function toggleNadeAiming(){
   if(!G||!G.player)return;var p=G.player;if(!p.alive||p.downed)return;
   if(p.nadeAiming){cancelNadeAiming();return}
@@ -1355,8 +1434,7 @@ function toggleNadeAiming(){
   if(!found){for(var ai2=0;ai2<arrs.length&&!found;ai2++){var arr2=arrs[ai2];if(!arr2)continue;for(var j2=0;j2<arr2.length;j2++){var it2=arr2[j2];if(it2&&it2.t==='nade'&&it2.data&&!it2.data.onlyLauncher){found=it2;break}}}}
   if(!found){addLog('没有可手抛的投掷物','r');return}
   p.nadeType=found.id;p.nadeAiming=true;p.nadeAimAngle=p.angle;p.nadeAimDist=260;
-  setTxt('nadeHint','预瞄中 · 点开火投掷 / G 取消');
-  setCls('nadeHint','on',true);setCls('btnNadeCancel','on',true);SFX.ui();
+  setTxt('nadeHint','预瞄中 · 点开火投掷 / G 取消');setCls('nadeHint','on',true);setCls('btnNadeCancel','on',true);SFX.ui();
 }
 function cancelNadeAiming(){var p=G&&G.player;if(!p)return;p.nadeAiming=false;setCls('nadeHint','on',false);setCls('btnNadeCancel','on',false)}
 function executeNadeThrow(){
@@ -1373,11 +1451,30 @@ function executeNadeThrow(){
 }
 function meleeAttack(){
   if(!G||!G.player||!G.player.alive||G.player.downed)return;
-  var p=G.player;if(p.meleeCd>0)return;p.meleeCd=0.8;
-  var range=80,ang=p.angle,hitAny=false,dmg=1600;
-  for(var i=0;i<G.enemies.length;i++){var e=G.enemies[i];if(!e.alive)continue;var d=dist(p.x,p.y,e.x,e.y);if(d<range&&Math.abs(angDiff(Math.atan2(e.y-p.y,e.x-p.x),ang))<1.2){hitAny=true;hitEnemy(e,dmg,e.x,e.y,'player',0,'melee')}}
-  for(var ai=0;ai<G.aiPlayers.length;ai++){var a=G.aiPlayers[ai];if(!a.alive||a.isAlly||a.isRemotePlayer)continue;var d2=dist(p.x,p.y,a.x,a.y);if(d2<range&&Math.abs(angDiff(Math.atan2(a.y-p.y,a.x-p.x),ang))<1.2){hitAny=true;hitAI(a,dmg,0,true,'melee')}}
-  if(!hitAny)addLog('近战挥空','y');SFX.metal();
+  var p=G.player, w=curWeapon();
+  if(p.meleeCd>0)return;
+  p.meleeCd = w.isMelee ? (60/(w.rpm||120)) : 0.8;
+  var range = w.isMelee ? (w.meleeRange||80) : 80;
+  var arc   = w.isMelee ? (w.meleeArc||1.2) : 1.2;
+  var dmg   = w.isMelee ? (w.e||800) : 1600;
+  var hitAny=false;
+  for(var i=0;i<G.enemies.length;i++){
+    var e=G.enemies[i];if(!e.alive)continue;
+    var d=dist(p.x,p.y,e.x,e.y);
+    if(d<range && Math.abs(angDiff(Math.atan2(e.y-p.y,e.x-p.x), p.angle))<arc){
+      hitAny=true; hitEnemy(e, dmg, e.x, e.y, 'player', w.isMelee?(w.pen||0):0, 'melee');
+    }
+  }
+  for(var ai=0;ai<G.aiPlayers.length;ai++){
+    var a=G.aiPlayers[ai];
+    if(!a.alive||a.isAlly||a.isRemotePlayer)continue;
+    var d2=dist(p.x,p.y,a.x,a.y);
+    if(d2<range && Math.abs(angDiff(Math.atan2(a.y-p.y,a.x-p.x), p.angle))<arc){
+      hitAny=true; hitAI(a, dmg, w.isMelee?(w.pen||0):0, true, 'melee');
+    }
+  }
+  if(!hitAny)addLog('近战挥空','y');
+  SFX.metal();
 }
 function callHelp(){if(!G||!G.player||!G.player.downed)return;for(var i=0;i<G.aiPlayers.length;i++){var ai=G.aiPlayers[i];if(!ai.alive||!ai.isAlly||ai.downed)continue;ai.needHelp=true;ai.helpCd=20}addLog('已呼叫救援！','g')}
 function giveUp(){if(!G||!G.player||!G.player.downed)return;var p=G.player;p.downed=false;p.alive=false;hideDownedUI();addLog('你选择了放弃','r');endGame(false)}
@@ -1391,6 +1488,7 @@ function updateTaskProgress(id,amount){
   var changed=false;
   for(var i=0;i<G.tasks.length;i++){
     var t=G.tasks[i];if(t.done)continue;
+    if(t.source==='challenge')continue;
     var match=false;
     if(t.type&&t.type===id)match=true;
     else if(t.trigger&&t.trigger===id)match=true;
@@ -1407,21 +1505,88 @@ function updateTaskUI(){
   if(!G||!G.tasks)return;
   var el=document.getElementById('taskItems');if(!el)return;
   var html='';
-  for(var i=0;i<G.tasks.length;i++){var t=G.tasks[i];var pct=Math.floor(safeNum(t.progress,0));html+='<div class="task'+(t.done?' done':'')+'">'+(t.done?'✓':'○')+' '+(t.name||t.text)+' <span class="p">'+pct+'/'+t.target+'</span></div>'}
+  for(var i=0;i<G.tasks.length;i++){
+    var t=G.tasks[i];var pct=Math.floor(safeNum(t.progress,0));
+    var cls='task'+(t.done?' done':'');
+    if(t.source==='daily')cls+=' src-daily';
+    else if(t.source==='challenge')cls+=' src-challenge';
+    html+='<div class="'+cls+'">'+(t.done?'✓':'○')+' '+(t.name||t.text)+' <span class="p">'+pct+'/'+t.target+'</span></div>';
+  }
   el.innerHTML=html;
   var tl=document.getElementById('taskList');
   if(tl&&CFG.assists.taskHint)tl.style.display='block';else if(tl)tl.style.display='none';
 }
 function buildTasks(){
-  if(CFG.storyMode&&TASKS.story&&TASKS.story[CFG.map]){
-    var chapter=TASKS.story[CFG.map];var out=[];
-    for(var i=0;i<chapter.missions.length;i++){var m=chapter.missions[i];out.push({id:m.id,type:m.type||m.id,trigger:m.trigger,text:m.name+' — '+m.desc,name:m.name,progress:0,target:m.target,done:false,reward:m.reward||0,rewardText:m.rewardText||''})}
-    if(G)G.storyChapter=chapter;
-    return out;
+  var out=[];
+  var usedIds={};
+  function addTask(t,src){
+    if(!t||!t.id)return;
+    if(usedIds[t.id])return;
+    usedIds[t.id]=true;
+    var progress=0,done=false;
+    if(SAVE&&SAVE.data&&SAVE.data.tasks&&SAVE.data.tasks[t.id]){
+      progress=safeNum(SAVE.data.tasks[t.id].progress,0);
+      done=!!SAVE.data.tasks[t.id].done;
+    }
+    var text=(t.text||t.name||t.id);
+    if(t.target!==undefined)text=text.replace('{N}',t.target);
+    out.push({
+      id:t.id,type:t.type||t.id,trigger:t.trigger,text:text,name:t.name||text,
+      desc:t.desc||'',progress:progress,target:t.target||1,done:done,
+      reward:t.reward||0,rewardText:t.rewardText||'',source:src||'default'
+    });
   }
-  var cfgs=TASKS.default||[];var out2=[];
-  for(var j=0;j<cfgs.length;j++){var t=cfgs[j];out2.push({id:t.id,type:t.type||t.id,text:(t.text||'').replace('{N}',t.target),progress:0,target:t.target,done:false})}
-  return out2;
+  if(CFG.storyMode&&TASKS.story&&TASKS.story[CFG.map]){
+    var chapter=TASKS.story[CFG.map];
+    if(G)G.storyChapter=chapter;
+    chapter.missions.forEach(function(m){
+      addTask({id:m.id,type:m.type||m.id,name:m.name,text:m.name,desc:m.desc,target:m.target,reward:m.reward,rewardText:m.rewardText},'story');
+    });
+  }else{
+    (TASKS.default||[]).forEach(function(t){
+      var txt=(t.text||'').replace('{N}',t.target);
+      addTask({id:t.id,type:t.type||t.id,name:txt,text:txt,target:t.target},'default');
+    });
+  }
+  if(TASKS.daily&&TASKS.daily.length){
+    var today=new Date().toDateString();
+    var rng=makeRng('daily_'+today);
+    var pool=TASKS.daily.slice();
+    var dailyCount=Math.min(2,pool.length);
+    for(var di=0;di<dailyCount;di++){
+      if(!pool.length)break;
+      var idx=Math.floor(rng()*pool.length);
+      var d=pool.splice(idx,1)[0];
+      var trigger=d.id.replace(/^d_/,'');
+      var txt=(d.text||d.id).replace('{N}',d.target);
+      addTask({id:'daily_'+d.id,type:trigger,name:'[每日] '+txt,text:'[每日] '+txt,target:d.target,reward:d.reward||0},'daily');
+    }
+  }
+  if(TASKS.challenges&&TASKS.challenges.length){
+    var today2=new Date().toDateString();
+    var rng2=makeRng('chal_'+today2);
+    var pool2=TASKS.challenges.slice();
+    var supportedIds=['ch_lone','ch_headshot','ch_speed','ch_no_heal','ch_boss_rush','ch_pistol_only'];
+    var supported=pool2.filter(function(c){return supportedIds.indexOf(c.id)>=0});
+    if(!supported.length)supported=pool2;
+    var idx2=Math.floor(rng2()*supported.length);
+    var c=supported[idx2];
+    addTask({id:'chal_'+c.id,type:null,name:'[挑战] '+c.name,text:'[挑战] '+c.name,desc:c.desc||'',target:1,reward:c.reward||0,rewardText:c.rewardText||''},'challenge');
+  }
+  return out;
+}
+function checkChallengeTask(taskId,G,p){
+  if(!G||!p)return false;
+  var stats=G.stats||{};
+  switch(taskId){
+    case 'chal_ch_lone':return CFG.mode==='solo';
+    case 'chal_ch_pistol_only':return (stats.pistolKills||0)>=5;
+    case 'chal_ch_no_heal':return !p.usedHeal;
+    case 'chal_ch_speed':return G.time<=240;
+    case 'chal_ch_headshot':return (stats.headshots||0)>=3;
+    case 'chal_ch_boss_rush':return !!(G.bossKillTime&&G.bossKillTime<=120);
+    default:return false;
+  }
 }
 
 function update(dt){
@@ -1440,9 +1605,7 @@ function update(dt){
   if(G.lastHitDirT>0)G.lastHitDirT-=dt;
   updateStreak(dt);
   var aimingNow=(touchState.aiming||keys['shift'])&&!p.downed&&p.alive&&!p.nadeAiming;
-  var wNow=curWeapon();
-  camZoom=aimingNow?(wNow.zoom||1):1;
-  renderScale=(camZoom>1)?(1/Math.pow(camZoom,0.85)):1;
+  var wNow=curWeapon();camZoom=aimingNow?(wNow.zoom||1):1;renderScale=(camZoom>1)?(1/Math.pow(camZoom,0.85)):1;
   for(var mi=0;mi<G.enemies.length;mi++){var me=G.enemies[mi];if(me&&me.marked&&me.markT>0){me.markT-=dt;if(me.markT<=0)me.marked=false}}
   if(G.rescuing&&G.nearDowned&&G.nearDowned.downed&&!G.nearDowned.revived){
     G.nearDowned.rescueProgress=safeNum(G.nearDowned.rescueProgress,0)+dt;
@@ -1528,10 +1691,7 @@ function updateMovement(dt){
   if(touchState.move){var j=touchState.move,dx=j.x-j.ox,dy=j.y-j.oy,d=Math.sqrt(dx*dx+dy*dy),maxR=48;if(d>6){var k=Math.min(d,maxR)/maxR;mx=dx/d*k;my=dy/d*k}}
   var len=Math.sqrt(mx*mx+my*my);if(len>1){mx/=len;my/=len}
   var spd=p.speed;
-  if(p.dashT>0)spd*=1.3;
-  if(p.buffs.speed>0)spd*=1.22;
-  if(p.shieldT>0)spd=0;
-  if(p.downed)spd*=0.32;
+  if(p.dashT>0)spd*=1.3;if(p.buffs.speed>0)spd*=1.22;if(p.shieldT>0)spd=0;if(p.downed)spd*=0.32;
   if(p.parts.lleg.broken&&p.parts.rleg.broken)spd*=.32;else if(p.parts.lleg.broken||p.parts.rleg.broken)spd*=.58;
   if(p.parts.abdomen.cur<p.parts.abdomen.max*.3)spd*=.86;
   p.vx=lerp(p.vx,mx*spd,.3);p.vy=lerp(p.vy,my*spd,.3);
@@ -1539,16 +1699,8 @@ function updateMovement(dt){
   p.x=clamp(p.x,20,MAPW-20);p.y=clamp(p.y,20,MAPH-20);
   resolveCollision(p,16);
   var aimAngleSet=false;
-  if(touchState.aim){
-    var a=touchState.aim,adx=a.x-a.ox,ady=a.y-a.oy;var amag=Math.sqrt(adx*adx+ady*ady);
-    if(amag>10){p.angle=Math.atan2(ady,adx);aimAngleSet=true}else if(len>.1){p.angle=Math.atan2(my,mx);aimAngleSet=true}
-    if(p.nadeAiming){p.nadeAimAngle=p.angle;var ratio=clamp(amag/48,0,1);p.nadeAimDist=clamp(70+ratio*430,70,500)}
-  }
-  if(!aimAngleSet&&CFG.platform==='pc'){
-    var wmx=G.cam.x+(mouse.x-VW/2)/renderScale;var wmy=G.cam.y+(mouse.y-VH/2)/renderScale;
-    var adx2=wmx-p.x,ady2=wmy-p.y;p.angle=Math.atan2(ady2,adx2);aimAngleSet=true;
-    if(p.nadeAiming){p.nadeAimAngle=p.angle;var dd=Math.sqrt(adx2*adx2+ady2*ady2);p.nadeAimDist=clamp(dd,70,500)}
-  }
+  if(touchState.aim){var a=touchState.aim,adx=a.x-a.ox,ady=a.y-a.oy;var amag=Math.sqrt(adx*adx+ady*ady);if(amag>10){p.angle=Math.atan2(ady,adx);aimAngleSet=true}else if(len>.1){p.angle=Math.atan2(my,mx);aimAngleSet=true}if(p.nadeAiming){p.nadeAimAngle=p.angle;var ratio=clamp(amag/48,0,1);p.nadeAimDist=clamp(70+ratio*430,70,500)}}
+  if(!aimAngleSet&&CFG.platform==='pc'){var wmx=G.cam.x+(mouse.x-VW/2)/renderScale;var wmy=G.cam.y+(mouse.y-VH/2)/renderScale;var adx2=wmx-p.x,ady2=wmy-p.y;p.angle=Math.atan2(ady2,adx2);aimAngleSet=true;if(p.nadeAiming){p.nadeAimAngle=p.angle;var dd=Math.sqrt(adx2*adx2+ady2*ady2);p.nadeAimDist=clamp(dd,70,500)}}
   if(!aimAngleSet&&len>.1){p.angle=Math.atan2(my,mx);if(p.nadeAiming)p.nadeAimAngle=p.angle}
 }
 function updateWeapon(dt){
@@ -1557,7 +1709,11 @@ function updateWeapon(dt){
   if(p.reloading>0){p.reloading-=dt;if(p.reloading<=0){if(w.isLauncher)fillLauncherAmmo(p,w);else{var need=w.magCap-w.ammo;var take=Math.min(need,w.reserve||0);w.ammo+=take;w.reserve=(w.reserve||0)-take}p.reloading=0}return}
   if(p.nadeAiming)return;if(p.downed)return;
   var wantFire=mouse.down||touchState.firing;
-  if(wantFire&&p.fireCd<=0){if(!w.isLauncher&&w.ammo<=0){startReload();return}fireWeapon()}
+  if(wantFire&&p.fireCd<=0){
+    if(w.isMelee){ fireWeapon(); return; }
+    if(!w.isLauncher&&w.ammo<=0){startReload();return}
+    fireWeapon();
+  }
 }
 function updateProtection(dt){
   var p=G.player;if(!p.isPrazer)return;sanitizeCoupling(p);
@@ -1594,6 +1750,7 @@ function updateUseItem(dt){
 function cancelUseItem(){var p=G.player;if(!p.usingItem)return;addLog('已取消使用：'+((p.usingItem.data&&p.usingItem.data.n)||''),'y');p.usingItem=null;p.useItemTimer=0}
 function applyItemEffect(c){
   if(!c)return;var p=G.player;
+  if(c.heal||c.stopBleed||c.fixLimbs||c.fixLimbOne||c.repairPlate||c.coupling){if(p) p.usedHeal = true;}
   if(c.heal)p.hp=Math.min(p.maxHp,p.hp+c.heal);
   if(c.stopBleed)p.bleeding=0;
   if(c.fixLimbs)for(var k in p.parts){p.parts[k].cur=p.parts[k].max;p.parts[k].broken=false}
@@ -1647,29 +1804,96 @@ function updateTTKTip(dt){
   setCls('ttkTip','on',true);setTxt('ttkNum',(G.trainingTTK||0).toFixed(2)+'s');
 }
 function updateNearInteractables(){
-  var p=G.player,near=null;var IC=CFG_INTERACTION();
-  if(!G.lootPanelOpen&&!p.downed){var bestDist=1e9;for(var i=0;i<G.containers.length;i++){var c=G.containers[i];if(c.opened)continue;var r=(c.isCorpse&&c.corpseEnemy&&c.corpseEnemy.boss)?IC.pickupRadiusBoss:IC.pickupRadius;var d=dist(p.x,p.y,c.x,c.y);if(d<r&&d<bestDist){bestDist=d;near=c}}}
+  var p=G.player;
+  var near=null;var IC=CFG_INTERACTION();
+  if(!G.lootPanelOpen&&!p.downed){
+    var bestDist=1e9;
+    for(var i=0;i<G.containers.length;i++){
+      var c=G.containers[i];if(c.opened)continue;
+      var r=(c.isCorpse&&c.corpseEnemy&&c.corpseEnemy.boss)?IC.pickupRadiusBoss:IC.pickupRadius;
+      var d=dist(p.x,p.y,c.x,c.y);
+      if(d<r&&d<bestDist){bestDist=d;near=c}
+    }
+  }
   G.nearContainer=near;
+  var nearGround=null,bestGD=1e9;
+  if(!p.downed){
+    for(var gi=0;gi<G.groundItems.length;gi++){
+      var g=G.groundItems[gi];
+      if(!g.items||g.items.length===0) continue;
+      var dg=dist(p.x,p.y,g.x,g.y);
+      if(dg<70&&dg<bestGD){bestGD=dg;nearGround=g}
+    }
+  }
+  G.nearGround=nearGround;
+
   var lootBtn=document.getElementById('lootBtn');
-  if(near&&!G.lootPanelOpen&&lootBtn){lootBtn.classList.add('on');lootBtn.textContent=near.isCorpse?'搜 索 尸 体':(near.supply?'搜 索 空 投':'搜 索 容 器')}
-  else if(lootBtn)lootBtn.classList.remove('on');
+  var pickupBtn=document.getElementById('pickupBtn');
+
+  if(near&&!G.lootPanelOpen&&lootBtn){
+    lootBtn.classList.add('on');
+    lootBtn.textContent=near.isCorpse?'搜 索 尸 体':(near.supply?'搜 索 空 投':'搜 索 容 器');
+  } else if(lootBtn) lootBtn.classList.remove('on');
+
+  if(nearGround && !near && !G.lootPanelOpen && pickupBtn){
+    pickupBtn.classList.add('on');
+    pickupBtn.textContent='拾 取 物 品 ('+nearGround.items.length+')';
+  } else if(pickupBtn) pickupBtn.classList.remove('on');
+
   var dnear=null;
-  if(!p.downed){for(var ai=0;ai<G.aiPlayers.length;ai++){var a=G.aiPlayers[ai];if(!a.alive||!a.isAlly||!a.downed)continue;if(dist(p.x,p.y,a.x,a.y)<70){dnear=a;break}}}
+  if(!p.downed){
+    for(var ai=0;ai<G.aiPlayers.length;ai++){
+      var a=G.aiPlayers[ai];
+      if(!a.alive||!a.isAlly||!a.downed)continue;
+      if(dist(p.x,p.y,a.x,a.y)<70){dnear=a;break}
+    }
+  }
   G.nearDowned=dnear;
   var rescueBtn=document.getElementById('rescueBtn');
   if(dnear&&rescueBtn){rescueBtn.classList.add('on');rescueBtn.textContent='按住救 '+dnear.name}
   else if(rescueBtn)rescueBtn.classList.remove('on');
 }
-function startSearch(){
-  if(!G||!G.nearContainer||G.lootPanelOpen)return;
-  if(G.player.usingItem)cancelUseItem();
-  var c=G.nearContainer;G.searchingContainer=c;G.lootPanelOpen=true;
-  setCls('searchPanel','on',true);
-  var st=document.getElementById('searchTitle');
-  if(st&&st.firstChild)st.firstChild.nodeValue=(c.isCorpse?'搜索尸体 ':(c.supply?'搜索空投 ':'搜索容器 '));
-  if(!c.searched){c.searching=true;c.progress=0;setHtml('lootContent','');setDisplay('lootTakeAll','none');setW('searchProg','0%');setTxt('searchTimer','搜集中...')}
-  else{c.searching=false;setW('searchProg','100%');setTxt('searchTimer','');renderLootList(c)}
+function pickUpGroundNearby(){
+  if(!G||!G.nearGround)return;
+  var g=G.nearGround;
+  var picked=0;
+  var left=[];
+  for(var i=0;i<g.items.length;i++){
+    var it=g.items[i];
+    if(tryAddItem(it)){picked++;}
+    else left.push(it);
+  }
+  g.items=left;
+  if(g.items.length===0){
+    var idx=G.groundItems.indexOf(g);
+    if(idx>=0)G.groundItems.splice(idx,1);
+  }
+  if(picked>0){
+    addLog('拾取 '+picked+' 件物品','g');
+    SFX.pickup();
+  } else {
+    addLog('背包已满','r');
+  }
+  G.nearGround=null;
 }
+function startSearch(){
+  if(!G)return;
+  if(G.nearContainer && !G.lootPanelOpen){
+    if(G.player.usingItem)cancelUseItem();
+    var c=G.nearContainer;G.searchingContainer=c;G.lootPanelOpen=true;
+    setCls('searchPanel','on',true);
+    var st=document.getElementById('searchTitle');
+    if(st&&st.firstChild)st.firstChild.nodeValue=(c.isCorpse?'搜索尸体 ':(c.supply?'搜索空投 ':'搜索容器 '));
+    if(!c.searched){c.searching=true;c.progress=0;setHtml('lootContent','');setDisplay('lootTakeAll','none');setW('searchProg','0%');setTxt('searchTimer','搜集中...')}
+    else{c.searching=false;setW('searchProg','100%');setTxt('searchTimer','');renderLootList(c)}
+    return;
+  }
+  if(G.nearGround){
+    pickUpGroundNearby();
+    return;
+  }
+}
+
 function generateLoot(tier,isCorpse,enemy){
   var loot=[];
   if(isCorpse&&enemy){
@@ -1680,7 +1904,19 @@ function generateLoot(tier,isCorpse,enemy){
     if(enemy.helmetEar&&!isEmptyEquipData(enemy.helmetEar))loot.push(Object.assign({}, {t:'helmetEar',id:enemy.helmetEar.id,data:deepCopy(enemy.helmetEar),qty:1}, {_from:'chest'}));
     if(enemy.vestFiber&&!isEmptyEquipData(enemy.vestFiber))loot.push(Object.assign({}, {t:'vestFiber',id:enemy.vestFiber.id,data:deepCopy(enemy.vestFiber),qty:1}, {_from:'chest'}));
     if(enemy.vestPlate&&!isEmptyEquipData(enemy.vestPlate))loot.push(Object.assign({}, {t:'vestPlate',id:enemy.vestPlate.id,data:deepCopy(enemy.vestPlate),qty:1}, {_from:'chest'}));
-    if(enemy.weapon&&!enemy.weapon.isLauncher)loot.push(Object.assign({}, mkAmmoItem(enemy.weapon.cal,enemy.weapon.pen,Math.round(enemy.weapon.mag*rand(1,2)),enemy.weapon.loadedAmmoType||enemy.weapon.cal), {_from:'chest'}));
+
+    if(enemy.backpack&&!isEmptyEquipData(enemy.backpack)){
+      var bpData=deepCopy(enemy.backpack);
+      delete bpData._stored;
+      loot.push(Object.assign({}, {t:'backpack',id:bpData.id,data:bpData,qty:1}, {_from:'backpack'}));
+    }
+    if(enemy.chestRig&&!isEmptyEquipData(enemy.chestRig)){
+      var crData=deepCopy(enemy.chestRig);
+      delete crData._stored;
+      loot.push(Object.assign({}, {t:'chestRig',id:crData.id,data:crData,qty:1}, {_from:'chestRig'}));
+    }
+
+    if(enemy.weapon&&!enemy.weapon.isLauncher&&!enemy.weapon.isMelee)loot.push(Object.assign({}, mkAmmoItem(enemy.weapon.cal,enemy.weapon.pen,Math.round(enemy.weapon.mag*rand(1,2)),enemy.weapon.loadedAmmoType||enemy.weapon.cal), {_from:'chest'}));
     if(enemy.weapon&&enemy.weapon.attach){for(var k in enemy.weapon.attach){var att=enemy.weapon.attach[k];if(att)loot.push(Object.assign({}, {t:'attach',k:k,id:att.id,data:att,qty:1}, {_from:'chest'}))}}
     if(enemy.chest){for(var ci=0;ci<enemy.chest.length;ci++){var cit=enemy.chest[ci];if(cit)loot.push(Object.assign({}, deepCopy(cit), {_from:'chest'}))}}
     if(enemy.pocket){for(var pi=0;pi<enemy.pocket.length;pi++){var pit=enemy.pocket[pi];if(pit)loot.push(Object.assign({}, deepCopy(pit), {_from:'pocket'}))}}
@@ -1709,8 +1945,9 @@ function generateItem(type,tier){
     var pool=WEAPONS.filter(function(w){return RIDX[w.rar]<=Math.min(9,tier+1)});
     var w=pick(pool.length?pool:WEAPONS);if(!w)return null;
     var nw=mkWeapon(w.id);if(!nw)return null;
-    if(nw.isLauncher){var pool2=NADES.filter(function(x){return x.onlyLauncher});var cnt=randi(1,3);for(var li=0;li<cnt;li++){var nd=pick(pool2.length?pool2:NADES);if(!nd)break;for(var si=0;si<nw.gm.length;si++)if(!nw.gm[si]){nw.gm[si]={t:'nade',id:nd.id,data:deepCopy(nd),qty:1};nw.ammo++;break}}item={t:'weapon',data:nw,qty:1}}
-    else{var nAtt=Math.floor(rand(0,1+tier*.6)),kk=['muzzle','sight','mag','grip'];for(var i=0;i<nAtt;i++){var k=pick(kk),list=ATTACH[k];if(!list||!list.length)continue;var fl=list.filter(function(x){return RIDX[x.rar]<=tier+1});var a=pick(fl.length?fl:list);if(!a)continue;nw.attach[k]={id:a.id,n:a.n,rar:a.rar,d:a.d,flavor:a.flavor}}recalcWeapon(nw);item={t:'weapon',data:nw,qty:1}}
+    if(nw.isMelee){item={t:'weapon',data:nw,qty:1}}
+    else if(nw.isLauncher){var pool2=NADES.filter(function(x){return x.onlyLauncher});var cnt=randi(1,3);for(var li=0;li<cnt;li++){var nd=pick(pool2.length?pool2:NADES);if(!nd)break;for(var si=0;si<nw.gm.length;si++)if(!nw.gm[si]){nw.gm[si]={t:'nade',id:nd.id,data:deepCopy(nd),qty:1};nw.ammo++;break}}item={t:'weapon',data:nw,qty:1}}
+    else{var nAtt=Math.floor(rand(0,1+tier*.6)),kk=['muzzle','sight','mag','grip'];for(var i=0;i<nAtt;i++){var k=pick(kk),list=ATTACH[k];if(!list||!list.length)continue;var fl=list.filter(function(x){return RIDX[x.rar]<=tier+1});var a=pick(fl.length?fl:list);if(!a)continue;var attItem=mkAttachItem(k,a.id);if(attItem)nw.attach[k]=attItem.data}recalcWeapon(nw);item={t:'weapon',data:nw,qty:1}}
   }
   else if(type==='ammo'){
     var pool3=[];for(var key in AMMO_TYPES){var d=AMMO_TYPES[key];if(!d.cal)continue;var dtier=d.tier!==undefined?d.tier:0;if(dtier<=tier+1)pool3.push(key)}
@@ -1741,7 +1978,19 @@ function generateItem(type,tier){
   }
   else if(type==='nade'){var pool5=NADES.filter(function(x){return !x.onlyLauncher});if(tier>=4&&Math.random()<0.18)pool5=NADES;var n=pick(pool5.length?pool5:NADES);if(n)item=mkNadeItem(n.id,1)}
   else if(type==='valuable'){var pool6=VALUABLES.filter(function(v){return RIDX[v.rar]<=Math.min(9,tier+1)});var v=pick(pool6.length?pool6:VALUABLES);if(v)item=mkValuableItem(v.id)}
-  else{var k2=pick(['muzzle','sight','mag','grip']);var list2=ATTACH[k2];if(list2&&list2.length){var fl2=list2.filter(function(x){return RIDX[x.rar]<=tier+2});var a3=pick(fl2.length?fl2:list2);if(a3)item={t:'attach',k:k2,id:a3.id,data:{id:a3.id,n:a3.n,rar:a3.rar,d:a3.d,flavor:a3.flavor},qty:1}}}
+  else{
+    var allKeys=[];
+    for(var key2 in ATTACH){
+      if(Array.isArray(ATTACH[key2])&&ATTACH[key2].length) allKeys.push(key2);
+    }
+    var k2=pick(allKeys);
+    if(k2){
+      var list2=ATTACH[k2];
+      var fl2=list2.filter(function(x){return RIDX[x.rar]<=tier+2});
+      var a3=pick(fl2.length?fl2:list2);
+      if(a3) item=mkAttachItem(k2, a3.id);
+    }
+  }
   var f=SCR('onItemGenerate');if(f&&item)item=f(item,tier);
   return item;
 }
@@ -1764,7 +2013,7 @@ function renderLootList(c){
   if(c.isCorpse){
     var title=c.corpseEnemy?(c.corpseEnemy.boss?'👑 '+c.corpseEnemy.name+' 的遗物':'💀 '+c.corpseEnemy.name+' 的装备'):'💀 尸体';
     html+='<div class="corpse-title">'+title+'</div>';
-    var groups={chest:[],pocket:[],bag:[]};
+    var groups={chestRig:[],chest:[],pocket:[],bag:[],backpack:[]};
     var ungrouped=[];
     for(var i=0;i<c.loot.length;i++){
       var it=c.loot[i];if(!it)continue;
@@ -1773,7 +2022,13 @@ function renderLootList(c){
       else ungrouped.push({it:it,idx:i});
     }
     var totalVal=0;
-    var groupOrder=[['chest','🧥 胸挂'],['pocket','👖 口袋'],['bag','🎒 背包']];
+    var groupOrder=[
+      ['chestRig','🧥 胸挂'],
+      ['chest','🧥 胸挂弹药'],
+      ['pocket','👖 口袋'],
+      ['bag','🎒 背包物品'],
+      ['backpack','🎒 背包装备']
+    ];
     for(var gi=0;gi<groupOrder.length;gi++){
       var gKey=groupOrder[gi][0],gLabel=groupOrder[gi][1];
       var arr=groups[gKey]||[];
@@ -1840,7 +2095,7 @@ function updateExtract(dt){
   }else{G.extractTarget=null;G.extractTimer=0;panel.style.display='none'}
 }
 function updateDrone(dt){if(!G.drone.active)return;G.drone.t-=dt;if(G.drone.t<=0)G.drone.active=false;var p=G.player;G.drone.x=lerp(G.drone.x,p.x,.05);G.drone.y=lerp(G.drone.y,p.y,.05)}
-function updateGunline(){var p=G.player,w=curWeapon();var range=w.rng*w.rngMul;var len=Math.min(range,castRay(p.x,p.y,p.angle,range));G.gunline.a=p.angle;G.gunline.len=len;G.gunline.show=!p.downed}
+function updateGunline(){var p=G.player,w=curWeapon();var range=w.rng*w.rngMul;if(w.isMelee)range=w.meleeRange||80;var len=Math.min(range,castRay(p.x,p.y,p.angle,range));G.gunline.a=p.angle;G.gunline.len=len;G.gunline.show=!p.downed}
 function bulletSpecialOnHit(b,hx,hy){if(!b||!b.ammoType)return;var def=AMMO_TYPES[b.ammoType];if(!def||!def.onHit)return;for(var i=0;i<def.onHit.length;i++)execBulletHit(G,b,hx,hy,def.onHit[i])}
 function updateNades(dt){
   if(!G||!G.nades)return;var frameDecay=Math.pow(NADE_DECAY_PER_SEC,dt);
@@ -1992,6 +2247,7 @@ function hitEnemy(e,energy,hx,hy,src,pen,type){
   var zdef=zoneOf(zone);var hpDmg=safeNum(kineticToHP(e,ares.remaining)*(zdef.dmgMul||1),0);
   e.hp-=hpDmg;e.hitFlash=.12;
   if(src==='player')G.stats.hits++;
+  if(src==='player'&&(zone==='head'||zone==='face')){G.stats.headshots=(G.stats.headshots||0)+1;}
   var p=G.player;if(src==='player'&&p){p.damageDealt+=hpDmg;logDamageOut(e,hpDmg,zone,curWeapon().n,ares.wear,ares.pierced)}
   if(e.trainingDummy){if(G.time-(e.lastHitTime||0)>2)e.firstHitTime=G.time;e.lastHitTime=G.time}
   SFX.flesh();
@@ -2067,8 +2323,15 @@ function handleEnemyDefeat(e,fromPlayer){
 }
 function killEnemy(e,fromPlayer){
   if(!e||!e.alive)return;e.alive=false;e.downed=false;
-  if(fromPlayer&&G&&G.player){G.player.kills++;updateTaskProgress('kill',1);pushKill()}
-  if(e.boss)updateTaskProgress('boss',1);
+  if(fromPlayer&&G&&G.player){
+    G.player.kills++;updateTaskProgress('kill',1);pushKill();
+    var w=curWeapon();
+    if(w&&w.cls==='pistol'){G.stats.pistolKills=(G.stats.pistolKills||0)+1;}
+  }
+  if(e.boss){
+    updateTaskProgress('boss',1);
+    if(G) G.bossKillTime=G.time;
+  }
   addLog('击杀：'+e.name,'g');
   var f=SCR('onEnemyDefeated');if(f)f(G,e,fromPlayer);
   G.containers.push({x:e.x,y:e.y,r:e.boss?50:32,opened:false,searched:false,searching:false,progress:0,rar:e.boss?'red':'common',tier:e.boss?5:0,loot:null,isCorpse:true,corpseEnemy:e});
@@ -2126,11 +2389,11 @@ function entThrowNade(e,tx,ty){
 }
 function tryPickupBetterWeapon(ent){
   if(!ent||!ent.alive||ent.downed)return;
-  if(!ent.weapon||ent.weapon.isLauncher)return;
+  if(!ent.weapon||ent.weapon.isLauncher||ent.weapon.isMelee)return;
   var AI=AI_CFG();var pickR=(AI.pickup&&AI.pickup.radius)||120;
   var myPower=(ent.weapon.e||0)*(ent.weapon.rpm||1)/1000;var bestScore=myPower*1.2;
   var best=null,srcArr=null,srcIdx=-1;
-  for(var i=0;i<G.groundItems.length;i++){var gi=G.groundItems[i];if(!gi||!gi.items)continue;if(dist(ent.x,ent.y,gi.x,gi.y)>pickR)continue;for(var j=0;j<gi.items.length;j++){var it=gi.items[j];if(!it||it.t!=='weapon')continue;if(it.data&&it.data.isLauncher)continue;var power=(it.data.e||0)*(it.data.rpm||1)/1000;if(power>bestScore){bestScore=power;best=it;srcArr=gi.items;srcIdx=j}}}
+  for(var i=0;i<G.groundItems.length;i++){var gi=G.groundItems[i];if(!gi||!gi.items)continue;if(dist(ent.x,ent.y,gi.x,gi.y)>pickR)continue;for(var j=0;j<gi.items.length;j++){var it=gi.items[j];if(!it||it.t!=='weapon')continue;if(it.data&&(it.data.isLauncher||it.data.isMelee))continue;var power=(it.data.e||0)*(it.data.rpm||1)/1000;if(power>bestScore){bestScore=power;best=it;srcArr=gi.items;srcIdx=j}}}
   if(best){var oldW=ent.weapon;ent.weapon=best.data;ent.fireCd=Math.max(ent.fireCd,0.8);srcArr[srcIdx]={t:'weapon',data:oldW,qty:1};if(ent.isAlly)addLog(ent.name+' 换用 '+best.data.n,'g');else addLog(ent.name+' 拾取了 '+best.data.n,'y')}
 }
 function updateEnemies(dt){
@@ -2215,8 +2478,31 @@ function updateEnemies(dt){
   }
 }
 function bossSkill(e,id){var def=BOSS_SKILLS[id];if(!def)return;var detail=execKind(SKILL_KINDS,def.kind,G,e,def.p||{});addLog(e.name+' '+(def.label||id)+(detail?'：'+detail:''),'r')}
+
+/* ★ v0.43.0：enemyFireAt 加副武器近战切换 */
 function enemyFireAt(e,target){
   var w=e.weapon;if(!w)return;
+
+  /* ★ 若副武器是近战，且目标进入近战范围，切刀砍人 */
+  if(e.sidearm && e.sidearm.isMelee){
+    var tdM = dist(e.x, e.y, target.x, target.y);
+    if(tdM < (e.sidearm.meleeRange||80) * 0.9){
+      w = e.sidearm;
+    }
+  }
+
+  if(w.isMelee){
+    var td=dist(e.x,e.y,target.x,target.y);
+    var range=w.meleeRange||70;
+    if(td<range && e.meleeCd<=0){
+      e.meleeCd=rand(0.5,1.0);
+      if(target===G.player) hitPlayer(w.e||400,target.x,target.y,e,w.pen||0);
+      else if(target.isAlly) hitAlly(target, w.e||400, w.pen||0);
+      else if(target.hp!==undefined) hitAI(target, w.e||400, w.pen||0, false, 'melee', e);
+    }
+    return;
+  }
+
   var td0=dist(e.x,e.y,target.x,target.y);
   if(w.isLauncher&&td0<550&&e.sidearm&&!e.sidearm.isLauncher)w=e.sidearm;
   if(w.isLauncher){
@@ -2269,8 +2555,21 @@ function updateAIPlayers(dt){
       var ncfg=AI_CFG().nade||{minDist:150,maxDist:480,chance:0.35};
       if(ai.nadeCd<=0&&td>(ncfg.minDist||150)&&td<(ncfg.maxDist||480)&&Math.random()<0.35){if(entThrowNade(ai,target.x,target.y)){ai.nadeCd=rand(12,22);ai.fireCd=Math.max(ai.fireCd,0.8)}else ai.nadeCd=rand(20,40)}
       ai.fireCd-=dt;
-      if(ai.fireCd<=0){ai.fireCd=60/ai.weapon.rpm*rand(.85,1.3);var spr=ai.weapon.spr*(1.5-ai.acc);var a2=ang+rand(-spr*3,spr*3)*(1-ai.acc*.5);var en=safeNum(ai.weapon.e*.9,0);G.bullets.push({x:ai.x+Math.cos(a2)*20,y:ai.y+Math.sin(a2)*20,vx:Math.cos(a2)*ai.weapon.spd,vy:Math.sin(a2)*ai.weapon.spd,baseEnergy:en,energy:en,range:ai.weapon.rng,traveled:0,from:'ai',dmgType:'ballistic',life:3,pen:ai.pen||0,owner:ai,ammoType:ai.weapon.loadedAmmoType||ai.weapon.cal});SFX.shot(ai.weapon.snd)}
-      if(td<60&&ai.meleeCd<=0){ai.meleeCd=rand(2,4);if(target===p)hitPlayer(100,target.x,target.y,ai,0);else if(target.isAlly)hitAlly(target,100,0)}
+      if(ai.fireCd<=0){
+        if(ai.weapon.isMelee){
+          if(td<ai.weapon.meleeRange||80){
+            ai.fireCd=rand(0.6,1.2);
+            if(target===p) hitPlayer(ai.weapon.e||300, target.x, target.y, ai, ai.weapon.pen||0);
+            else if(target.isAlly) hitAlly(target, ai.weapon.e||300, ai.weapon.pen||0);
+            else if(target.hp!==undefined) hitAI(target, ai.weapon.e||300, ai.weapon.pen||0, false, 'melee', ai);
+          } else ai.fireCd=0.4;
+        } else {
+          ai.fireCd=60/ai.weapon.rpm*rand(.85,1.3);
+          var spr=ai.weapon.spr*(1.5-ai.acc);var a2=ang+rand(-spr*3,spr*3)*(1-ai.acc*.5);var en=safeNum(ai.weapon.e*.9,0);
+          G.bullets.push({x:ai.x+Math.cos(a2)*20,y:ai.y+Math.sin(a2)*20,vx:Math.cos(a2)*ai.weapon.spd,vy:Math.sin(a2)*ai.weapon.spd,baseEnergy:en,energy:en,range:ai.weapon.rng,traveled:0,from:'ai',dmgType:'ballistic',life:3,pen:ai.pen||0,owner:ai,ammoType:ai.weapon.loadedAmmoType||ai.weapon.cal});
+          SFX.shot(ai.weapon.snd);
+        }
+      }
       checkStuck(ai,dt,aSp);
     }else if(cont){
       ai.state='loot';var ang2=Math.atan2(cont.y-ai.y,cont.x-ai.x);ai.angle=angLerp(ai.angle,ang2,Math.min(1,dt*5));
@@ -2321,7 +2620,21 @@ function updateAllyAI(dt){
       ai.x+=Math.cos(mvA)*aSp*dt;ai.y+=Math.sin(mvA)*aSp*dt;ai.x=clamp(ai.x,20,MAPW-20);ai.y=clamp(ai.y,20,MAPH-20);resolveCollision(ai,15);
       if(ai.nadeCd<=0&&td>150&&td<450&&Math.random()<0.25){if(entThrowNade(ai,target.x,target.y))ai.nadeCd=rand(15,25);else ai.nadeCd=rand(20,40)}
       ai.fireCd-=dt;
-      if(ai.fireCd<=0){ai.fireCd=60/ai.weapon.rpm*rand(.85,1.3);var spr=ai.weapon.spr*(1.5-ai.acc);var a2=ang2+rand(-spr*3,spr*3)*(1-ai.acc*.5);var en=safeNum(ai.weapon.e*.8,0);G.bullets.push({x:ai.x+Math.cos(a2)*20,y:ai.y+Math.sin(a2)*20,vx:Math.cos(a2)*ai.weapon.spd,vy:Math.sin(a2)*ai.weapon.spd,baseEnergy:en,energy:en,range:ai.weapon.rng,traveled:0,from:'ai',dmgType:'ballistic',life:3,owner:ai,ammoType:ai.weapon.loadedAmmoType||ai.weapon.cal});SFX.shot(ai.weapon.snd)}
+      if(ai.fireCd<=0){
+        if(ai.weapon.isMelee){
+          if(td<ai.weapon.meleeRange||80){
+            ai.fireCd=rand(0.6,1.2);
+            if(target===p) hitPlayer(ai.weapon.e||300, target.x, target.y, ai, ai.weapon.pen||0);
+            else if(target.isAlly) hitAlly(target, ai.weapon.e||300, ai.weapon.pen||0);
+            else if(target.hp!==undefined) hitAI(target, ai.weapon.e||300, ai.weapon.pen||0, false, 'melee', ai);
+          } else ai.fireCd=0.4;
+        } else {
+          ai.fireCd=60/ai.weapon.rpm*rand(.85,1.3);
+          var spr=ai.weapon.spr*(1.5-ai.acc);var a2=ang2+rand(-spr*3,spr*3)*(1-ai.acc*.5);var en=safeNum(ai.weapon.e*.8,0);
+          G.bullets.push({x:ai.x+Math.cos(a2)*20,y:ai.y+Math.sin(a2)*20,vx:Math.cos(a2)*ai.weapon.spd,vy:Math.sin(a2)*ai.weapon.spd,baseEnergy:en,energy:en,range:ai.weapon.rng,traveled:0,from:'ai',dmgType:'ballistic',life:3,owner:ai,ammoType:ai.weapon.loadedAmmoType||ai.weapon.cal});
+          SFX.shot(ai.weapon.snd);
+        }
+      }
       if(target&&Math.random()<0.02)ai.markTarget={x:target.x,y:target.y,t:5};
       if(ai.markTarget){ai.markTarget.t-=dt;if(ai.markTarget.t<=0)ai.markTarget=null}
       checkStuck(ai,dt,aSp);safePosition(ai);continue;
@@ -2390,25 +2703,21 @@ function drawContainers(){
       ctx.strokeStyle=isBoss?'rgba(255,180,60,.9)':'rgba(80,80,80,.6)';
       ctx.lineWidth=(isBoss?2.5:1.5)/renderScale;ctx.stroke();
       ctx.fillStyle=isBoss?'rgba(255,220,120,.95)':'rgba(255,200,200,.85)';
-      ctx.font=(isBoss?'22px':'16px')+' sans-serif';
-      ctx.textAlign='center';ctx.textBaseline='middle';
-      ctx.fillText(isBoss?'👑':'☠',0,0);
-      ctx.textBaseline='alphabetic';
+      ctx.font=(isBoss?'22px':'16px')+' sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(isBoss?'👑':'☠',0,0);ctx.textBaseline='alphabetic';
     }else{
       if(!c.opened){
         var pulse=.6+.4*Math.sin(G.time*3+c.x*.01);
         ctx.shadowColor=rc.col;ctx.shadowBlur=18*pulse;
         ctx.fillStyle=rc.col;ctx.globalAlpha=.9;
-        ctx.beginPath();
-        if(ctx.roundRect)ctx.roundRect(-14,-12,28,24,4);else ctx.rect(-14,-12,28,24);
+        ctx.beginPath();if(ctx.roundRect)ctx.roundRect(-14,-12,28,24,4);else ctx.rect(-14,-12,28,24);
         ctx.fill();ctx.globalAlpha=1;ctx.shadowBlur=0;
         ctx.strokeStyle='rgba(10,16,24,.9)';ctx.lineWidth=2/renderScale;
         ctx.beginPath();ctx.moveTo(-14,0);ctx.lineTo(14,0);ctx.stroke();
         if(c.supply){ctx.fillStyle='#ffcc33';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('★',0,-18)}
       }else{
         ctx.globalAlpha=.22;ctx.strokeStyle='#5a7a9a';ctx.lineWidth=1.5/renderScale;
-        ctx.beginPath();
-        if(ctx.roundRect)ctx.roundRect(-14,-12,28,24,4);else ctx.rect(-14,-12,28,24);
+        ctx.beginPath();if(ctx.roundRect)ctx.roundRect(-14,-12,28,24,4);else ctx.rect(-14,-12,28,24);
         ctx.stroke();ctx.globalAlpha=1;
       }
     }
@@ -2429,6 +2738,20 @@ function drawExtracts(){
 function drawGunline(){
   var p=G.player,gl=G.gunline;if(!gl.show||!p.alive)return;
   var aiming=touchState.aiming||keys['shift'];var w=curWeapon();
+  if(w.isMelee){
+    ctx.save();
+    ctx.fillStyle='rgba(255,200,100,.12)';
+    ctx.beginPath();
+    ctx.moveTo(p.x,p.y);
+    ctx.arc(p.x,p.y, w.meleeRange||80, p.angle-(w.meleeArc||1.2), p.angle+(w.meleeArc||1.2));
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle='rgba(255,220,140,.55)';
+    ctx.lineWidth=1.5/renderScale;
+    ctx.stroke();
+    ctx.restore();
+    return;
+  }
   var spr=w.spr*w.sprMul*(aiming?.3:1),alpha=aiming?.55:.3;
   var sx=p.x,sy=p.y;var ex=sx+Math.cos(gl.a)*gl.len,ey=sy+Math.sin(gl.a)*gl.len;
   ctx.save();
@@ -2481,7 +2804,18 @@ function drawPlayer(){
     ctx.beginPath();ctx.arc(ex-2.4,-2+ey*.4,1.7,0,TAU);ctx.fill();
     ctx.beginPath();ctx.arc(ex+2.4,-2+ey*.4,1.7,0,TAU);ctx.fill();
   }
-  if(!p.downed){ctx.save();ctx.rotate(p.angle);ctx.fillStyle='#2b3542';ctx.fillRect(8,-2.5,20,5);ctx.fillStyle='#3d4a5c';ctx.fillRect(26,-1.5,5,3);ctx.restore()}
+  var w=curWeapon();
+  if(!p.downed){
+    ctx.save();ctx.rotate(p.angle);
+    if(w.isMelee){
+      ctx.fillStyle='#c0d0e0';ctx.fillRect(8,-2,22,4);
+      ctx.fillStyle='#e0e8f0';ctx.fillRect(28,-1,6,2);
+    } else {
+      ctx.fillStyle='#2b3542';ctx.fillRect(8,-2.5,20,5);
+      ctx.fillStyle='#3d4a5c';ctx.fillRect(26,-1.5,5,3);
+    }
+    ctx.restore();
+  }
   if(p.protection&&p.protectionHold&&p.coupling>0){var col={L1:'rgba(90,255,150,.5)',L2:'rgba(90,180,255,.5)',L3:'rgba(200,120,255,.5)'}[p.protection];ctx.strokeStyle=col;ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(0,0,24+Math.sin(G.time*8)*2,0,TAU);ctx.stroke()}
   if(p.shieldT>0){ctx.strokeStyle='rgba(180,220,255,.75)';ctx.lineWidth=4;ctx.beginPath();ctx.arc(0,0,30,0,TAU);ctx.stroke()}
   if(p.suppressT>0){ctx.strokeStyle='rgba(255,200,100,.75)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,34+Math.sin(G.time*10)*2,0,TAU);ctx.stroke()}
@@ -2500,8 +2834,7 @@ function drawEnemies(){
       ctx.strokeStyle='rgba(0,0,0,.5)';ctx.lineWidth=1.5;ctx.stroke();
       ctx.fillStyle=e.hitFlash>0?'#fff':(e.boss?'#e0b060':e.super?'#ff5050':e.elite?'#e06a6a':'#a07060');
       ctx.beginPath();ctx.arc(0,-1,7.5,0,TAU);ctx.fill();
-      ctx.fillStyle=e.super?'#ff2020':'#ffdd55';
-      var ex=Math.cos(e.angle)*3,ey=Math.sin(e.angle)*3;
+      ctx.fillStyle=e.super?'#ff2020':'#ffdd55';var ex=Math.cos(e.angle)*3,ey=Math.sin(e.angle)*3;
       ctx.beginPath();ctx.arc(ex-2,-1+ey*.3,1.4,0,TAU);ctx.fill();ctx.beginPath();ctx.arc(ex+2,-1+ey*.3,1.4,0,TAU);ctx.fill();
       if(!e.downed){ctx.save();ctx.rotate(e.angle);ctx.fillStyle='#222a34';ctx.fillRect(5,-2,18,4);ctx.restore()}
     }
@@ -2583,6 +2916,7 @@ function drawMinimap(){
   for(var i=0;i<obstacles.length;i++){var o=obstacles[i];m.fillRect(o.x*sc,o.y*sc,Math.max(1,o.w*sc),Math.max(1,o.h*sc))}
   if(CFG.assists.extHint&&!G.trainingMode){for(var j=0;j<G.extracts.length;j++){var e=G.extracts[j];m.fillStyle=e.locked?'rgba(255,90,90,.9)':'rgba(90,225,255,.9)';m.beginPath();m.arc(e.x*sc,e.y*sc,3,0,TAU);m.fill()}}
   for(var k=0;k<G.containers.length;k++){var c=G.containers[k];if(c.searched&&(!c.loot||c.loot.filter(function(x){return x}).length===0)&&!c.isCorpse&&!c.supply)continue;var isBoss=c.corpseEnemy&&c.corpseEnemy.boss;var rc=RARITY[c.tier]||RARITY[0];m.fillStyle=isBoss?'#ffaa40':c.supply?'#ff4040':c.isCorpse?'#c04040':rc.col;m.globalAlpha=c.supply?1:.7;m.fillRect(c.x*sc-1.5,c.y*sc-1.5,isBoss?4:3,isBoss?4:3);m.globalAlpha=1}
+  for(var gii=0;gii<G.groundItems.length;gii++){var gi=G.groundItems[gii];if(!gi.items||!gi.items.length)continue;m.fillStyle='#ffe066';m.fillRect(gi.x*sc-2,gi.y*sc-2,4,4);}
   var p=G.player;
   for(var m2=0;m2<G.enemies.length;m2++){var en=G.enemies[m2];if(!en.alive||en.isAllyGuard)continue;var d=dist(en.x,en.y,p.x,p.y);if(d<VIEW_DIST*1.5){m.fillStyle=en.downed?'#ff6060':en.marked?'#ffe055':en.boss?'#ffb040':en.super?'#ff3030':en.elite?'#ff6a6a':'#ff9a6a';m.beginPath();m.arc(en.x*sc,en.y*sc,en.downed?2.5:3,0,TAU);m.fill()}}
   for(var a2=0;a2<G.aiPlayers.length;a2++){var ai=G.aiPlayers[a2];if(!ai.alive)continue;m.fillStyle=ai.isAlly?(ai.downed?'#ff6060':'#5fe08a'):(ai.hostileToPlayer?'#ff4040':'#e0a060');m.fillRect(ai.x*sc-2,ai.y*sc-2,4,4)}
@@ -2604,13 +2938,28 @@ function updateHUD(){
   var pbtns=document.querySelectorAll('.pbtn');
   for(var i=0;i<pbtns.length;i++){var b=pbtns[i],lv=b.dataset.l;if(!p.isPrazer||p.coupling<=0.5||p.downed)b.classList.add('dead');else b.classList.remove('dead');if(p.protection===lv&&p.protectionHold&&p.coupling>0)b.classList.add('active');else b.classList.remove('active')}
   var w=curWeapon();
-  setTxt('wname',w.n+(p.usingSidearm?' [副]':'')+(w.isLauncher?' ['+w.ammo+'/4]':''));
-  setTxt('amag',w.ammo);setTxt('ares',w.isLauncher?'—':(w.reserve||0));
-  var rl=document.getElementById('rlinfo');
-  if(rl){
-    if(p.reloading>0){rl.textContent='装填中 '+Math.round((1-p.reloading/p.reloadMax)*100)+'%';rl.style.color='#ffb84d'}
-    else if(w.isLauncher){rl.textContent='弹管式 · 4 发 · 按 R 补弹';rl.style.color='#7fa0bc'}
-    else{var ammoDef=AMMO_TYPES[w.loadedAmmoType]||AMMO_TYPES[w.cal];var bRar=ammoDef?(ammoDef.rar||bulletRarity(w.pen||0)):bulletRarity(w.pen||0);var pen=ammoDef&&ammoDef.pen!==undefined?ammoDef.pen:w.pen;var parts=['<span style="color:'+RCOL(bRar)+'">'+(ammoDef?ammoDef.n:w.loadedAmmoType)+'</span>','穿透'+pen,'倍率'+w.zoom.toFixed(1)+'x'];rl.innerHTML=parts.join(' · ');rl.style.color='#7fa0bc'}
+  setTxt('wname',w.n+(p.usingSidearm?' [副]':''));
+  if(w.isMelee){
+    setTxt('amag','∞');setTxt('ares','—');
+    var rlM=document.getElementById('rlinfo');
+    if(rlM){rlM.textContent='近战 · 挥砍 '+((w.meleeRange||80)/PX_PER_M).toFixed(1)+'m';rlM.style.color='#ffc890';}
+  } else if(w.isLauncher){
+    setTxt('amag',w.ammo);setTxt('ares','—');
+    var rlL=document.getElementById('rlinfo');
+    if(rlL){rlL.textContent='弹管式 · 4 发 · 按 R 补弹';rlL.style.color='#7fa0bc';}
+  } else {
+    setTxt('amag',w.ammo);setTxt('ares',w.reserve||0);
+    var rl=document.getElementById('rlinfo');
+    if(rl){
+      if(p.reloading>0){rl.textContent='装填中 '+Math.round((1-p.reloading/p.reloadMax)*100)+'%';rl.style.color='#ffb84d'}
+      else{
+        var ammoDef=AMMO_TYPES[w.loadedAmmoType]||AMMO_TYPES[w.cal];
+        var bRar=ammoDef?(ammoDef.rar||bulletRarity(w.pen||0)):bulletRarity(w.pen||0);
+        var pen=ammoDef&&ammoDef.pen!==undefined?ammoDef.pen:w.pen;
+        var parts=['<span style="color:'+RCOL(bRar)+'">'+(ammoDef?ammoDef.n:w.loadedAmmoType)+'</span>','穿透'+pen,'倍率'+w.zoom.toFixed(1)+'x'];
+        rl.innerHTML=parts.join(' · ');rl.style.color='#7fa0bc';
+      }
+    }
   }
   var tip=document.getElementById('guntip');
   if(tip){
@@ -2630,40 +2979,22 @@ function useQuick(id){var p=G.player;if(p.usingItem){if(p.usingItem.data&&p.usin
 function useQuickNade(id){var p=G.player;if(p.nadeAiming&&p.nadeType===id){cancelNadeAiming();return}p.nadeType=id;if(p.nadeAiming)return;toggleNadeAiming()}
 
 /* ============================================================
-   ★ 通用上下文：配装 / 战局背包统一用
+   通用上下文
    ============================================================ */
-var CTX = null;              // 当前操作目标（SAVE.data.equipped 或 null→G.player）
-function getCtx(){
-  if(CTX) return CTX;
-  if(G && G.player) return G.player;
-  return null;
-}
+var CTX = null;
+function getCtx(){if(CTX) return CTX;if(G && G.player) return G.player;return null;}
 function isStashMode(){ return !!CTX; }
 
-/* ============================================================
-   通用：容器/装备访问（基于 getCtx）
-   ============================================================ */
 function containerArr(c){
-  var p = getCtx();
-  if(!p) return null;
-  if(c==='chest') return p.chest;
-  if(c==='pocket') return p.pocket;
-  if(c==='bag') return p.bag;
-  if(c==='safe') return p.safe;
-  return null;
+  var p = getCtx();if(!p) return null;
+  if(c==='chest') return p.chest;if(c==='pocket') return p.pocket;if(c==='bag') return p.bag;if(c==='safe') return p.safe;return null;
 }
 function containerCap(c){
-  var p = getCtx();
-  if(!p) return 0;
-  if(c==='chest') return p.chestCap||0;
-  if(c==='pocket') return p.pocketCap||0;
-  if(c==='bag') return p.bagCap||0;
-  if(c==='safe') return p.safeCap||0;
-  return 0;
+  var p = getCtx();if(!p) return 0;
+  if(c==='chest') return p.chestCap||0;if(c==='pocket') return p.pocketCap||0;if(c==='bag') return p.bagCap||0;if(c==='safe') return p.safeCap||0;return 0;
 }
 function getEquipItem(slot){
-  var p = getCtx();
-  if(!p) return null;
+  var p = getCtx();if(!p) return null;
   if(slot==='main') return p.equip.main;
   if(slot==='side') return p.equip.side;
   if(slot==='helmetComposite') return (p.helmetShell&&!isEmptyEquipData(p.helmetShell))?{t:'helmetShell',id:p.helmetShell.id,data:p.helmetShell,qty:1}:null;
@@ -2673,82 +3004,114 @@ function getEquipItem(slot){
   return null;
 }
 function getEquipSub(slot,sub){
-  var p = getCtx();
-  if(!p) return null;
-  if(slot==='helmetComposite'){
-    if(sub==='visor') return (p.helmetVisor&&!isEmptyEquipData(p.helmetVisor))?{t:'helmetVisor',id:p.helmetVisor.id,data:p.helmetVisor,qty:1}:null;
-    if(sub==='ear') return (p.helmetEar&&!isEmptyEquipData(p.helmetEar))?{t:'helmetEar',id:p.helmetEar.id,data:p.helmetEar,qty:1}:null;
-  }
-  if(slot==='vestComposite'){
-    if(sub==='plate') return (p.vestPlate&&!isEmptyEquipData(p.vestPlate))?{t:'vestPlate',id:p.vestPlate.id,data:p.vestPlate,qty:1}:null;
-  }
+  var p = getCtx();if(!p) return null;
+  if(slot==='helmetComposite'){if(sub==='visor') return (p.helmetVisor&&!isEmptyEquipData(p.helmetVisor))?{t:'helmetVisor',id:p.helmetVisor.id,data:p.helmetVisor,qty:1}:null;if(sub==='ear') return (p.helmetEar&&!isEmptyEquipData(p.helmetEar))?{t:'helmetEar',id:p.helmetEar.id,data:p.helmetEar,qty:1}:null}
+  if(slot==='vestComposite'){if(sub==='plate') return (p.vestPlate&&!isEmptyEquipData(p.vestPlate))?{t:'vestPlate',id:p.vestPlate.id,data:p.vestPlate,qty:1}:null}
   return null;
 }
+/* ★ v0.43.0：setEquipItem 的背包/胸挂分支改为深拷贝 + 剔除自环 */
 function setEquipItem(slot,it){
-  var p = getCtx();
-  if(!p) return false;
+  var p = getCtx();if(!p) return false;
   if(slot==='main'){p.equip.main=it;p.weapon=it?it.data:null;return true}
   if(slot==='side'){p.equip.side=it;p.sidearm=it?it.data:null;return true}
   if(slot==='helmetComposite'){if(it&&it.data)p.helmetShell=it.data;else p.helmetShell=mkHelmetShell('hs0');return true}
   if(slot==='vestComposite'){if(it&&it.data)p.vestFiber=it.data;else p.vestFiber=mkVestFiber('vf0');return true}
+
   if(slot==='backpack'){
     var oldBp=p.equip.backpack;
     var newBp=it;
     if(oldBp===newBp) return true;
-    var newCap=(newBp&&newBp.data)?newBp.data.cap:0;
-    if(oldBp&&oldBp.data) oldBp.data._stored=p.bag;
-    if(newBp&&newBp.data&&Array.isArray(newBp.data._stored)&&newBp.data._stored.length>0){
-      var stored=newBp.data._stored;
-      if(p.bag.length+stored.length>newCap){
-        if(oldBp&&oldBp.data) oldBp.data._stored=p.bag;
-        return false;
+
+    /* 当前 p.bag 内容（剔除 oldBp / newBp 自己，防止自环） */
+    var currentBag=[];
+    for(var bi=0;bi<(p.bag||[]).length;bi++){
+      var cur=p.bag[bi];
+      if(cur && cur!==oldBp && cur!==newBp) currentBag.push(cur);
+    }
+    /* 新背包的 _stored（同样剔除自己） */
+    var newStored=[];
+    if(newBp && newBp.data && Array.isArray(newBp.data._stored)){
+      for(var si=0;si<newBp.data._stored.length;si++){
+        var ns=newBp.data._stored[si];
+        if(ns && ns!==newBp) newStored.push(ns);
       }
-      for(var mi=0;mi<stored.length;mi++){if(stored[mi])p.bag.push(stored[mi])}
-      newBp.data._stored=[];
-    }else if(newBp&&p.bag.length>newCap){
-      if(oldBp&&oldBp.data) oldBp.data._stored=p.bag;
+    }
+    /* 容量检查 */
+    var newCap=(newBp && newBp.data)?(newBp.data.cap||0):0;
+    if(newBp && (currentBag.length + newStored.length) > newCap){
       return false;
-    }else if(!newBp){
+    }
+    /* 存档旧背包（深拷贝快照） */
+    if(oldBp && oldBp.data){
+      oldBp.data._stored = deepCopy(currentBag);
+    }
+    /* 更新 p.bag */
+    if(newBp && newBp.data){
+      p.bag = [];
+      for(var ci2=0;ci2<currentBag.length;ci2++){
+        p.bag.push(deepCopy(currentBag[ci2]));
+      }
+      for(var ci3=0;ci3<newStored.length;ci3++){
+        p.bag.push(deepCopy(newStored[ci3]));
+      }
+      newBp.data._stored=[];
+      p.bagCap=newCap;
+    } else {
       p.bag=[];
+      p.bagCap=0;
     }
     p.equip.backpack=newBp;
     p.backpack=newBp?newBp.data:null;
-    p.bagCap=newCap;
     return true;
   }
+
   if(slot==='chestRig'){
     var oldCr=p.equip.chestRig;
     var newCr=it;
     if(oldCr===newCr) return true;
-    var newCap2=(newCr&&newCr.data)?newCr.data.cap:0;
-    if(oldCr&&oldCr.data) oldCr.data._stored=p.chest;
-    if(newCr&&newCr.data&&Array.isArray(newCr.data._stored)&&newCr.data._stored.length>0){
-      var stored2=newCr.data._stored;
-      if(p.chest.length+stored2.length>newCap2){
-        if(oldCr&&oldCr.data) oldCr.data._stored=p.chest;
-        return false;
+
+    var currentChest=[];
+    for(var cii=0;cii<(p.chest||[]).length;cii++){
+      var cc=p.chest[cii];
+      if(cc && cc!==oldCr && cc!==newCr) currentChest.push(cc);
+    }
+    var newStored2=[];
+    if(newCr && newCr.data && Array.isArray(newCr.data._stored)){
+      for(var si2=0;si2<newCr.data._stored.length;si2++){
+        var ns2=newCr.data._stored[si2];
+        if(ns2 && ns2!==newCr) newStored2.push(ns2);
       }
-      for(var mi2=0;mi2<stored2.length;mi2++){if(stored2[mi2])p.chest.push(stored2[mi2])}
-      newCr.data._stored=[];
-    }else if(newCr&&p.chest.length>newCap2){
-      if(oldCr&&oldCr.data) oldCr.data._stored=p.chest;
+    }
+    var newCap2=(newCr && newCr.data)?(newCr.data.cap||0):0;
+    if(newCr && (currentChest.length + newStored2.length) > newCap2){
       return false;
-    }else if(!newCr){
+    }
+    if(oldCr && oldCr.data){
+      oldCr.data._stored = deepCopy(currentChest);
+    }
+    if(newCr && newCr.data){
+      p.chest = [];
+      for(var cj=0;cj<currentChest.length;cj++){
+        p.chest.push(deepCopy(currentChest[cj]));
+      }
+      for(var ck=0;ck<newStored2.length;ck++){
+        p.chest.push(deepCopy(newStored2[ck]));
+      }
+      newCr.data._stored=[];
+      p.chestCap=newCap2;
+    } else {
       p.chest=[];
+      p.chestCap=0;
     }
     p.equip.chestRig=newCr;
     p.chestRig=newCr?newCr.data:null;
-    p.chestCap=newCap2;
     return true;
   }
   return true;
 }
 function tryAddItem(it){
-  var p = getCtx();
-  if(!p||!it) return false;
-  if(it.t==='helmetShell'||it.t==='helmetVisor'||it.t==='helmetEar'||it.t==='vestFiber'||it.t==='vestPlate'||it.t==='backpack'||it.t==='chestRig'){
-    if(isEmptyEquipData(it.data)) return true;
-  }
+  var p = getCtx();if(!p||!it) return false;
+  if(it.t==='helmetShell'||it.t==='helmetVisor'||it.t==='helmetEar'||it.t==='vestFiber'||it.t==='vestPlate'||it.t==='backpack'||it.t==='chestRig'){if(isEmptyEquipData(it.data)) return true}
   var containers=['chest','pocket','bag','safe'];
   if(isStackable(it)){
     var maxQ=itemStackLimit(it);
@@ -2758,20 +3121,14 @@ function tryAddItem(it){
       for(var j=0;j<arr.length;j++){
         if(arr[j]&&arr[j].t===it.t&&arr[j].id===it.id&&arr[j].cal===it.cal){
           var space=maxQ-(arr[j].qty||1);
-          if(space>0){
-            var take=Math.min(space,it.qty||1);
-            arr[j].qty+=take;it.qty-=take;
-            if(it.qty<=0) return true;
-          }
+          if(space>0){var take=Math.min(space,it.qty||1);arr[j].qty+=take;it.qty-=take;if(it.qty<=0) return true}
         }
       }
     }
   }
   for(var ci2=0;ci2<containers.length;ci2++){
-    var c=containers[ci2];
-    if(!canPlaceIn(c,it)) continue;
-    var arr2=containerArr(c),cap=containerCap(c);
-    if(cap<=0) continue;
+    var c=containers[ci2];if(!canPlaceIn(c,it)) continue;
+    var arr2=containerArr(c),cap=containerCap(c);if(cap<=0) continue;
     if(arr2&&arr2.length<cap){arr2.push(it);return true}
   }
   return false;
@@ -2779,9 +3136,10 @@ function tryAddItem(it){
 function tryAddToBag(it){return tryAddItem(it)}
 
 /* ============================================================
-   拖拽核心（通用）
+   拖拽核心
    ============================================================ */
 var selectedSlot=null,floatCtx=null,floatPos={x:0,y:0},activeDrag=null,_justDragged=false;
+var _dropInProgress = false;
 
 function getDragItem(srcDesc){
   if(!srcDesc)return null;
@@ -2789,6 +3147,7 @@ function getDragItem(srcDesc){
   if(srcDesc.type==='container'){var arr=containerArr(srcDesc.container);return (arr&&srcDesc.idx>=0&&srcDesc.idx<arr.length)?arr[srcDesc.idx]:null}
   if(srcDesc.type==='stash'){return SAVE.data.stash[srcDesc.idx]||null}
   if(srcDesc.type==='attach'){if(!floatCtx||!floatCtx.it||floatCtx.it.t!=='weapon')return null;var a=floatCtx.it.data.attach[srcDesc.key];if(!a)return null;return {t:'attach',k:srcDesc.key,id:a.id,data:a,qty:1}}
+  if(srcDesc.type==='attach_inner'){if(!floatCtx||!floatCtx.it||floatCtx.it.t!=='weapon')return null;var host=floatCtx.it.data.attach[srcDesc.hostKey];if(!host||!host.inner)return null;var a2=host.inner[srcDesc.slotKey];if(!a2)return null;return {t:'attach',k:srcDesc.slotKey,id:a2.id,data:a2,qty:1}}
   if(srcDesc.type==='gm'){if(!floatCtx||!floatCtx.it||!floatCtx.it.data.isLauncher)return null;var g=floatCtx.it.data.gm[srcDesc.idx];if(!g)return null;return g}
   if(srcDesc.type==='subslot')return getEquipSub(srcDesc.slot,srcDesc.sub);
   return null;
@@ -2797,13 +3156,24 @@ function removeFromSrc(srcDesc){
   if(!srcDesc) return null;
   if(srcDesc.type==='equip'){var it=getEquipItem(srcDesc.slot);if(!it)return null;setEquipItem(srcDesc.slot,null);return it}
   if(srcDesc.type==='container'){var arr=containerArr(srcDesc.container);if(!arr)return null;var it2=arr[srcDesc.idx];if(!it2)return null;arr.splice(srcDesc.idx,1);return it2}
-  if(srcDesc.type==='stash'){
-    var it3=SAVE.data.stash[srcDesc.idx];
-    if(!it3) return null;
-    SAVE.data.stash.splice(srcDesc.idx,1);
-    return it3;
+  if(srcDesc.type==='stash'){var it3=SAVE.data.stash[srcDesc.idx];if(!it3) return null;SAVE.data.stash.splice(srcDesc.idx,1);return it3}
+  if(srcDesc.type==='attach'){
+    if(!floatCtx||!floatCtx.it||floatCtx.it.t!=='weapon')return null;
+    var host=floatCtx.it;
+    var a=host.data.attach[srcDesc.key];if(!a)return null;
+    host.data.attach[srcDesc.key]=null;
+    recalcWeapon(host.data);
+    return {t:'attach',k:srcDesc.key,id:a.id,data:a,qty:1};
   }
-  if(srcDesc.type==='attach'){if(!floatCtx||!floatCtx.it)return null;var host=floatCtx.it;var a=host.data.attach[srcDesc.key];if(!a)return null;host.data.attach[srcDesc.key]=null;recalcWeapon(host.data);return {t:'attach',k:srcDesc.key,id:a.id,data:a,qty:1}}
+  if(srcDesc.type==='attach_inner'){
+    if(!floatCtx||!floatCtx.it||floatCtx.it.t!=='weapon')return null;
+    var hostAttach=floatCtx.it.data.attach[srcDesc.hostKey];
+    if(!hostAttach||!hostAttach.inner)return null;
+    var a2=hostAttach.inner[srcDesc.slotKey];if(!a2)return null;
+    hostAttach.inner[srcDesc.slotKey]=null;
+    recalcWeapon(floatCtx.it.data);
+    return {t:'attach',k:srcDesc.slotKey,id:a2.id,data:a2,qty:1};
+  }
   if(srcDesc.type==='gm'){if(!floatCtx||!floatCtx.it||!floatCtx.it.data.isLauncher)return null;var host2=floatCtx.it;var g=host2.data.gm[srcDesc.idx];if(!g)return null;host2.data.gm[srcDesc.idx]=null;host2.data.ammo=host2.data.gm.filter(function(x){return !!x}).length;return g}
   if(srcDesc.type==='subslot'){
     var p = getCtx();if(!p) return null;
@@ -2857,9 +3227,27 @@ function placeAtTarget(item,targetEl){
     if(item.k!==ds.attach) return {ok:false,reason:'type'};
     if(!floatCtx||!floatCtx.it||floatCtx.it.t!=='weapon') return {ok:false};
     var host=floatCtx.it,oldA=host.data.attach[ds.attach];
-    host.data.attach[ds.attach]={id:item.data.id,n:item.data.n,rar:item.data.rar,d:item.data.d,flavor:item.data.flavor};
+    var newA = deepCopy(item.data);
+    if(newA.subSlots && !newA.inner){
+      newA.inner={};
+      for(var si=0;si<newA.subSlots.length;si++) newA.inner[newA.subSlots[si]]=null;
+    }
+    host.data.attach[ds.attach]=newA;
     recalcWeapon(host.data);
     return {ok:true,swap:oldA?{t:'attach',k:ds.attach,id:oldA.id,data:oldA,qty:1}:null};
+  }
+  if(ds.attachInner!==undefined){
+    if(item.t!=='attach') return {ok:false,reason:'type'};
+    if(item.k!==ds.attachInner) return {ok:false,reason:'type'};
+    if(!floatCtx||!floatCtx.it||floatCtx.it.t!=='weapon') return {ok:false};
+    var hostKey = ds.hostKey;
+    var hostAttach = floatCtx.it.data.attach[hostKey];
+    if(!hostAttach) return {ok:false};
+    if(!hostAttach.inner) hostAttach.inner={};
+    var oldInner = hostAttach.inner[ds.attachInner]||null;
+    hostAttach.inner[ds.attachInner] = deepCopy(item.data);
+    recalcWeapon(floatCtx.it.data);
+    return {ok:true,swap:oldInner?{t:'attach',k:ds.attachInner,id:oldInner.id,data:oldInner,qty:1}:null};
   }
   if(ds.gm!==undefined){
     if(item.t!=='nade') return {ok:false,reason:'type'};
@@ -2885,24 +3273,16 @@ function placeAtTarget(item,targetEl){
         var a=arr[j];
         if(a&&a.t===item.t&&a.id===item.id&&a.cal===item.cal){
           var space=maxQ-(a.qty||1);
-          if(space>0){
-            var take=Math.min(space,item.qty||1);
-            a.qty+=take;item.qty-=take;
-            if(item.qty<=0) return {ok:true,swap:null,leftover:null};
-          }
+          if(space>0){var take=Math.min(space,item.qty||1);a.qty+=take;item.qty-=take;if(item.qty<=0) return {ok:true,swap:null,leftover:null}}
         }
       }
     }
-    if(idx<arr.length&&arr[idx]){
-      var oldC=arr[idx];arr[idx]=item;
-      return {ok:true,swap:oldC,leftover:null};
-    }
+    if(idx<arr.length&&arr[idx]){var oldC=arr[idx];arr[idx]=item;return {ok:true,swap:oldC,leftover:null}}
     if(arr.length<cap){arr.push(item);return {ok:true,swap:null,leftover:null}}
     for(var k=0;k<arr.length;k++){if(!arr[k]){arr[k]=item;return {ok:true,swap:null,leftover:null}}}
     return {ok:false,reason:'cap'};
   }
   if(ds.stashIdx!==undefined){
-    // 目标 = 仓库
     var st = SAVE.data.stash;
     var sidx = +ds.stashIdx;
     if(sidx>=0 && sidx<st.length && st[sidx]){
@@ -2916,48 +3296,65 @@ function placeAtTarget(item,targetEl){
   return {ok:false};
 }
 function putBackToSrc(item,srcDesc){
-  if(!item||!srcDesc) return;
+  if(!item||!srcDesc) return false;
   if(srcDesc.type==='equip'){
-    if(srcDesc.slot==='main'||srcDesc.slot==='side'){if(item.t!=='weapon')return}
-    else if(srcDesc.slot==='helmetComposite'){if(item.t!=='helmetShell')return}
-    else if(srcDesc.slot==='vestComposite'){if(item.t!=='vestFiber')return}
-    else if(srcDesc.slot==='backpack'){if(item.t!=='backpack')return}
-    else if(srcDesc.slot==='chestRig'){if(item.t!=='chestRig')return}
+    if(srcDesc.slot==='main'||srcDesc.slot==='side'){if(item.t!=='weapon')return false}
+    else if(srcDesc.slot==='helmetComposite'){if(item.t!=='helmetShell')return false}
+    else if(srcDesc.slot==='vestComposite'){if(item.t!=='vestFiber')return false}
+    else if(srcDesc.slot==='backpack'){if(item.t!=='backpack')return false}
+    else if(srcDesc.slot==='chestRig'){if(item.t!=='chestRig')return false}
+    else return false;
     setEquipItem(srcDesc.slot,item);
-    return;
+    return true;
   }
   if(srcDesc.type==='container'){
     var arr=containerArr(srcDesc.container);
-    if(arr)arr.splice(Math.min(srcDesc.idx,arr.length),0,item);
-    return;
+    if(!arr) return false;
+    arr.splice(Math.min(srcDesc.idx,arr.length),0,item);
+    return true;
   }
   if(srcDesc.type==='stash'){
     SAVE.data.stash.splice(Math.min(srcDesc.idx,SAVE.data.stash.length),0,item);
-    return;
+    return true;
   }
   if(srcDesc.type==='attach'){
-    if(item.t!=='attach')return;
+    if(item.t!=='attach')return false;
     if(floatCtx&&floatCtx.it&&floatCtx.it.t==='weapon'){
-      floatCtx.it.data.attach[srcDesc.key]={id:item.data.id,n:item.data.n,rar:item.data.rar,d:item.data.d,flavor:item.data.flavor};
+      floatCtx.it.data.attach[srcDesc.key]=item.data;
       recalcWeapon(floatCtx.it.data);
+      return true;
     }
-    return;
+    return false;
+  }
+  if(srcDesc.type==='attach_inner'){
+    if(item.t!=='attach')return false;
+    if(floatCtx&&floatCtx.it&&floatCtx.it.t==='weapon'){
+      var hostAttach=floatCtx.it.data.attach[srcDesc.hostKey];
+      if(!hostAttach)return false;
+      if(!hostAttach.inner) hostAttach.inner={};
+      hostAttach.inner[srcDesc.slotKey]=item.data;
+      recalcWeapon(floatCtx.it.data);
+      return true;
+    }
+    return false;
   }
   if(srcDesc.type==='gm'){
-    if(item.t!=='nade')return;
+    if(item.t!=='nade')return false;
     if(floatCtx&&floatCtx.it&&floatCtx.it.data.isLauncher){
       floatCtx.it.data.gm[srcDesc.idx]={t:'nade',id:item.id,data:item.data,qty:1};
       floatCtx.it.data.ammo=floatCtx.it.data.gm.filter(function(x){return !!x}).length;
+      return true;
     }
-    return;
+    return false;
   }
   if(srcDesc.type==='subslot'){
-    var p=getCtx();if(!p) return;
-    if(srcDesc.sub==='visor'&&item.t==='helmetVisor')p.helmetVisor=item.data;
-    else if(srcDesc.sub==='ear'&&item.t==='helmetEar')p.helmetEar=item.data;
-    else if(srcDesc.sub==='plate'&&item.t==='vestPlate')p.vestPlate=item.data;
-    return;
+    var p=getCtx();if(!p) return false;
+    if(srcDesc.sub==='visor'&&item.t==='helmetVisor'){p.helmetVisor=item.data;return true}
+    else if(srcDesc.sub==='ear'&&item.t==='helmetEar'){p.helmetEar=item.data;return true}
+    else if(srcDesc.sub==='plate'&&item.t==='vestPlate'){p.vestPlate=item.data;return true}
+    return false;
   }
+  return false;
 }
 function slotLogicId(el){
   if(!el||!el.dataset) return null;
@@ -2966,56 +3363,72 @@ function slotLogicId(el){
   if(ds.eq!==undefined) return 'eq:'+ds.eq;
   if(ds.sub!==undefined) return 'sub:'+ds.sub;
   if(ds.attach!==undefined) return 'att:'+ds.attach;
+  if(ds.attachInner!==undefined) return 'ai:'+ds.hostKey+':'+ds.attachInner;
   if(ds.gm!==undefined) return 'gm:'+ds.gm;
   if(ds.stashIdx!==undefined) return 'st:'+ds.stashIdx;
   return null;
 }
 function dropItem(srcDesc,targetEl){
-  if(!targetEl||!targetEl.dataset) return;
-  var ds=targetEl.dataset;
-  // 同容器内交换
-  if(srcDesc.type==='container'&&ds.container!==undefined&&srcDesc.container===ds.container){
-    var arr=containerArr(srcDesc.container);
-    if(!arr) return;
-    var si=+srcDesc.idx,di=+ds.idx;
-    if(si===di){ return; }
-    if(si>=arr.length||di>=arr.length){ return; }
-    var tmp=arr[si];
-    arr[si]=arr[di]||null;
-    arr[di]=tmp;
-    if(isStashMode()){renderStashPanel();} else {renderBag();}
+  if(_dropInProgress) return;
+  _dropInProgress = true;
+  try {
+    if(!targetEl||!targetEl.dataset) return;
+    var ds=targetEl.dataset;
+    if(srcDesc.type==='container'&&ds.container!==undefined&&srcDesc.container===ds.container){
+      var arr=containerArr(srcDesc.container);
+      if(!arr) return;
+      var si=+srcDesc.idx, di=+ds.idx;
+      if(si===di || isNaN(si) || isNaN(di)) return;
+      if(si>=arr.length) return;
+      if(di<arr.length){
+        var tmp=arr[si];
+        arr[si]=arr[di]||null;
+        arr[di]=tmp;
+      } else {
+        var srcItem=arr[si];
+        if(!srcItem) return;
+        arr.splice(si,1);
+        arr.push(srcItem);
+      }
+      if(isStashMode()){renderStashPanel();} else {renderBag();}
+      refreshFloatPanelIfAny();
+      SFX.ui();
+      return;
+    }
+    var item=removeFromSrc(srcDesc);
+    if(!item){return}
+    var res=placeAtTarget(item,targetEl);
+    if(!res||!res.ok){
+      putBackToSrc(item,srcDesc);
+      if(isStashMode()){renderStashPanel();} else {renderBag();}
+      refreshFloatPanelIfAny();
+      return;
+    }
+    if(res.swap){
+      if(!putBackToSrc(res.swap,srcDesc)){
+        if(!tryAddToBag(res.swap)){
+          if(G) dropItemNear(res.swap,G.player.x+rand(-20,20),G.player.y+rand(-20,20));
+          else SAVE.data.stash.push(res.swap);
+          addLog('旧物已掉落在附近','y');
+        } else {
+          addLog('旧物已装入背包','y');
+        }
+      }
+    }
+    if(res.leftover){
+      if(!putBackToSrc(res.leftover,srcDesc)){
+        if(!tryAddToBag(res.leftover)){
+          if(G) dropItemNear(res.leftover,G.player.x+rand(-20,20),G.player.y+rand(-20,20));
+          else SAVE.data.stash.push(res.leftover);
+        }
+      }
+    }
+    if(isStashMode()){SAVE.save();renderStashPanel();} else {renderBag();}
     refreshFloatPanelIfAny();
     SFX.ui();
-    return;
+  } finally {
+    _dropInProgress = false;
   }
-  var item=removeFromSrc(srcDesc);
-  if(!item){return}
-  var res=placeAtTarget(item,targetEl);
-  if(!res||!res.ok){
-    putBackToSrc(item,srcDesc);
-    if(isStashMode()){renderStashPanel();} else {renderBag();}
-    refreshFloatPanelIfAny();
-    return;
-  }
-  if(res.swap){
-    if(!putBackToSrc(res.swap,srcDesc)){
-      if(!tryAddToBag(res.swap)){
-        if(G) dropItemNear(res.swap,G.player.x+rand(-20,20),G.player.y+rand(-20,20));
-        else SAVE.data.stash.push(res.swap);
-      }
-    }
-  }
-  if(res.leftover){
-    if(!putBackToSrc(res.leftover,srcDesc)){
-      if(!tryAddToBag(res.leftover)){
-        if(G) dropItemNear(res.leftover,G.player.x+rand(-20,20),G.player.y+rand(-20,20));
-        else SAVE.data.stash.push(res.leftover);
-      }
-    }
-  }
-  if(isStashMode()){SAVE.save();renderStashPanel();}
-  else{renderBag();}
-  refreshFloatPanelIfAny();SFX.ui();
 }
 function refreshFloatPanelIfAny(){
   if(!floatCtx||!floatCtx.it) return;
@@ -3027,13 +3440,6 @@ function refreshFloatPanelIfAny(){
   else if(it.t==='backpack'&&p.backpack) openFloatPanel({t:'backpack',id:p.backpack.id,data:p.backpack,qty:1},floatCtx.srcDesc,null,{keepPos:true});
   else if(it.t==='chestRig'&&p.chestRig) openFloatPanel({t:'chestRig',id:p.chestRig.id,data:p.chestRig,qty:1},floatCtx.srcDesc,null,{keepPos:true});
 }
-
-/* ★ 关键：拖拽与战局完全一致
-   修复说明：
-   - 之前的 onDown 未调用 preventDefault，导致移动端触摸时仍可能被浏览器夺走 pointer。
-   - 现在在所有 onDown/onMove/onUp 都阻止默认行为，并且由于 CSS 中所有 .slot 已设为 touch-action:none，
-     浏览器不会再将指针交还给它自己去做滚动 → pointercancel 不会再触发 → 拖拽不再"一瞬间拖出来又消失"。
-   - 触摸设备如果想要滚动配装页，请使用面板标题栏或 panel 空白区（那些区域仍然 touch-action:auto/pan-y）。 */
 function startDragFromSlot(slotEl,srcDesc){
   function onDown(e){
     if(!srcDesc) return;
@@ -3042,11 +3448,9 @@ function startDragFromSlot(slotEl,srcDesc){
     var pid=e.pointerId;
     if(pid===undefined||pid===null)pid='mouse';
     activeDrag={pointerId:pid,srcEl:slotEl,srcDesc:srcDesc,startX:e.clientX,startY:e.clientY,ghost:null,moved:false};
-    try{if(slotEl.setPointerCapture&&e.pointerId!=null)slotEl.setPointerCapture(e.pointerId)}catch(err){}
     window.addEventListener('pointermove',onMove,true);
     window.addEventListener('pointerup',onUp,true);
     window.addEventListener('pointercancel',onUp,true);
-    // 阻止默认：阻止浏览器把这次触摸当作可滚动/可点击处理
     try{e.preventDefault&&e.preventDefault()}catch(_){}
   }
   function onMove(e){
@@ -3070,7 +3474,7 @@ function startDragFromSlot(slotEl,srcDesc){
     if(activeDrag.ghost){activeDrag.ghost.style.left=e.clientX+'px';activeDrag.ghost.style.top=e.clientY+'px'}
     var el2=document.elementFromPoint(e.clientX,e.clientY);
     document.querySelectorAll('.slot.dropok').forEach(function(s){s.classList.remove('dropok')});
-    if(el2){var t=el2.closest?el2.closest('.slot'):null;if(t&&t!==activeDrag.srcEl&&t.dataset&&(t.dataset.container!==undefined||t.dataset.eq!==undefined||t.dataset.attach!==undefined||t.dataset.gm!==undefined||t.dataset.sub!==undefined||t.dataset.stashIdx!==undefined))t.classList.add('dropok')}
+    if(el2){var t=el2.closest?el2.closest('.slot'):null;if(t&&t!==activeDrag.srcEl&&t.dataset&&(t.dataset.container!==undefined||t.dataset.eq!==undefined||t.dataset.attach!==undefined||t.dataset.attachInner!==undefined||t.dataset.gm!==undefined||t.dataset.sub!==undefined||t.dataset.stashIdx!==undefined))t.classList.add('dropok')}
     try{e.preventDefault&&e.preventDefault()}catch(_){}
   }
   function onUp(e){
@@ -3081,21 +3485,20 @@ function startDragFromSlot(slotEl,srcDesc){
     var srcDesc2=activeDrag.srcDesc;
     var srcEl=activeDrag.srcEl;
     var srcLogicId=slotLogicId(srcEl);
-    if(moved&&activeDrag.ghost){
-      var el=document.elementFromPoint(e.clientX,e.clientY);
-      var t=el&&el.closest?el.closest('.slot'):null;
-      if(t&&t.dataset){
-        var tgtLogicId=slotLogicId(t);
-        if(srcLogicId===null||tgtLogicId===null||srcLogicId!==tgtLogicId){
-          dropItem(srcDesc2,t);
+    try {
+      if(moved&&activeDrag.ghost){
+        var el=document.elementFromPoint(e.clientX,e.clientY);
+        var t=el&&el.closest?el.closest('.slot'):null;
+        if(t&&t.dataset){
+          var tgtLogicId=slotLogicId(t);
+          if(srcLogicId===null||tgtLogicId===null||srcLogicId!==tgtLogicId){
+            dropItem(srcDesc2,t);
+          }
         }
       }
-    }
+    } catch(err){ console.warn('[drop] error:', err); }
     cleanupDrag();
-    if(moved){
-      _justDragged=true;
-      setTimeout(function(){_justDragged=false},500);
-    }
+    if(moved){_justDragged=true;setTimeout(function(){_justDragged=false},500)}
     try{e.preventDefault&&e.preventDefault()}catch(_){}
   }
   function cleanupDrag(){
@@ -3109,10 +3512,6 @@ function startDragFromSlot(slotEl,srcDesc){
   }
   slotEl.addEventListener('pointerdown',onDown);
 }
-
-/* ============================================================
-   通用：物品详情浮层 + 操作
-   ============================================================ */
 function closeFloatPanel(){var el=document.getElementById('floatPanel');if(el)el.classList.remove('on');floatCtx=null}
 function openFloatPanel(it,srcDesc,ev,opts){
   if(!it){closeFloatPanel();return}
@@ -3125,6 +3524,7 @@ function openFloatPanel(it,srcDesc,ev,opts){
   var html='';
   var isEquippedHelmet=it.t==='helmetShell'&&srcDesc&&srcDesc.type==='equip'&&srcDesc.slot==='helmetComposite';
   var isEquippedVest=it.t==='vestFiber'&&srcDesc&&srcDesc.type==='equip'&&srcDesc.slot==='vestComposite';
+
   if(isEquippedHelmet && p){
     var shell=p.helmetShell,visor=p.helmetVisor,ear=p.helmetEar;var shellOk=!isEmptyEquipData(shell);
     html+='<div class="fp-head">';if(parent)html+='<button class="fp-back" id="fpBackBtn">‹</button>';
@@ -3159,16 +3559,57 @@ function openFloatPanel(it,srcDesc,ev,opts){
     html+='</div>';
     if(fiberOk)html+='<div class="fp-actions"><button data-act="unequipVest" class="danger">卸下护甲</button></div>';
     html+='</div></div>';
-  }else{
+  }
+  else if(it.t==='attach'){
+    var a=it.data;
+    var isFromWeapon = srcDesc && srcDesc.type==='attach';
+    var isInner = srcDesc && srcDesc.type==='attach_inner';
+    html+='<div class="fp-head">';
+    if(parent) html+='<button class="fp-back" id="fpBackBtn">‹</button>';
+    html+='<div class="fp-title" style="color:'+RCOL(a.rar)+'">⚙ '+a.n+'</div>';
+    html+='<button class="fp-close" id="fpCloseBtn">×</button></div>';
+    html+='<div class="fp-body">';
+    html+='<div class="fp-desc">'+itemDesc(it)+'</div>';
+    if(a.subSlots && a.subSlots.length){
+      html+='<div class="fp-attach"><div class="fp-attach-title"><span>内层槽位</span><span class="cnt">'+(a.inner?(Object.keys(a.inner).filter(function(k){return a.inner[k]}).length):0)+' / '+a.subSlots.length+'</span></div><div class="attach-grid">';
+      for(var si=0;si<a.subSlots.length;si++){
+        var subKey=a.subSlots[si];
+        var subA=(a.inner&&a.inner[subKey])||null;
+        var hostKeyAttr = isFromWeapon?srcDesc.key:(isInner?srcDesc.hostKey:'');
+        if(subA){
+          html+='<div class="slot occupied" data-attach-inner="'+subKey+'" data-host-key="'+hostKeyAttr+'"><span class="item-icon">'+itemIcon({t:'attach',data:subA})+'</span><span class="item-name" style="color:'+RCOL(subA.rar)+'">'+subA.n+'</span></div>';
+        } else {
+          html+='<div class="slot" data-attach-inner="'+subKey+'" data-host-key="'+hostKeyAttr+'"><span class="slot-hint">'+subKey.replace(/^inner_/,'子槽 ')+'</span></div>';
+        }
+      }
+      html+='</div></div>';
+    }
+    html+='<div class="fp-actions">';
+    if(isFromWeapon){
+      html+='<button data-act="unequipAttach" class="danger">卸下</button>';
+    } else if(isInner){
+      html+='<button data-act="unequipAttachInner" class="danger">卸下</button>';
+    } else if(srcDesc&&srcDesc.type==='container'){
+      html+='<button data-act="drop" class="danger">丢弃</button>';
+    } else if(srcDesc&&srcDesc.type==='stash'){
+      html+='<button data-act="sell" class="gold">出售（+'+itemValue(it)+' cp）</button>';
+    }
+    html+='</div></div>';
+  }
+  else {
     html+='<div class="fp-head">';if(parent)html+='<button class="fp-back" id="fpBackBtn">‹</button>';
     html+='<div class="fp-title" style="color:'+RCOL(itemRar(it))+'">'+itemIcon(it)+' '+itemName(it)+'</div>';
     html+='<button class="fp-close" id="fpCloseBtn">×</button></div>';
     html+='<div class="fp-body">';
     html+='<div class="fp-desc">'+itemDesc(it)+'</div>';
-    if(it.t==='weapon'&&!it.data.isLauncher){
+    if(it.t==='weapon'&&!it.data.isLauncher&&!it.data.isMelee){
       html+='<div class="fp-attach"><div class="fp-attach-title"><span>配件槽</span></div><div class="attach-grid">';
       var keys=['muzzle','sight','mag','grip'],names={muzzle:'枪口',sight:'瞄具',mag:'弹匣',grip:'握把'};
-      for(var i=0;i<keys.length;i++){var k=keys[i],a=it.data.attach?it.data.attach[k]:null;if(a)html+='<div class="slot occupied" data-attach="'+k+'"><span class="item-icon">⚙</span><span class="item-name" style="color:'+RCOL(a.rar)+'">'+a.n+'</span></div>';else html+='<div class="slot" data-attach="'+k+'"><span class="slot-hint">'+names[k]+'</span></div>'}
+      for(var i=0;i<keys.length;i++){
+        var k=keys[i],a2=it.data.attach?it.data.attach[k]:null;
+        if(a2)html+='<div class="slot occupied" data-attach="'+k+'"><span class="item-icon">⚙</span><span class="item-name" style="color:'+RCOL(a2.rar)+'">'+a2.n+'</span></div>';
+        else html+='<div class="slot" data-attach="'+k+'"><span class="slot-hint">'+names[k]+'</span></div>';
+      }
       html+='</div></div>';
     }
     if(it.t==='weapon'&&it.data.isLauncher){
@@ -3197,7 +3638,6 @@ function openFloatPanel(it,srcDesc,ev,opts){
       html+='<button data-act="unequip">卸下</button>';
     }else if(srcDesc&&srcDesc.type==='subslot'){html+='<button data-act="unequipSub">卸下</button>';}
     else if(isStash){
-      // 仓库物品
       if(it.t==='weapon')html+='<button data-act="equipMain">装主武器</button><button data-act="equipSide">装副武器</button>';
       else if(it.t==='helmetShell')html+='<button data-act="equipHelmet">装头盔</button>';
       else if(it.t==='vestFiber')html+='<button data-act="equipVest">装护甲</button>';
@@ -3222,45 +3662,66 @@ function openFloatPanel(it,srcDesc,ev,opts){
   if(backBtn)backBtn.addEventListener('click',function(e){e.stopPropagation();var c=floatCtx;if(c&&c.parent)openFloatPanel(c.parent.it,c.parent.srcDesc,null,{parent:c.parent.parent,keepPos:true});else closeFloatPanel()});
   el.querySelectorAll('.attach-grid .slot').forEach(function(node){
     var ds=node.dataset;
-    var hasItem=false,srcDesc2=null;var hostType=it.t;
+    var hasItem=false,srcDesc2=null;
+    var hostType=it.t;
     if(ds.eq==='helmetComposite'){hasItem=!!(p&&!isEmptyEquipData(p.helmetShell));srcDesc2={type:'equip',slot:'helmetComposite'}}
     else if(ds.eq==='vestComposite'){hasItem=!!(p&&!isEmptyEquipData(p.vestFiber));srcDesc2={type:'equip',slot:'vestComposite'}}
     else if(ds.sub!==undefined){var hostSlot=hostType==='helmetShell'?'helmetComposite':'vestComposite';hasItem=!!getEquipSub(hostSlot,ds.sub);srcDesc2={type:'subslot',slot:hostSlot,sub:ds.sub}}
-    else if(ds.attach!==undefined){hasItem=!!(it.data.attach&&it.data.attach[ds.attach]);srcDesc2={type:'attach',key:ds.attach}}
+    else if(ds.attach!==undefined){
+      hasItem=!!(it.data.attach&&it.data.attach[ds.attach]);
+      srcDesc2={type:'attach',key:ds.attach};
+    }
+    else if(ds.attachInner!==undefined){
+      var hk=ds.hostKey;
+      var hostAttach=null;
+      if(it.t==='attach'&&srcDesc&&srcDesc.type==='attach'){ hostAttach=it.data; hk=srcDesc.key; }
+      else if(it.t==='attach'&&srcDesc&&srcDesc.type==='attach_inner'){ hostAttach=it.data; hk=srcDesc.hostKey; }
+      else if(it.t==='weapon'){ hostAttach=it.data.attach[hk]; }
+      if(hostAttach){
+        hasItem=!!(hostAttach.inner&&hostAttach.inner[ds.attachInner]);
+        srcDesc2={type:'attach_inner',hostKey:hk,slotKey:ds.attachInner};
+      }
+    }
     else if(ds.gm!==undefined){var gi2=+ds.gm;hasItem=!!(it.data.gm&&it.data.gm[gi2]);srcDesc2={type:'gm',idx:gi2}}
+
     if(hasItem&&srcDesc2)startDragFromSlot(node,srcDesc2);
+
     node.addEventListener('click',function(e){
       e.stopPropagation();
       if(_justDragged)return;
-      if(hasItem&&srcDesc2){
-        if(srcDesc2.type==='equip'){
-          if(srcDesc2.slot==='helmetComposite'&&p){
-            if(isEmptyEquipData(p.helmetShell))return;
-            var oldShell={t:'helmetShell',id:p.helmetShell.id,data:p.helmetShell,qty:1};
-            if(!tryAddToBag(oldShell)){return}
-            p.helmetShell=mkHelmetShell('hs0');
-            if(isStashMode()){SAVE.save();renderStashPanel();}else{renderBag();}
-            openFloatPanel({t:'helmetShell',id:p.helmetShell.id,data:p.helmetShell,qty:1},srcDesc,null,{keepPos:true})
-          }
-          else if(srcDesc2.slot==='vestComposite'&&p){
-            if(isEmptyEquipData(p.vestFiber))return;
-            var oldFiber={t:'vestFiber',id:p.vestFiber.id,data:p.vestFiber,qty:1};
-            if(!tryAddToBag(oldFiber)){return}
-            p.vestFiber=mkVestFiber('vf0');
-            if(isStashMode()){SAVE.save();renderStashPanel();}else{renderBag();}
-            openFloatPanel({t:'vestFiber',id:p.vestFiber.id,data:p.vestFiber,qty:1},srcDesc,null,{keepPos:true})
-          }
-        }
-        else if(srcDesc2.type==='subslot'){var subItem=getEquipSub(srcDesc2.slot,srcDesc2.sub);if(subItem)openFloatPanel(subItem,srcDesc2,null,{parent:floatCtx,keepPos:true})}
-        else if(srcDesc2.type==='attach'){
-          var a2=it.data.attach[srcDesc2.key];if(!a2)return;
-          var item={t:'attach',k:srcDesc2.key,id:a2.id,data:a2,qty:1};
-          if(tryAddToBag(item)){it.data.attach[srcDesc2.key]=null;recalcWeapon(it.data);if(isStashMode()){SAVE.save();renderStashPanel();}else{renderBag();}openFloatPanel(it,floatCtx?floatCtx.srcDesc:null,null,{keepPos:true})}
-        }
-        else if(srcDesc2.type==='gm'){
-          var gItem2=it.data.gm[srcDesc2.idx];if(!gItem2)return;
-          if(tryAddToBag(deepCopy(gItem2))){it.data.gm[srcDesc2.idx]=null;it.data.ammo=it.data.gm.filter(function(x){return !!x}).length;if(isStashMode()){SAVE.save();renderStashPanel();}else{renderBag();}openFloatPanel(it,floatCtx?floatCtx.srcDesc:null,null,{keepPos:true})}
-        }
+      if(!hasItem||!srcDesc2) return;
+      if(srcDesc2.type==='attach'){
+        var a2=it.data.attach[srcDesc2.key];
+        if(!a2)return;
+        openFloatPanel({t:'attach',k:srcDesc2.key,id:a2.id,data:a2,qty:1}, srcDesc2, null, {parent: floatCtx, keepPos:true});
+      } else if(srcDesc2.type==='attach_inner'){
+        var hostAttach=null,hk=srcDesc2.hostKey;
+        if(it.t==='weapon'){ hostAttach=it.data.attach[hk]; }
+        else if(it.t==='attach'){ hostAttach=it.data; }
+        if(!hostAttach) return;
+        var subA=hostAttach.inner && hostAttach.inner[srcDesc2.slotKey];
+        if(!subA) return;
+        openFloatPanel({t:'attach',k:srcDesc2.slotKey,id:subA.id,data:subA,qty:1}, srcDesc2, null, {parent: floatCtx, keepPos:true});
+      } else if(srcDesc2.type==='gm'){
+        var gItem=it.data.gm[srcDesc2.idx]; if(!gItem) return;
+        openFloatPanel(gItem, srcDesc2, null, {parent: floatCtx, keepPos:true});
+      } else if(srcDesc2.type==='equip' && srcDesc2.slot==='helmetComposite' && p){
+        if(isEmptyEquipData(p.helmetShell))return;
+        var oldShell={t:'helmetShell',id:p.helmetShell.id,data:p.helmetShell,qty:1};
+        if(!tryAddToBag(oldShell)){return}
+        p.helmetShell=mkHelmetShell('hs0');
+        if(isStashMode()){SAVE.save();renderStashPanel();}else{renderBag();}
+        openFloatPanel({t:'helmetShell',id:p.helmetShell.id,data:p.helmetShell,qty:1},srcDesc,null,{keepPos:true})
+      } else if(srcDesc2.type==='equip' && srcDesc2.slot==='vestComposite' && p){
+        if(isEmptyEquipData(p.vestFiber))return;
+        var oldFiber={t:'vestFiber',id:p.vestFiber.id,data:p.vestFiber,qty:1};
+        if(!tryAddToBag(oldFiber)){return}
+        p.vestFiber=mkVestFiber('vf0');
+        if(isStashMode()){SAVE.save();renderStashPanel();}else{renderBag();}
+        openFloatPanel({t:'vestFiber',id:p.vestFiber.id,data:p.vestFiber,qty:1},srcDesc,null,{keepPos:true})
+      } else if(srcDesc2.type==='subslot'){
+        var subItem=getEquipSub(srcDesc2.slot,srcDesc2.sub);
+        if(subItem)openFloatPanel(subItem,srcDesc2,null,{parent:floatCtx,keepPos:true})
       }
     });
   });
@@ -3271,20 +3732,14 @@ function doFloatAction(act,it,srcDesc){
   var p=getCtx();if(!p) return;
   var arr=null,idx=-1;
   if(srcDesc.type==='container'){arr=containerArr(srcDesc.container);idx=srcDesc.idx}
-
   function moveToSlot(slot,expectedType){
     if(expectedType && it.t!==expectedType) return;
     var old=getEquipItem(slot);
-    // 从源移除
     var moved = removeFromSrc(srcDesc);
     if(!moved) return;
     var ok = setEquipItem(slot,moved);
-    if(ok===false){
-      // 容量不足，回滚
-      putBackToSrc(moved,srcDesc);
-      return;
-    }
-    if(old) SAVE.data.stash.push(old); // 旧的放回仓库
+    if(ok===false){putBackToSrc(moved,srcDesc);return}
+    if(old) SAVE.data.stash.push(old);
     if(isStashMode()){SAVE.save();renderStashPanel();}else{renderBag();}
   }
   function moveToSub(sub){
@@ -3301,7 +3756,6 @@ function doFloatAction(act,it,srcDesc){
     if(old) SAVE.data.stash.push(old);
     if(isStashMode()){SAVE.save();renderStashPanel();}else{renderBag();}
   }
-
   if(act==='use'&&it.t==='cons'){
     if(!arr||!G) return;
     if(p.usingItem){if(p.usingItem.data&&p.usingItem.data.id===it.id){cancelUseItem();return}return}
@@ -3319,10 +3773,15 @@ function doFloatAction(act,it,srcDesc){
   else if(act==='equipChestRig') moveToSlot('chestRig','chestRig');
   else if(act==='attach'){
     if(it.t!=='attach'||!arr) return;
-    var w=curWeapon();if(!w||w.isLauncher) return;
+    var w=curWeapon();if(!w||w.isLauncher||w.isMelee) return;
     var k=it.k;if(!k) return;
     var oldAt=w.attach[k];
-    w.attach[k]={id:it.data.id,n:it.data.n,rar:it.data.rar,d:it.data.d,flavor:it.data.flavor};
+    var newData=deepCopy(it.data);
+    if(newData.subSlots && !newData.inner){
+      newData.inner={};
+      for(var si=0;si<newData.subSlots.length;si++) newData.inner[newData.subSlots[si]]=null;
+    }
+    w.attach[k]=newData;
     recalcWeapon(w);
     if(oldAt) arr[idx]={t:'attach',k:k,id:oldAt.id,data:oldAt,qty:1};else arr.splice(idx,1);
     closeFloatPanel();renderBag();
@@ -3330,7 +3789,7 @@ function doFloatAction(act,it,srcDesc){
   else if(act==='load'){
     if(it.t!=='ammo'||!arr||!G) return;
     var w2=curWeapon();
-    if(!w2||w2.isLauncher) return;
+    if(!w2||w2.isLauncher||w2.isMelee) return;
     if(w2.cal!==it.cal) return;
     w2.reserve+=it.qty;if(it.tid)w2.loadedAmmoType=it.tid;
     arr.splice(idx,1);
@@ -3342,7 +3801,6 @@ function doFloatAction(act,it,srcDesc){
     p.nadeType=it.id;closeFloatPanel();renderBag();
   }
   else if(act==='drop'){
-    // 战局：丢地上；配装：退回仓库
     if(srcDesc.type==='stash'){closeFloatPanel();return;}
     var dropped=removeFromSrc(srcDesc);
     if(dropped){
@@ -3352,31 +3810,53 @@ function doFloatAction(act,it,srcDesc){
       if(isStashMode()){SAVE.save();renderStashPanel();}else{renderBag();}
     }
   }
+  else if(act==='unequipAttach'){
+    if(srcDesc.type!=='attach') return;
+    if(!floatCtx||!floatCtx.it||floatCtx.it.t!=='weapon') return;
+    var host=floatCtx.it;
+    var oldA=host.data.attach[srcDesc.key];
+    if(!oldA) {closeFloatPanel();return;}
+    host.data.attach[srcDesc.key]=null;
+    recalcWeapon(host.data);
+    var attachedItem={t:'attach',k:srcDesc.key,id:oldA.id,data:oldA,qty:1};
+    if(!tryAddToBag(attachedItem)){
+      if(G) dropItemNear(attachedItem,G.player.x+rand(-20,20),G.player.y+rand(-20,20));
+      else SAVE.data.stash.push(attachedItem);
+      addLog('背包已满，配件掉在地上','y');
+    } else {
+      addLog('卸下：'+oldA.n,'g');
+    }
+    closeFloatPanel();
+    if(isStashMode()){SAVE.save();renderStashPanel();}else{renderBag();}
+  }
+  else if(act==='unequipAttachInner'){
+    if(srcDesc.type!=='attach_inner') return;
+    if(!floatCtx||!floatCtx.it||floatCtx.it.t!=='weapon') return;
+    var hostW=floatCtx.it;
+    var hostAttach=hostW.data.attach[srcDesc.hostKey];
+    if(!hostAttach||!hostAttach.inner) {closeFloatPanel();return;}
+    var subA=hostAttach.inner[srcDesc.slotKey];
+    if(!subA) {closeFloatPanel();return;}
+    hostAttach.inner[srcDesc.slotKey]=null;
+    recalcWeapon(hostW.data);
+    var subItem={t:'attach',k:srcDesc.slotKey,id:subA.id,data:subA,qty:1};
+    if(!tryAddToBag(subItem)){
+      if(G) dropItemNear(subItem,G.player.x+rand(-20,20),G.player.y+rand(-20,20));
+      else SAVE.data.stash.push(subItem);
+      addLog('背包已满，子配件掉在地上','y');
+    } else {
+      addLog('卸下子配件：'+subA.n,'g');
+    }
+    closeFloatPanel();
+    if(isStashMode()){SAVE.save();renderStashPanel();}else{renderBag();}
+  }
   else if(act==='unequip'||act==='unequipHelmet'||act==='unequipVest'){
     if(srcDesc.type==='equip'){
       if(srcDesc.slot==='main'||srcDesc.slot==='side'){if(!tryAddToBag(it))return;setEquipItem(srcDesc.slot,null);}
       else if(srcDesc.slot==='helmetComposite'){if(isEmptyEquipData(p.helmetShell)){closeFloatPanel();return}var oS={t:'helmetShell',id:p.helmetShell.id,data:p.helmetShell,qty:1};if(!tryAddToBag(oS))return;p.helmetShell=mkHelmetShell('hs0');}
       else if(srcDesc.slot==='vestComposite'){if(isEmptyEquipData(p.vestFiber)){closeFloatPanel();return}var oF={t:'vestFiber',id:p.vestFiber.id,data:p.vestFiber,qty:1};if(!tryAddToBag(oF))return;p.vestFiber=mkVestFiber('vf0');}
-      else if(srcDesc.slot==='backpack'){
-        var oBp=p.equip.backpack;
-        if(!oBp){closeFloatPanel();return}
-        if(oBp.data) oBp.data._stored=p.bag;
-        p.equip.backpack=null;p.backpack=null;p.bag=[];p.bagCap=0;
-        if(!tryAddToBag(oBp)){
-          p.equip.backpack=oBp;p.backpack=oBp.data;p.bag=oBp.data._stored||[];p.bagCap=oBp.data.cap;
-          return;
-        }
-      }
-      else if(srcDesc.slot==='chestRig'){
-        var oCr=p.equip.chestRig;
-        if(!oCr){closeFloatPanel();return}
-        if(oCr.data) oCr.data._stored=p.chest;
-        p.equip.chestRig=null;p.chestRig=null;p.chest=[];p.chestCap=0;
-        if(!tryAddToBag(oCr)){
-          p.equip.chestRig=oCr;p.chestRig=oCr.data;p.chest=oCr.data._stored||[];p.chestCap=oCr.data.cap;
-          return;
-        }
-      }
+      else if(srcDesc.slot==='backpack'){var oBp=p.equip.backpack;if(!oBp){closeFloatPanel();return}if(oBp.data) oBp.data._stored=deepCopy(p.bag);p.equip.backpack=null;p.backpack=null;p.bag=[];p.bagCap=0;if(!tryAddToBag(oBp)){p.equip.backpack=oBp;p.backpack=oBp.data;p.bag=deepCopy(oBp.data._stored||[]);p.bagCap=oBp.data.cap;return}}
+      else if(srcDesc.slot==='chestRig'){var oCr=p.equip.chestRig;if(!oCr){closeFloatPanel();return}if(oCr.data) oCr.data._stored=deepCopy(p.chest);p.equip.chestRig=null;p.chestRig=null;p.chest=[];p.chestCap=0;if(!tryAddToBag(oCr)){p.equip.chestRig=oCr;p.chestRig=oCr.data;p.chest=deepCopy(oCr.data._stored||[]);p.chestCap=oCr.data.cap;return}}
     }
     closeFloatPanel();
     if(isStashMode()){SAVE.save();renderStashPanel();}else{renderBag();}
@@ -3405,30 +3885,23 @@ function doFloatAction(act,it,srcDesc){
     if(isStashMode()){SAVE.save();renderStashPanel();}else{renderBag();}
   }
   else if(act==='sell'){
-    // 仅仓库物品可出售
     if(srcDesc.type!=='stash') return;
     var val=itemValue(it);
     if(!confirm('确定出售 '+itemName(it)+' ？\n将获得 '+val+' 信用点。')) return;
     SAVE.data.stash.splice(srcDesc.idx,1);
     SAVE.data.credits=(SAVE.data.credits||0)+val;
     SAVE.data.stats.totalValueEarned=(SAVE.data.stats.totalValueEarned||0)+val;
-    SAVE.save();
-    SAVE.refreshMenu();
-    closeFloatPanel();
+    SAVE.save();SAVE.refreshMenu();closeFloatPanel();
     if(isStashMode()){renderStashPanel();}
   }
 }
 
-/* ============================================================
-   战局背包（G.player 上下文，CTX=null）
-   ============================================================ */
 function toggleBag(){if(!G||!running)return;if(!bagOpen&&G.player.usingItem)cancelUseItem();bagOpen=!bagOpen;var b=document.getElementById('bag');if(b)b.classList.toggle('on',bagOpen);if(bagOpen){CTX=null;selectedSlot=null;bagRefreshTimer=0;renderBag()}else closeFloatPanel()}
 __el=document.getElementById('bagClose');if(__el)__el.addEventListener('click',function(){bagOpen=false;var b=document.getElementById('bag');if(b)b.classList.remove('on');closeFloatPanel()});
 __el=document.getElementById('sortBtn');if(__el)__el.addEventListener('click',function(){if(!G)return;var p=G.player;function sortFn(a,b){if(!a)return 1;if(!b)return -1;var ra=RIDX[itemRar(a)]||0,rb=RIDX[itemRar(b)]||0;if(ra!==rb)return rb-ra;if(a.t!==b.t)return a.t.localeCompare(b.t);return (itemName(a)).localeCompare(itemName(b))}p.chest.sort(sortFn);p.pocket.sort(sortFn);p.bag.sort(sortFn);p.safe.sort(sortFn);addLog('背包已整理','g');SFX.ui();renderBag()});
 
 function renderBag(){
-  var p = G&&G.player;
-  if(!p) return;
+  var p = G&&G.player;if(!p) return;
   CTX=null;
   var eqHtml='';
   var eqSlots=[['main','主武器'],['side','副武器'],['helmetComposite','头盔'],['vestComposite','护甲'],['backpack','背包'],['chestRig','胸挂']];
@@ -3518,9 +3991,6 @@ function calcTotalValue(p,includeAll){
   return Math.round(total);
 }
 
-/* ============================================================
-   仓库 / 配装（SAVE.data.equipped 上下文，CTX=equipped）
-   ============================================================ */
 function mkEmptyEquipped(){
   return {
     __v:3,
@@ -3549,33 +4019,15 @@ function equippedHasContent(eq){
   for(var a=0;a<arrs.length;a++){if(Array.isArray(arrs[a])&&arrs[a].length>0) return true;}
   return false;
 }
-function openStash(){
-  if(!SAVE.data.equipped) SAVE.data.equipped=mkEmptyEquipped();
-  closeFloatPanel();
-  setCls('stashov','on',true);
-  CTX = SAVE.data.equipped;
-  renderStashPanel();
-}
-function closeStash(){
-  setCls('stashov','on',false);
-  closeFloatPanel();
-  CTX = null;
-}
-function renderStashPanel(){
-  var d=SAVE.data;
-  if(!d.equipped) d.equipped=mkEmptyEquipped();
-  CTX = d.equipped;
+function openStash(){if(!SAVE.data.equipped) SAVE.data.equipped=mkEmptyEquipped();closeFloatPanel();setCls('stashov','on',true);CTX = SAVE.data.equipped;renderStashPanel();}
+function closeStash(){setCls('stashov','on',false);closeFloatPanel();CTX = null;}
 
+function renderStashPanel(){
+  var d=SAVE.data;if(!d.equipped) d.equipped=mkEmptyEquipped();
+  CTX = d.equipped;
   var total=SAVE.stashValue();
   var summary=document.getElementById('stashSummary');
-  if(summary){
-    summary.innerHTML=
-      '<div class="stash-card"><div class="k">信用点</div><div class="v">'+(d.credits||0).toLocaleString()+'</div></div>'+
-      '<div class="stash-card"><div class="k">仓库价值</div><div class="v">'+total.toLocaleString()+'</div></div>'+
-      '<div class="stash-card"><div class="k">出勤 / 撤离</div><div class="v">'+d.stats.totalRuns+' / '+d.stats.totalExtracts+'</div></div>'+
-      '<div class="stash-card"><div class="k">总击杀</div><span class="v">'+d.stats.totalKills+'</span></div>';
-  }
-
+  if(summary){summary.innerHTML='<div class="stash-card"><div class="k">信用点</div><div class="v">'+(d.credits||0).toLocaleString()+'</div></div>'+'<div class="stash-card"><div class="k">仓库价值</div><div class="v">'+total.toLocaleString()+'</div></div>'+'<div class="stash-card"><div class="k">出勤 / 撤离</div><div class="v">'+d.stats.totalRuns+' / '+d.stats.totalExtracts+'</div></div>'+'<div class="stash-card"><div class="k">总击杀</div><span class="v">'+d.stats.totalKills+'</span></div>';}
   var p=d.equipped;
   var eqHtml='';
   var eqSlots=[['main','主武器'],['side','副武器'],['helmetComposite','头盔'],['vestComposite','护甲'],['backpack','背包'],['chestRig','胸挂']];
@@ -3590,9 +4042,7 @@ function renderStashPanel(){
       else if(s[0]==='backpack')subBadge='<span class="sub-badge" style="color:#7fd0ff">'+p.bag.length+'/'+p.bagCap+'</span>';
       else if(s[0]==='chestRig')subBadge='<span class="sub-badge" style="color:#7fd0ff">'+p.chest.length+'/'+p.chestCap+'</span>';
       eqHtml+='<div class="slot occupied" data-eq="'+s[0]+'"><span class="item-icon">'+itemIcon(it)+'</span><span class="item-name" style="color:'+RCOL(itemRar(it))+'">'+itemName(it)+'</span><span class="item-value">'+val+'</span>'+durBar+subBadge+'</div>';
-    }else{
-      eqHtml+='<div class="slot" data-eq="'+s[0]+'"><span class="slot-hint">'+s[1]+'</span></div>';
-    }
+    }else{eqHtml+='<div class="slot" data-eq="'+s[0]+'"><span class="slot-hint">'+s[1]+'</span></div>'}
   });
   var grid=document.getElementById('spEquipGrid');
   if(grid){
@@ -3603,8 +4053,6 @@ function renderStashPanel(){
       if(it&&it.data)startDragFromSlot(node,{type:'equip',slot:eq});
     });
   }
-
-  // 各容器
   renderStashGrid('spChestGrid',p.chest,containerCap('chest'),'chest');
   setTxt('spChestCount',p.chest.length+'/'+containerCap('chest'));
   renderStashGrid('spPocketGrid',p.pocket,containerCap('pocket'),'pocket');
@@ -3613,13 +4061,10 @@ function renderStashPanel(){
   setTxt('spBagCount',p.bag.length+'/'+containerCap('bag'));
   renderStashGrid('spSafeGrid',p.safe,containerCap('safe'),'safe');
   setTxt('spSafeCount',p.safe.length+'/'+containerCap('safe'));
-
-  // 仓库物品
   var sg=document.getElementById('stashGrid');
   if(sg){
-    if(!d.stash.length){
-      sg.innerHTML='<div class="stash-empty">仓库是空的。去战区带点东西回来。</div>';
-    } else {
+    if(!d.stash.length){sg.innerHTML='<div class="stash-empty">仓库是空的。去战区带点东西回来。</div>'}
+    else{
       var html='';
       for(var k=0;k<d.stash.length;k++){
         var it=d.stash[k];if(!it) continue;
@@ -3637,7 +4082,6 @@ function renderStashPanel(){
     }
   }
   setTxt('stashTotalVal',total+' cp');
-
   var hint=document.getElementById('equipHint');
   if(hint){
     var filled=0;
@@ -3661,9 +4105,7 @@ function renderStashGrid(id,arr,cap,container){
       var dp=itemDurPct(it),durBar='';
       if(dp>=0){var dc=dp>70?'#6fe07a':(dp>40?'#ffd93d':'#ff5a5a');durBar='<span class="item-dur"><i style="width:'+dp+'%;background:'+dc+'"></i></span>'}
       html+='<div class="slot occupied" data-container="'+container+'" data-idx="'+i+'"><span class="item-icon">'+itemIcon(it)+'</span><span class="item-name" style="color:'+RCOL(itemRar(it))+'">'+nm+'</span>'+(qty>1?'<span class="item-qty">×'+qty+'</span>':'')+'<span class="item-value">'+val+'</span>'+durBar+'</div>';
-    }else{
-      html+='<div class="slot" data-container="'+container+'" data-idx="'+i+'"></div>';
-    }
+    }else{html+='<div class="slot" data-container="'+container+'" data-idx="'+i+'"></div>'}
   }
   if(effCap<=0)html+='<div style="grid-column:1/-1;text-align:center;color:#5c82a8;font-size:10px;padding:14px">未装备容器，容量为 0</div>';
   el.innerHTML=html;
@@ -3674,8 +4116,6 @@ function renderStashGrid(id,arr,cap,container){
     if(arr3&&arr3[idx])startDragFromSlot(node,{type:'container',container:container,idx:idx});
   });
 }
-
-/* 快速配装：从仓库取默认装备放入 equipped */
 function autoEquip(){
   var d=SAVE.data;
   var charEl=document.querySelector('.charcard.on');
@@ -3685,13 +4125,9 @@ function autoEquip(){
   function take(type,id){
     if(!id) return null;
     for(var i=0;i<d.stash.length;i++){
-      var it=d.stash[i];
-      if(!it) continue;
+      var it=d.stash[i];if(!it) continue;
       var rid=it.data&&it.data.id?it.data.id:it.id;
-      if(it.t===type && rid===id){
-        d.stash.splice(i,1);
-        return it;
-      }
+      if(it.t===type && rid===id){d.stash.splice(i,1);return it}
     }
     return null;
   }
@@ -3709,18 +4145,13 @@ function autoEquip(){
   eq.bagCap=eq.backpack?eq.backpack.cap:0;
   eq.chestCap=eq.chestRig?eq.chestRig.cap:0;
   d.equipped=eq;
-  SAVE.save();
-  renderStashPanel();
-  updateDeployInfo();
+  SAVE.save();renderStashPanel();updateDeployInfo();
 }
 function clearEquip(){
-  var d=SAVE.data;
-  var eq=d.equipped || mkEmptyEquipped();
+  var d=SAVE.data;var eq=d.equipped || mkEmptyEquipped();
   function pushBack(it){if(it) d.stash.push(it);}
-  pushBack(eq.equip&&eq.equip.main);
-  pushBack(eq.equip&&eq.equip.side);
-  pushBack(eq.equip&&eq.equip.backpack);
-  pushBack(eq.equip&&eq.equip.chestRig);
+  pushBack(eq.equip&&eq.equip.main);pushBack(eq.equip&&eq.equip.side);
+  pushBack(eq.equip&&eq.equip.backpack);pushBack(eq.equip&&eq.equip.chestRig);
   if(eq.helmetShell&&!isEmptyEquipData(eq.helmetShell)) d.stash.push({t:'helmetShell',id:eq.helmetShell.id,data:eq.helmetShell,qty:1});
   if(eq.helmetVisor&&!isEmptyEquipData(eq.helmetVisor)) d.stash.push({t:'helmetVisor',id:eq.helmetVisor.id,data:eq.helmetVisor,qty:1});
   if(eq.helmetEar&&!isEmptyEquipData(eq.helmetEar)) d.stash.push({t:'helmetEar',id:eq.helmetEar.id,data:eq.helmetEar,qty:1});
@@ -3731,9 +4162,7 @@ function clearEquip(){
   for(var k=0;k<eq.bag.length;k++) pushBack(eq.bag[k]);
   for(var l=0;l<eq.safe.length;l++) pushBack(eq.safe[l]);
   d.equipped=mkEmptyEquipped();
-  SAVE.save();
-  renderStashPanel();
-  updateDeployInfo();
+  SAVE.save();renderStashPanel();updateDeployInfo();
 }
 function calcEquippedValue(eq){
   if(!eq) return 0;
@@ -3748,15 +4177,11 @@ function calcEquippedValue(eq){
   if(eq.equip&&eq.equip.backpack) val+=itemValue(eq.equip.backpack);
   if(eq.equip&&eq.equip.chestRig) val+=itemValue(eq.equip.chestRig);
   var arrs=[eq.chest,eq.pocket,eq.bag,eq.safe];
-  for(var a=0;a<arrs.length;a++){
-    if(!Array.isArray(arrs[a])) continue;
-    for(var i=0;i<arrs[a].length;i++) if(arrs[a][i]) val+=itemValue(arrs[a][i]);
-  }
+  for(var a=0;a<arrs.length;a++){if(!Array.isArray(arrs[a])) continue;for(var i=0;i<arrs[a].length;i++) if(arrs[a][i]) val+=itemValue(arrs[a][i]);}
   return Math.round(val);
 }
 function updateDeployInfo(){
-  var el=document.getElementById('deployInfo');
-  if(!el) return;
+  var el=document.getElementById('deployInfo');if(!el) return;
   var lim=CFG_DEPLOY_LIMIT(CFG.map,CFG.difficulty);
   var d=SAVE.data;
   var cur=calcEquippedValue(d.equipped);
@@ -3769,28 +4194,16 @@ function updateDeployInfo(){
     else if(lim.min>0&&cur<lim.min) status='<span style="color:#ffd93d">（低于最低要求！出击将被拒绝）</span>';
     else status='<span style="color:#7bf5a8">（合格）</span>';
     txt='战备限制 '+minStr+maxStr+' cp · 当前配装 '+cur.toLocaleString()+' cp '+status;
-  } else {
-    txt='当前配装价值 '+cur.toLocaleString()+' cp · 此地图暂无战备限制';
-  }
+  } else {txt='当前配装价值 '+cur.toLocaleString()+' cp · 此地图暂无战备限制'}
   el.innerHTML=txt;
 }
-
-/* 出击时：把 equipped 拷到 player */
 function applyEquippedToPlayer(player,eq){
   if(!player||!eq) return;
   if(eq.equip){
     if(eq.equip.main){player.equip.main=deepCopy(eq.equip.main);player.weapon=player.equip.main.data;}
     if(eq.equip.side){player.equip.side=deepCopy(eq.equip.side);player.sidearm=player.equip.side.data;}
-    if(eq.equip.backpack){
-      player.equip.backpack=deepCopy(eq.equip.backpack);
-      player.backpack=player.equip.backpack.data;
-      player.bagCap=player.backpack.cap||0;
-    }
-    if(eq.equip.chestRig){
-      player.equip.chestRig=deepCopy(eq.equip.chestRig);
-      player.chestRig=player.equip.chestRig.data;
-      player.chestCap=player.chestRig.cap||0;
-    }
+    if(eq.equip.backpack){player.equip.backpack=deepCopy(eq.equip.backpack);player.backpack=player.equip.backpack.data;player.bagCap=player.backpack.cap||0;}
+    if(eq.equip.chestRig){player.equip.chestRig=deepCopy(eq.equip.chestRig);player.chestRig=player.equip.chestRig.data;player.chestCap=player.chestRig.cap||0;}
   }
   if(eq.helmetShell&&!isEmptyEquipData(eq.helmetShell)) player.helmetShell=deepCopy(eq.helmetShell);
   if(eq.helmetVisor&&!isEmptyEquipData(eq.helmetVisor)) player.helmetVisor=deepCopy(eq.helmetVisor);
@@ -3798,19 +4211,10 @@ function applyEquippedToPlayer(player,eq){
   if(eq.vestFiber&&!isEmptyEquipData(eq.vestFiber)) player.vestFiber=deepCopy(eq.vestFiber);
   if(eq.vestPlate&&!isEmptyEquipData(eq.vestPlate)) player.vestPlate=deepCopy(eq.vestPlate);
   function copyArr(src){var out=[];if(!Array.isArray(src))return out;for(var i=0;i<src.length;i++){if(src[i])out.push(deepCopy(src[i]));}return out;}
-  player.chest=copyArr(eq.chest);
-  player.pocket=copyArr(eq.pocket);
-  player.bag=copyArr(eq.bag);
-  player.safe=copyArr(eq.safe);
+  player.chest=copyArr(eq.chest);player.pocket=copyArr(eq.pocket);player.bag=copyArr(eq.bag);player.safe=copyArr(eq.safe);
 }
-function clearEquippedAfterDeploy(){
-  SAVE.data.equipped=mkEmptyEquipped();
-  SAVE.save();
-}
+function clearEquippedAfterDeploy(){SAVE.data.equipped=mkEmptyEquipped();SAVE.save();}
 
-/* ============================================================
-   启动 / newGame / endGame 等（保留原逻辑，只调整配装应用）
-   ============================================================ */
 var SAVE={
   KEY:'ASAKA_SAVE_V1',
   data:null,
@@ -3832,35 +4236,12 @@ var SAVE={
     if(!Array.isArray(d.stash))d.stash=[];
     if(typeof d.tasks!=='object'||!d.tasks)d.tasks={};
     if(typeof d.storyUnlocked!=='object'||!d.storyUnlocked)d.storyUnlocked={};
-    // 迁移 equipped：老格式（ID 映射）→ 新格式（完整 player 结构）
     if(!d.equipped || typeof d.equipped!=='object' || d.equipped.__v!==3){
       var newEq = (typeof mkEmptyEquipped==='function') ? mkEmptyEquipped() : null;
-      if(!newEq){
-        newEq = {
-          __v:3,
-          equip:{main:null,side:null,backpack:null,chestRig:null},
-          weapon:null,sidearm:null,
-          backpack:null,chestRig:null,
-          helmetShell:{id:'hs0',n:'无',lv:0,rar:'common',red:0,energyPerPct:0,dur:100,durMax:100},
-          helmetVisor:{id:'hv0',n:'无',lv:0,rar:'common',red:0,energyPerPct:0,dur:100,durMax:100},
-          helmetEar:{id:'he0',n:'无',lv:0,rar:'common',hearingMul:1,flashResist:0,dur:100,durMax:100},
-          vestFiber:{id:'vf0',n:'无',lv:0,rar:'common',red:0,energyPerPct:0,dur:100,durMax:100},
-          vestPlate:{id:'vp0',n:'无',lv:0,rar:'common',red:0,energyPerPct:0,dur:100,durMax:100},
-          chest:[],pocket:[],bag:[],safe:[],
-          chestCap:0,pocketCap:4,bagCap:0,safeCap:3
-        };
-      }
+      if(!newEq){newEq = {__v:3,equip:{main:null,side:null,backpack:null,chestRig:null},weapon:null,sidearm:null,backpack:null,chestRig:null,helmetShell:{id:'hs0',n:'无',lv:0,rar:'common',red:0,energyPerPct:0,dur:100,durMax:100},helmetVisor:{id:'hv0',n:'无',lv:0,rar:'common',red:0,energyPerPct:0,dur:100,durMax:100},helmetEar:{id:'he0',n:'无',lv:0,rar:'common',hearingMul:1,flashResist:0,dur:100,durMax:100},vestFiber:{id:'vf0',n:'无',lv:0,rar:'common',red:0,energyPerPct:0,dur:100,durMax:100},vestPlate:{id:'vp0',n:'无',lv:0,rar:'common',red:0,energyPerPct:0,dur:100,durMax:100},chest:[],pocket:[],bag:[],safe:[],chestCap:0,pocketCap:4,bagCap:0,safeCap:3};}
       var old = d.equipped;
       if(old && typeof old==='object'){
-        function take(type,id){
-          if(!id) return null;
-          for(var i=0;i<d.stash.length;i++){
-            var it=d.stash[i]; if(!it) continue;
-            var rid = it.data&&it.data.id ? it.data.id : it.id;
-            if(it.t===type && rid===id){ d.stash.splice(i,1); return it; }
-          }
-          return null;
-        }
+        function take(type,id){if(!id) return null;for(var i=0;i<d.stash.length;i++){var it=d.stash[i]; if(!it) continue;var rid = it.data&&it.data.id ? it.data.id : it.id;if(it.t===type && rid===id){ d.stash.splice(i,1); return it; }}return null;}
         if(old.main) newEq.equip.main = take('weapon',old.main);
         if(old.side) newEq.equip.side = take('weapon',old.side);
         if(old.helmetShell){var s=take('helmetShell',old.helmetShell); if(s) newEq.helmetShell=s.data;}
@@ -3870,21 +4251,10 @@ var SAVE={
         if(old.vestPlate){var pp=take('vestPlate',old.vestPlate); if(pp) newEq.vestPlate=pp.data;}
         if(old.backpack){var bp=take('backpack',old.backpack); if(bp){newEq.equip.backpack=bp; newEq.backpack=bp.data; newEq.bagCap=bp.data.cap;}}
         if(old.chestRig){var cr=take('chestRig',old.chestRig); if(cr){newEq.equip.chestRig=cr; newEq.chestRig=cr.data; newEq.chestCap=cr.data.cap;}}
-        if(Array.isArray(old.safe)){
-          for(var si=0;si<old.safe.length;si++){
-            var sid = old.safe[si];
-            if(!sid) continue;
-            for(var sj=0;sj<d.stash.length;sj++){
-              var sit=d.stash[sj]; if(!sit) continue;
-              var srid = sit.data&&sit.data.id ? sit.data.id : sit.id;
-              if(srid===sid){ newEq.safe.push(sit); d.stash.splice(sj,1); break; }
-            }
-          }
-        }
+        if(Array.isArray(old.safe)){for(var si=0;si<old.safe.length;si++){var sid = old.safe[si];if(!sid) continue;for(var sj=0;sj<d.stash.length;sj++){var sit=d.stash[sj]; if(!sit) continue;var srid = sit.data&&sit.data.id ? sit.data.id : sit.id;if(srid===sid){ newEq.safe.push(sit); d.stash.splice(sj,1); break; }}}}
       }
       d.equipped = newEq;
     }
-    // 补齐字段
     if(!d.equipped.equip) d.equipped.equip={main:null,side:null,backpack:null,chestRig:null};
     if(d.equipped.equip.main===undefined) d.equipped.equip.main=null;
     if(d.equipped.equip.side===undefined) d.equipped.equip.side=null;
@@ -3917,31 +4287,17 @@ var SAVE={
         var isNew=!this.data.lastLogin;
         if(isNew)this.data.loginStreak=1;
         else{var last=new Date(this.data.lastLogin),now=new Date(today);var days=Math.floor((now-last)/(1000*60*60*24));if(days===1)this.data.loginStreak=(this.data.loginStreak||0)+1;else this.data.loginStreak=1}
-        this.data.lastLogin=today;
-        this.data.standardVouchers=(this.data.standardVouchers||0)+1;
-        this.save();
+        this.data.lastLogin=today;this.data.standardVouchers=(this.data.standardVouchers||0)+1;this.save();
         return {isNew:isNew,vouchers:this.data.standardVouchers,streak:this.data.loginStreak};
       }
       return null;
     }catch(e){return null}
   },
-  addToStash:function(items){
-    if(!Array.isArray(items)||!items.length)return 0;
-    var n=0;
-    for(var i=0;i<items.length;i++){
-      var it=items[i];if(!it)continue;
-      try{this.data.stash.push(deepCopy(it));n++}catch(_){}
-    }
-    this.save();return n;
-  },
-  stashValue:function(){
-    var v=0;
-    for(var i=0;i<this.data.stash.length;i++){try{var it=this.data.stash[i];if(it)v+=itemValue(it)}catch(_){}}
-    return Math.round(v);
-  },
+  addToStash:function(items){if(!Array.isArray(items)||!items.length)return 0;var n=0;for(var i=0;i<items.length;i++){var it=items[i];if(!it)continue;try{this.data.stash.push(deepCopy(it));n++}catch(_){}}this.save();return n;},
+  stashValue:function(){var v=0;for(var i=0;i<this.data.stash.length;i++){try{var it=this.data.stash[i];if(it)v+=itemValue(it)}catch(_){}}return Math.round(v);},
   recordExtract:function(s){if(!s)s={};this.data.stats.totalRuns=(this.data.stats.totalRuns||0)+1;this.data.stats.totalExtracts=(this.data.stats.totalExtracts||0)+1;this.data.stats.totalKills=(this.data.stats.totalKills||0)+(s.kills||0);this.data.stats.totalValueEarned=(this.data.stats.totalValueEarned||0)+(s.value||0);this.save()},
   recordDeath:function(s){if(!s)s={};this.data.stats.totalRuns=(this.data.stats.totalRuns||0)+1;this.data.stats.totalDeaths=(this.data.stats.totalDeaths||0)+1;this.data.stats.totalKills=(this.data.stats.totalKills||0)+(s.kills||0);this.data.stats.totalValueLost=(this.data.stats.totalValueLost||0)+(s.loss||0);this.save()},
-  markTask:function(taskId,done){if(!taskId)return;if(!this.data.tasks[taskId])this.data.tasks[taskId]={done:false,progress:0};this.data.tasks[taskId].done=!!done;this.save()},
+  markTask:function(taskId,done,progress){if(!taskId)return;if(!this.data.tasks[taskId])this.data.tasks[taskId]={done:false,progress:0};this.data.tasks[taskId].done=!!done;if(progress!==undefined)this.data.tasks[taskId].progress=progress;this.save()},
   refreshMenu:function(){
     try{
       var d=this.data,el;
@@ -3999,11 +4355,8 @@ function newGame(charId,training,useEquipped){
     protection:null,protectionHold:false,
     useTime:0,lastUseTime:0,recoverDelay:0,alive:true,
     equip:{main:null,side:null,backpack:null,chestRig:null},weapon:null,sidearm:null,
-    helmetShell:mkHelmetShell('hs0'),
-    helmetVisor:mkHelmetVisor('hv0'),
-    helmetEar:mkHelmetEar('he0'),
-    vestFiber:mkVestFiber('vf0'),
-    vestPlate:mkVestPlate('vp0'),
+    helmetShell:mkHelmetShell('hs0'),helmetVisor:mkHelmetVisor('hv0'),helmetEar:mkHelmetEar('he0'),
+    vestFiber:mkVestFiber('vf0'),vestPlate:mkVestPlate('vp0'),
     backpack:null,chestRig:null,
     usingSidearm:false,fireCd:0,reloading:0,reloadMax:0,
     chest:[],pocket:[],bag:[],safe:[],
@@ -4015,14 +4368,10 @@ function newGame(charId,training,useEquipped){
     downed:false,downedTimer:0,revived:false,rescueProgress:0,
     nadeType:'frag',nadeCd:0,blindT:0,stunT:0,
     nadeAiming:false,nadeAimAngle:0,nadeAimDist:260,meleeCd:0,
-    voicePitch:C.voicePitch||1.0,lastVoiceT:-10
+    voicePitch:C.voicePitch||1.0,lastVoiceT:-10,usedHeal:false
   };
-  // 出击时总是应用 equipped（包括空配装=裸装）
-  if(!training){
-    applyEquippedToPlayer(player, SAVE.data.equipped);
-    clearEquippedAfterDeploy();
-  } else {
-    // 训练场：给默认套装（这样玩家在训练场有装备测试）
+  if(!training){applyEquippedToPlayer(player, SAVE.data.equipped);clearEquippedAfterDeploy();}
+  else{
     var bpItem=mkBackpackItem(initLoad.backpack||'bp3');
     var crItem=mkChestRigItem(initLoad.chestRig||'cr3');
     player.equip.backpack=bpItem;player.backpack=bpItem?bpItem.data:null;
@@ -4031,8 +4380,20 @@ function newGame(charId,training,useEquipped){
     player.chestCap=player.chestRig?player.chestRig.cap:0;
     var wItem=mkWeaponItem(initLoad.main);if(!wItem)wItem=mkWeaponItem('p9');
     if(initLoad.attach){
-      for(var ai=0;ai<initLoad.attach.length;ai++){var a=initLoad.attach[ai];var list=ATTACH[a.k];if(!list)continue;for(var li=0;li<list.length;li++){if(list[li].id===a.id){wItem.data.attach[a.k]={id:list[li].id,n:list[li].n,rar:list[li].rar,d:list[li].d,flavor:list[li].flavor};break}}}
-      recalcWeapon(wItem.data);if(!wItem.data.isLauncher)wItem.data.ammo=wItem.data.magCap;
+      for(var ai=0;ai<initLoad.attach.length;ai++){
+        var a=initLoad.attach[ai];
+        var list=ATTACH[a.k];
+        if(!list)continue;
+        for(var li=0;li<list.length;li++){
+          if(list[li].id===a.id){
+            var newAt = mkAttachItem(a.k, a.id);
+            if(newAt) wItem.data.attach[a.k] = newAt.data;
+            break;
+          }
+        }
+      }
+      recalcWeapon(wItem.data);
+      if(!wItem.data.isLauncher && !wItem.data.isMelee)wItem.data.ammo=wItem.data.magCap;
     }
     player.equip.main=wItem;player.weapon=wItem.data;
     player.equip.side=mkWeaponItem(C.sidearm);player.sidearm=player.equip.side?player.equip.side.data:null;
@@ -4041,14 +4402,10 @@ function newGame(charId,training,useEquipped){
     player.helmetEar=mkHelmetEar(initLoad.helmetEar||'he3');
     player.vestFiber=mkVestFiber(initLoad.vestFiber||'vf4');
     player.vestPlate=mkVestPlate(initLoad.vestPlate||'vp4');
-    var bagSrc=initLoad.bag||[];
-    for(var i=0;i<bagSrc.length;i++){var it=bagSrc[i];if(!it)continue;var ci=mkConsItem(it.id,it.qty);if(ci&&player.bag.length<player.bagCap)player.bag.push(ci)}
-    var pocketSrc=initLoad.pocket||[];
-    for(var i2=0;i2<pocketSrc.length;i2++){var it2=pocketSrc[i2];if(!it2)continue;var ci2=mkConsItem(it2.id,it2.qty);if(ci2&&player.pocket.length<player.pocketCap)player.pocket.push(ci2)}
-    var safeSrc=initLoad.safe||[];
-    for(var i3=0;i3<safeSrc.length;i3++){var it3=safeSrc[i3];if(!it3)continue;var ci3=mkConsItem(it3.id,it3.qty);if(ci3&&player.safe.length<player.safeCap)player.safe.push(ci3)}
-    var chestSrc=initLoad.chest||[];
-    for(var i4=0;i4<chestSrc.length;i4++){var it4=chestSrc[i4];if(!it4)continue;var ni=mkNadeItem(it4.id,it4.qty);if(ni&&player.chest.length<player.chestCap)player.chest.push(ni)}
+    var bagSrc=initLoad.bag||[];for(var i=0;i<bagSrc.length;i++){var it=bagSrc[i];if(!it)continue;var ci=mkConsItem(it.id,it.qty);if(ci&&player.bag.length<player.bagCap)player.bag.push(ci)}
+    var pocketSrc=initLoad.pocket||[];for(var i2=0;i2<pocketSrc.length;i2++){var it2=pocketSrc[i2];if(!it2)continue;var ci2=mkConsItem(it2.id,it2.qty);if(ci2&&player.pocket.length<player.pocketCap)player.pocket.push(ci2)}
+    var safeSrc=initLoad.safe||[];for(var i3=0;i3<safeSrc.length;i3++){var it3=safeSrc[i3];if(!it3)continue;var ci3=mkConsItem(it3.id,it3.qty);if(ci3&&player.safe.length<player.safeCap)player.safe.push(ci3)}
+    var chestSrc=initLoad.chest||[];for(var i4=0;i4<chestSrc.length;i4++){var it4=chestSrc[i4];if(!it4)continue;var ni=mkNadeItem(it4.id,it4.qty);if(ni&&player.chest.length<player.chestCap)player.chest.push(ni)}
   }
   var hitZones=HIT_ZONES.map(function(z){return Object.assign({},z)});
   var fHZ=SCR('onHitZones');if(fHZ)hitZones=fHZ(hitZones)||hitZones;
@@ -4093,21 +4450,22 @@ function newGame(charId,training,useEquipped){
     nades:[],smokeClouds:[],soundEvents:[],fireZones:[],
     cam:{x:player.x,y:player.y},time:0,trainingMode:!!training,logLines:[],
     extracted:false,dead:false,extractTimer:0,extractTarget:null,
-    shakeT:0,shakeMag:0,drone:{active:false,x:0,y:0,t:0},stats:{shots:0,hits:0},
+    shakeT:0,shakeMag:0,drone:{active:false,x:0,y:0,t:0},stats:{shots:0,hits:0,headshots:0,pistolKills:0},
     gunline:{a:0,len:0,show:false},frozen:0,nearContainer:null,nearGround:null,nearDowned:null,
     lootPanelOpen:false,searchingContainer:null,infiniteAmmo:false,
     lastHitDir:0,lastHitDirT:0,tasks:tasks,markedEnemy:null,markT:0,boss:null,bossFound:false,
     rescuing:false,chatTimer:rand(8,14),streak:{count:0,t:0,tierShown:0},
     events:{active:null,t:0},eventCooldown:rand(25,45),
     trainingTTK:0,trainingTTKTime:0,hitZones:hitZones,
-    storyChapter:(CFG.storyMode&&TASKS.story&&TASKS.story[CFG.map])?TASKS.story[CFG.map]:null
+    storyChapter:(CFG.storyMode&&TASKS.story&&TASKS.story[CFG.map])?TASKS.story[CFG.map]:null,
+    bossKillTime:null
   };
   if(training){
     G.infiniteAmmo=true;
     for(var ci4=0;ci4<CONSUMABLES.length;ci4++)player.bag.push(mkConsItem(CONSUMABLES[ci4].id,3));
     for(var ni2=0;ni2<NADES.length;ni2++)player.bag.push(mkNadeItem(NADES[ni2].id,3));
-    if(!player.weapon.isLauncher)player.weapon.reserve=999;
-    if(player.sidearm&&!player.sidearm.isLauncher)player.sidearm.reserve=999;
+    if(!player.weapon.isLauncher && !player.weapon.isMelee)player.weapon.reserve=999;
+    if(player.sidearm&&!player.sidearm.isLauncher && !player.sidearm.isMelee)player.sidearm.reserve=999;
     setCls('trainToggle','on',true);setTxt('tInfinite','无限子弹：开');
   }else{setCls('trainToggle','on',false);setCls('trainPanel','on',false)}
   for(var bi=0;bi<enemies.length;bi++){if(enemies[bi].boss){G.boss=enemies[bi];G.bossFound=true;break}}
@@ -4122,11 +4480,17 @@ function endGame(success){
   hideDownedUI();
   var carried=success?calcTotalValue(p,true):calcTotalValue(p,false);
   var lost=success?0:(calcTotalValue(p,true)-carried);
-  if(CFG.storyMode&&G.storyChapter&&success){
-    var missionReward=0,doneCount=0;
-    for(var ti=0;ti<G.tasks.length;ti++){var t=G.tasks[ti];if(t.done&&t.reward){missionReward+=t.reward;doneCount++}}
-    carried+=missionReward;
-    if(missionReward>0)addLog('剧情奖励：+'+missionReward+' cp','g');
+  if(success){
+    var extraReward=0;
+    for(var ti=0;ti<G.tasks.length;ti++){
+      var t=G.tasks[ti];
+      if(t.done&&t.reward&&(t.source==='story'||t.source==='daily')){extraReward+=t.reward}
+      if(t.source==='challenge'&&!t.done&&checkChallengeTask(t.id,G,p)){
+        t.done=true;t.progress=t.target;extraReward+=t.reward||0;
+        addLog('挑战完成：'+t.name+' +'+(t.reward||0)+' cp','g');
+      }
+    }
+    if(extraReward>0){carried+=extraReward;addLog('任务奖励：+'+extraReward+' cp','g')}
   }
   var fEnd=SCR('onGameEnd');if(fEnd)fEnd(G,success);
   try{
@@ -4142,14 +4506,8 @@ function endGame(success){
       if(p.helmetEar&&!isEmptyEquipData(p.helmetEar))stashItems.push({t:'helmetEar',id:p.helmetEar.id,data:p.helmetEar,qty:1});
       if(p.vestFiber&&!isEmptyEquipData(p.vestFiber))stashItems.push({t:'vestFiber',id:p.vestFiber.id,data:p.vestFiber,qty:1});
       if(p.vestPlate&&!isEmptyEquipData(p.vestPlate))stashItems.push({t:'vestPlate',id:p.vestPlate.id,data:p.vestPlate,qty:1});
-      if(p.backpack&&!isEmptyEquipData(p.backpack)){
-        var bpCopy=deepCopy(p.backpack);delete bpCopy._stored;
-        stashItems.push({t:'backpack',id:bpCopy.id,data:bpCopy,qty:1});
-      }
-      if(p.chestRig&&!isEmptyEquipData(p.chestRig)){
-        var crCopy=deepCopy(p.chestRig);delete crCopy._stored;
-        stashItems.push({t:'chestRig',id:crCopy.id,data:crCopy,qty:1});
-      }
+      if(p.backpack&&!isEmptyEquipData(p.backpack)){var bpCopy=deepCopy(p.backpack);delete bpCopy._stored;stashItems.push({t:'backpack',id:bpCopy.id,data:bpCopy,qty:1});}
+      if(p.chestRig&&!isEmptyEquipData(p.chestRig)){var crCopy=deepCopy(p.chestRig);delete crCopy._stored;stashItems.push({t:'chestRig',id:crCopy.id,data:crCopy,qty:1});}
       SAVE.addToStash(stashItems);
     }else{
       SAVE.recordDeath({kills:p.kills||0,loss:lost});
@@ -4167,7 +4525,7 @@ function endGame(success){
     setHtml('rstat',
       '角色：<b>'+CHARACTERS[p.charId].name+'</b><br>'+
       '地图：<b>'+(MAPS[CFG.map]?MAPS[CFG.map].label:CFG.map)+' '+((MAP_DIFF[CFG.difficulty]&&MAP_DIFF[CFG.difficulty].label)||'')+'</b><br>'+
-      '击杀：<b>'+p.kills+'</b> 搜刮：<b>'+p.looted+'</b><br>'+
+      '击杀：<b>'+p.kills+'</b> 搜刮：<b>'+p.looted+'</b> 爆头：<b>'+(G.stats.headshots||0)+'</b><br>'+
       '伤害：<b>'+Math.round(p.damageDealt)+'</b> 承受：<b>'+Math.round(p.damageTaken)+'</b><br>'+
       '命中率：<b>'+acc+'%</b> 存活：<b>'+G.time.toFixed(0)+'s</b><br>'+
       '<div style="margin-top:8px;border-top:1px solid rgba(120,180,240,.3);padding-top:8px">'+
@@ -4207,7 +4565,6 @@ function showDeathAnalysis(carried,lost){
 }
 __el=document.getElementById('deathClose');if(__el)__el.addEventListener('click',function(){setCls('deathAnalysis','on',false);setCls('game','on',false);setCls('menu','on',true)});
 
-/* 主循环 */
 function loop(t){
   requestAnimationFrame(loop);
   var dt=Math.min(.05,(t-lastT)/1000||0);
@@ -4219,7 +4576,6 @@ function loop(t){
 }
 requestAnimationFrame(function(t){lastT=t;requestAnimationFrame(loop)});
 
-/* UI 绑定 */
 document.addEventListener('click',function(e){
   var t=e.target;
   var pbtn=t.closest?t.closest('[data-plat]'):null;
@@ -4233,15 +4589,7 @@ document.addEventListener('click',function(e){
   var cbtn=t.closest?t.closest('.charcard'):null;
   if(cbtn){SFX.init();SFX.ui();document.querySelectorAll('.charcard').forEach(function(x){x.classList.remove('on')});cbtn.classList.add('on');return}
   var sbtn=t.closest?t.closest('.sw'):null;
-  if(sbtn&&sbtn.dataset.a){
-    SFX.init();SFX.ui();sbtn.classList.toggle('on');
-    CFG.assists[sbtn.dataset.a]=sbtn.classList.contains('on');
-    if(sbtn.dataset.a==='sound')SFX.enabled=CFG.assists.sound;
-    if(sbtn.dataset.a==='taskHint')updateTaskUI();
-    if(sbtn.dataset.a==='bossBar')updateBossBar();
-    if(sbtn.dataset.a==='storyMode')CFG.storyMode=CFG.assists.storyMode;
-    return;
-  }
+  if(sbtn&&sbtn.dataset.a){SFX.init();SFX.ui();sbtn.classList.toggle('on');CFG.assists[sbtn.dataset.a]=sbtn.classList.contains('on');if(sbtn.dataset.a==='sound')SFX.enabled=CFG.assists.sound;if(sbtn.dataset.a==='taskHint')updateTaskUI();if(sbtn.dataset.a==='bossBar')updateBossBar();if(sbtn.dataset.a==='storyMode')CFG.storyMode=CFG.assists.storyMode;return}
   if(t.id==='startbtn'){startGame(false);return}
   if(t.id==='trainBtn'){startGame(true);return}
   if(t.id==='stashBtn'){openStash();return}
@@ -4268,9 +4616,7 @@ document.addEventListener('click',function(e){
   if(t.id==='tResetDummies'){resetTrainingDummies();return}
   if(t.id==='storyBtn'){setCls('storyOv','on',false);finishStory();return}
   var picker=document.getElementById('equipPicker');
-  if(picker&&picker.style.display==='block'){
-    if(!picker.contains(e.target))picker.style.display='none';
-  }
+  if(picker&&picker.style.display==='block'){if(!picker.contains(e.target))picker.style.display='none'}
 });
 __el=document.getElementById('importFileInput');if(__el)__el.addEventListener('change',function(e){
   var f=e.target.files&&e.target.files[0];if(!f)return;
@@ -4289,19 +4635,12 @@ function startGame(training){
     if(!CHARACTERS[charId])charId='kate';
     var mapCfg=MAPS[CFG.map]||MAPS.factory;
     if(!mapCfg)throw new Error('地图不存在: '+CFG.map);
-
     if(!training){
       var lim=CFG_DEPLOY_LIMIT(CFG.map,CFG.difficulty);
       if(lim){
         var cur=calcEquippedValue(SAVE.data.equipped);
-        if(isFinite(lim.max)&&cur>lim.max){
-          alert('出击被拒绝。\n\n当前配装价值 '+cur+' cp 超过该地图战备上限 '+lim.max+' cp。\n请调整配装后再出击。');
-          return;
-        }
-        if(lim.min>0&&cur<lim.min){
-          alert('出击被拒绝。\n\n当前配装价值 '+cur+' cp 低于该地图战备下限 '+lim.min+' cp。\n请提升配装后再出击。');
-          return;
-        }
+        if(isFinite(lim.max)&&cur>lim.max){alert('出击被拒绝。\n\n当前配装价值 '+cur+' cp 超过该地图战备上限 '+lim.max+' cp。\n请调整配装后再出击。');return}
+        if(lim.min>0&&cur<lim.min){alert('出击被拒绝。\n\n当前配装价值 '+cur+' cp 低于该地图战备下限 '+lim.min+' cp。\n请提升配装后再出击。');return}
       }
     }
     genMapSafe(mapCfg.seed);
@@ -4320,8 +4659,7 @@ function startGame(training){
     if(cv)cv.style.filter='';
     camZoom=1;renderScale=1;
     bagOpen=false;paused=false;running=true;lastT=performance.now();
-    bagRefreshTimer=0;
-    CTX = null;
+    bagRefreshTimer=0;CTX = null;
     if(CFG.platform==='touch')setCls('touchUI','on',true);else setCls('touchUI','on',false);
     renderSkillBar();
     if(training)initTrainPanel();
@@ -4352,7 +4690,7 @@ function resetTrainingDummies(){
   for(var i=0;i<G.enemies.length;i++){var e=G.enemies[i];if(!e.trainingDummy)continue;e.hp=e.maxHp;e.alive=true;e.downed=false;e.respawnTimer=0;e.firstHitTime=0;e.lastHitTime=0;e.ttkValue=0;e.helmetShell.dur=e.helmetShell.durMax;e.helmetVisor.dur=e.helmetVisor.durMax;e.helmetEar.dur=e.helmetEar.durMax;e.vestFiber.dur=e.vestFiber.durMax;e.vestPlate.dur=e.vestPlate.durMax;e.x=e.spawnX;e.y=e.spawnY}
   addLog('所有假人已重置','g');
 }
-function refreshAmmoSelect(wSel,aSel){if(!wSel||!aSel)return;var wdef=weaponById(wSel.value);if(!wdef||wdef.isLauncher){aSel.innerHTML='<option value="">（弹管式）</option>';return}var cal=wdef.cal,html='';for(var key in AMMO_TYPES){var d=AMMO_TYPES[key];if(d.cal===cal)html+='<option value="'+key+'">'+d.n+'</option>'}if(!html)html='<option value="'+cal+'">'+cal+'</option>';aSel.innerHTML=html}
+function refreshAmmoSelect(wSel,aSel){if(!wSel||!aSel)return;var wdef=weaponById(wSel.value);if(!wdef||wdef.isLauncher||wdef.isMelee){aSel.innerHTML='<option value="">（不适用）</option>';return}var cal=wdef.cal,html='';for(var key in AMMO_TYPES){var d=AMMO_TYPES[key];if(d.cal===cal)html+='<option value="'+key+'">'+d.n+'</option>'}if(!html)html='<option value="'+cal+'">'+cal+'</option>';aSel.innerHTML=html}
 function initTrainPanel(){
   var tMain=document.getElementById('tMain');var tSide=document.getElementById('tSide');
   var tMainAmmo=document.getElementById('tMainAmmo');var tSideAmmo=document.getElementById('tSideAmmo');
@@ -4389,12 +4727,15 @@ function applyTrainSettings(){
   removeByTypes(p.bag,['weapon','helmetShell','helmetVisor','helmetEar','vestFiber','vestPlate','backpack','chestRig']);
   var wMain=mkWeaponItem(settings.main);if(!wMain)return;
   if(wMain.data.isLauncher){var pool=NADES.filter(function(x){return x.onlyLauncher});for(var si=0;si<wMain.data.gm.length;si++){var nd=pick(pool.length?pool:NADES);wMain.data.gm[si]={t:'nade',id:nd.id,data:deepCopy(nd),qty:1}}wMain.data.ammo=4}
-  else{var kk=['muzzle','sight','mag','grip'];for(var ki=0;ki<kk.length;ki++){var k=kk[ki],list=ATTACH[k];if(!list||!list.length)continue;var a=list[Math.min(list.length-1,1)];wMain.data.attach[k]={id:a.id,n:a.n,rar:a.rar,d:a.d,flavor:a.flavor}}recalcWeapon(wMain.data);if(tMainAmmo&&tMainAmmo.value&&AMMO_TYPES[tMainAmmo.value])wMain.data.loadedAmmoType=tMainAmmo.value;wMain.data.ammo=wMain.data.magCap;wMain.data.reserve=999}
+  else if(!wMain.data.isMelee){var kk=['muzzle','sight','mag','grip'];for(var ki=0;ki<kk.length;ki++){var k=kk[ki],list=ATTACH[k];if(!list||!list.length)continue;var a=list[Math.min(list.length-1,1)];var atItem=mkAttachItem(k,a.id);if(atItem)wMain.data.attach[k]=atItem.data}recalcWeapon(wMain.data);if(tMainAmmo&&tMainAmmo.value&&AMMO_TYPES[tMainAmmo.value])wMain.data.loadedAmmoType=tMainAmmo.value;wMain.data.ammo=wMain.data.magCap;wMain.data.reserve=999}
   p.equip.main=wMain;p.weapon=wMain.data;
   var wSide=mkWeaponItem(settings.side);
-  if(wSide&&!wSide.data.isLauncher){if(tSideAmmo&&tSideAmmo.value&&AMMO_TYPES[tSideAmmo.value])wSide.data.loadedAmmoType=tSideAmmo.value}
-  if(wSide){wSide.data.ammo=wSide.data.magCap;wSide.data.reserve=999;p.equip.side=wSide;p.sidearm=wSide.data}
-  for(var ai=0;ai<WEAPONS.length;ai++){if(WEAPONS[ai].isLauncher)continue;p.bag.push(mkAmmoItem(WEAPONS[ai].cal,WEAPONS[ai].pen||0,300,WEAPONS[ai].cal))}
+  if(wSide&&!wSide.data.isLauncher&&!wSide.data.isMelee){if(tSideAmmo&&tSideAmmo.value&&AMMO_TYPES[tSideAmmo.value])wSide.data.loadedAmmoType=tSideAmmo.value}
+  if(wSide){
+    if(!wSide.data.isMelee){wSide.data.ammo=wSide.data.magCap;wSide.data.reserve=999}
+    p.equip.side=wSide;p.sidearm=wSide.data;
+  }
+  for(var ai=0;ai<WEAPONS.length;ai++){if(WEAPONS[ai].isLauncher||WEAPONS[ai].isMelee)continue;p.bag.push(mkAmmoItem(WEAPONS[ai].cal,WEAPONS[ai].pen||0,300,WEAPONS[ai].cal))}
   function giveAmmoFor(cal){for(var key in AMMO_TYPES){var d=AMMO_TYPES[key];if(d.cal===cal){var qty=(cal==='12号')?60:(cal==='43mm'?12:200);p.bag.push(mkAmmoItem(d.cal,d.pen||0,qty,key))}}}
   giveAmmoFor(wMain.data.cal);if(wSide&&wSide.data.cal!==wMain.data.cal)giveAmmoFor(wSide.data.cal);
   for(var ci=0;ci<CONSUMABLES.length;ci++)p.bag.push(mkConsItem(CONSUMABLES[ci].id,3));
@@ -4403,23 +4744,24 @@ function applyTrainSettings(){
   renderBag();addLog('训练场已应用','g');SFX.ui();
 }
 
-/* 控制台 */
 function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 function consoleLog(msg,cls){var out=document.getElementById('consoleOutput');if(!out)return;var div=document.createElement('div');div.className='con-line '+(cls||'');div.innerHTML=msg;out.appendChild(div);out.scrollTop=out.scrollHeight;while(out.children.length>300)out.removeChild(out.firstChild)}
 function toggleConsole(){consoleOpen=!consoleOpen;var el=document.getElementById('devConsole');if(el)el.classList.toggle('on',consoleOpen);var inp=document.getElementById('consoleInput');if(consoleOpen){if(inp)inp.focus();if(!window._consoleBannerShown){window._consoleBannerShown=true;consoleLog('<b>ASP 控制台</b> 输入 <b>help</b>','warn')}}else if(inp)inp.blur()}
-function findItemById(id){var i;for(i=0;i<CONSUMABLES.length;i++)if(CONSUMABLES[i].id===id)return{kind:'cons',data:CONSUMABLES[i]};for(i=0;i<NADES.length;i++)if(NADES[i].id===id)return{kind:'nade',data:NADES[i]};for(i=0;i<VALUABLES.length;i++)if(VALUABLES[i].id===id)return{kind:'valuable',data:VALUABLES[i]};for(i=0;i<WEAPONS.length;i++)if(WEAPONS[i].id===id)return{kind:'weapon',data:WEAPONS[i]};for(i=0;i<HELMET_SHELLS.length;i++)if(HELMET_SHELLS[i].id===id)return{kind:'helmetShell',data:HELMET_SHELLS[i]};for(i=0;i<HELMET_VISORS.length;i++)if(HELMET_VISORS[i].id===id)return{kind:'helmetVisor',data:HELMET_VISORS[i]};for(i=0;i<HELMET_EARS.length;i++)if(HELMET_EARS[i].id===id)return{kind:'helmetEar',data:HELMET_EARS[i]};for(i=0;i<VEST_FIBERS.length;i++)if(VEST_FIBERS[i].id===id)return{kind:'vestFiber',data:VEST_FIBERS[i]};for(i=0;i<VEST_PLATES.length;i++)if(VEST_PLATES[i].id===id)return{kind:'vestPlate',data:VEST_PLATES[i]};for(i=0;i<BACKPACKS.length;i++)if(BACKPACKS[i].id===id)return{kind:'backpack',data:BACKPACKS[i]};for(i=0;i<CHEST_RIGS.length;i++)if(CHEST_RIGS[i].id===id)return{kind:'chestRig',data:CHEST_RIGS[i]};if(AMMO_TYPES[id])return{kind:'ammo',data:AMMO_TYPES[id],tid:id};return null}
+function findItemById(id){var i;for(i=0;i<CONSUMABLES.length;i++)if(CONSUMABLES[i].id===id)return{kind:'cons',data:CONSUMABLES[i]};for(i=0;i<NADES.length;i++)if(NADES[i].id===id)return{kind:'nade',data:NADES[i]};for(i=0;i<VALUABLES.length;i++)if(VALUABLES[i].id===id)return{kind:'valuable',data:VALUABLES[i]};for(i=0;i<WEAPONS.length;i++)if(WEAPONS[i].id===id)return{kind:'weapon',data:WEAPONS[i]};for(i=0;i<HELMET_SHELLS.length;i++)if(HELMET_SHELLS[i].id===id)return{kind:'helmetShell',data:HELMET_SHELLS[i]};for(i=0;i<HELMET_VISORS.length;i++)if(HELMET_VISORS[i].id===id)return{kind:'helmetVisor',data:HELMET_VISORS[i]};for(i=0;i<HELMET_EARS.length;i++)if(HELMET_EARS[i].id===id)return{kind:'helmetEar',data:HELMET_EARS[i]};for(i=0;i<VEST_FIBERS.length;i++)if(VEST_FIBERS[i].id===id)return{kind:'vestFiber',data:VEST_FIBERS[i]};for(i=0;i<VEST_PLATES.length;i++)if(VEST_PLATES[i].id===id)return{kind:'vestPlate',data:VEST_PLATES[i]};for(i=0;i<BACKPACKS.length;i++)if(BACKPACKS[i].id===id)return{kind:'backpack',data:BACKPACKS[i]};for(i=0;i<CHEST_RIGS.length;i++)if(CHEST_RIGS[i].id===id)return{kind:'chestRig',data:CHEST_RIGS[i]};for(var k in ATTACH){if(!Array.isArray(ATTACH[k]))continue;for(i=0;i<ATTACH[k].length;i++)if(ATTACH[k][i].id===id)return{kind:'attach',data:ATTACH[k][i],k:k};}if(AMMO_TYPES[id])return{kind:'ammo',data:AMMO_TYPES[id],tid:id};return null}
 var CONSOLE_CMDS={};
 CONSOLE_CMDS.help={desc:'显示帮助',fn:function(args){if(args[0]){var c=CONSOLE_CMDS[args[0].toLowerCase()];if(c){consoleLog('<b>'+args[0]+'</b> — '+(c.desc||''));if(c.usage)consoleLog('用法：'+escapeHtml(c.usage),'warn')}else consoleLog('未知命令','err');return}var keys=Object.keys(CONSOLE_CMDS).sort();consoleLog('可用命令（'+keys.length+'）：');var line='';for(var i=0;i<keys.length;i++){line+='  <b>'+keys[i]+'</b>';if((i+1)%4===0){consoleLog(line);line=''}}if(line)consoleLog(line)}};
 CONSOLE_CMDS.clear={desc:'清空控制台',fn:function(){var out=document.getElementById('consoleOutput');if(out)out.innerHTML=''}};
 CONSOLE_CMDS.spawn={desc:'召唤敌人/AI',usage:'spawn <类型> [数量]',fn:function(args){if(!G)return consoleLog('游戏未运行','err');var type=args[0],count=Math.max(1,Math.min(50,parseInt(args[1])||1));if(!type)return consoleLog('用法：spawn &lt;类型&gt; [数量]','err');var isAI=['rookie','veteran','elite_ai'].indexOf(type)>=0;var isEnemy=!!ENEMY_TYPES[type];if(!isAI&&!isEnemy){consoleLog('未知类型','err');return}var p=G.player,DI=MAP_DIFF[CFG.difficulty]||MAP_DIFF.normal;for(var i=0;i<count;i++){var a=rand(0,TAU),d=rand(90,200);var x=clamp(p.x+Math.cos(a)*d,30,MAPW-30),y=clamp(p.y+Math.sin(a)*d,30,MAPH-30);if(isAI){var ai=mkAI(type,x,y,DI);if(ai){ai.hostileToPlayer=true;G.aiPlayers.push(ai)}}else{var e=mkEnemy(type,x,y,DI);if(e){G.enemies.push(e);if(e.boss&&!G.boss){G.boss=e;G.bossFound=true}}}}consoleLog('已召唤 '+count+'× '+type,'ok')}};
-CONSOLE_CMDS.give={desc:'获取物品',usage:'give <物品ID> [数量]',fn:function(args){if(!G)return consoleLog('游戏未运行','err');var id=args[0],qty=Math.max(1,Math.min(999,parseInt(args[1])||1));if(!id)return consoleLog('用法：give &lt;物品ID&gt; [数量]','err');var found=findItemById(id);if(!found)return consoleLog('未找到物品：'+escapeHtml(id),'err');var made=0;for(var i=0;i<qty;i++){var item=null;if(found.kind==='cons')item=mkConsItem(id,1);else if(found.kind==='nade')item=mkNadeItem(id,1);else if(found.kind==='valuable')item=mkValuableItem(id);else if(found.kind==='weapon')item=mkWeaponItem(id);else if(found.kind==='helmetShell')item=mkShellItem(id);else if(found.kind==='helmetVisor')item=mkVisorItem(id);else if(found.kind==='helmetEar')item=mkEarItem(id);else if(found.kind==='vestFiber')item=mkFiberItem(id);else if(found.kind==='vestPlate')item=mkPlateItem(id);else if(found.kind==='backpack')item=mkBackpackItem(id);else if(found.kind==='chestRig')item=mkChestRigItem(id);else if(found.kind==='ammo'){var q=(found.data.cal==='12号')?20:(found.data.cal==='43mm'?10:60);item=mkAmmoItem(found.data.cal,found.data.pen||0,q,id)}if(!item)break;if(!tryAddItem(item))dropItemNear(item,G.player.x+rand(-40,40),G.player.y+rand(-40,40));made++}consoleLog('已获得 '+made+'× '+id,'ok')}};
+CONSOLE_CMDS.give={desc:'获取物品',usage:'give <物品ID> [数量]',fn:function(args){if(!G)return consoleLog('游戏未运行','err');var id=args[0],qty=Math.max(1,Math.min(999,parseInt(args[1])||1));if(!id)return consoleLog('用法：give &lt;物品ID&gt; [数量]','err');var found=findItemById(id);if(!found)return consoleLog('未找到物品：'+escapeHtml(id),'err');var made=0;for(var i=0;i<qty;i++){var item=null;if(found.kind==='cons')item=mkConsItem(id,1);else if(found.kind==='nade')item=mkNadeItem(id,1);else if(found.kind==='valuable')item=mkValuableItem(id);else if(found.kind==='weapon')item=mkWeaponItem(id);else if(found.kind==='helmetShell')item=mkShellItem(id);else if(found.kind==='helmetVisor')item=mkVisorItem(id);else if(found.kind==='helmetEar')item=mkEarItem(id);else if(found.kind==='vestFiber')item=mkFiberItem(id);else if(found.kind==='vestPlate')item=mkPlateItem(id);else if(found.kind==='backpack')item=mkBackpackItem(id);else if(found.kind==='chestRig')item=mkChestRigItem(id);else if(found.kind==='attach')item=mkAttachItem(found.k,id);else if(found.kind==='ammo'){var q=(found.data.cal==='12号')?20:(found.data.cal==='43mm'?10:60);item=mkAmmoItem(found.data.cal,found.data.pen||0,q,id)}if(!item)break;if(!tryAddItem(item))dropItemNear(item,G.player.x+rand(-40,40),G.player.y+rand(-40,40));made++}consoleLog('已获得 '+made+'× '+id,'ok')}};
 CONSOLE_CMDS.heal={desc:'回满生命',fn:function(){if(!G)return;var p=G.player;p.hp=p.maxHp;p.bleeding=0;p.downed=false;for(var k in p.parts){p.parts[k].cur=p.parts[k].max;p.parts[k].broken=false}consoleLog('已恢复','ok')}};
-CONSOLE_CMDS.ammo={desc:'补满弹药',fn:function(){if(!G)return;var p=G.player,w=curWeapon();if(w.isLauncher){fillLauncherAmmo(p,w);return}w.ammo=w.magCap;w.reserve=Math.max(w.reserve||0,999);if(p.sidearm&&p.sidearm!==w){p.sidearm.ammo=p.sidearm.magCap;p.sidearm.reserve=Math.max(p.sidearm.reserve||0,999)}consoleLog('弹药已补满','ok')}};
+CONSOLE_CMDS.ammo={desc:'补满弹药',fn:function(){if(!G)return;var p=G.player,w=curWeapon();if(w.isLauncher){fillLauncherAmmo(p,w);return}if(w.isMelee)return;w.ammo=w.magCap;w.reserve=Math.max(w.reserve||0,999);if(p.sidearm&&p.sidearm!==w&&!p.sidearm.isMelee){p.sidearm.ammo=p.sidearm.magCap;p.sidearm.reserve=Math.max(p.sidearm.reserve||0,999)}consoleLog('弹药已补满','ok')}};
 CONSOLE_CMDS.god={desc:'切换无敌',fn:function(){CFG.assists.dbgInfHP=!CFG.assists.dbgInfHP;consoleLog('无敌：'+(CFG.assists.dbgInfHP?'开':'关'),'ok')}};
 CONSOLE_CMDS.extract={desc:'立即撤离',fn:function(){if(!G)return;if(G.trainingMode)return consoleLog('训练场无法撤离','err');updateTaskProgress('extract',1);endGame(true);consoleLog('已强制撤离','ok')}};
 CONSOLE_CMDS.save={desc:'查看存档',fn:function(){consoleLog('<b>存档</b><br>信用点: '+SAVE.data.credits+'<br>仓库件数: '+SAVE.data.stash.length+'<br>仓库价值: '+SAVE.stashValue())}};
 CONSOLE_CMDS.deploy={desc:'设置战备限制（临时）',usage:'deploy <min> <max>',fn:function(args){if(!DATA_CONFIG.deployLimit)DATA_CONFIG.deployLimit={};if(!DATA_CONFIG.deployLimit[CFG.map])DATA_CONFIG.deployLimit[CFG.map]={};var mn=parseFloat(args[0])||0;var mx=parseFloat(args[1])||0;DATA_CONFIG.deployLimit[CFG.map][CFG.difficulty]={min:mn,max:mx||Infinity};updateDeployInfo();consoleLog('已设置 '+CFG.map+'/'+CFG.difficulty+' 战备限制 ['+mn+', '+mx+']','ok')}};
-function execConsoleCommand(raw){var str=(raw||'').trim();if(!str)return;consoleLog('&gt; '+escapeHtml(str),'cmd');var parts=str.split(/\s+/),cmd=parts[0].toLowerCase(),args=parts.slice(1);var def=CONSOLE_CMDS[cmd];if(!def){consoleLog('未知命令：'+escapeHtml(cmd),'err');return}if(!G&&cmd!=='help'&&cmd!=='clear'&&cmd!=='save'){consoleLog('游戏未运行','err');return}try{def.fn(args)}catch(err){consoleLog('错误：'+escapeHtml(err&&err.message||err),'err');console.error(err)}}
+CONSOLE_CMDS.tasks={desc:'列出当前任务',fn:function(){if(!G||!G.tasks)return consoleLog('无任务','err');var s='';for(var i=0;i<G.tasks.length;i++){var t=G.tasks[i];s+='<b>['+t.source+']</b> '+t.name+' ('+t.progress+'/'+t.target+(t.done?' ✓':'')+')<br>'}consoleLog(s)}};
+CONSOLE_CMDS.diff={desc:'列出所有难度',fn:function(){var s='';for(var k in MAP_DIFF){var d=MAP_DIFF[k]||{};s+='<b>'+k+'</b> '+(d.label||'')+' · 敌人'+d.enemyCount+' 精英'+d.eliteCount+' 重装'+d.superCount+'<br>'}consoleLog(s)}};
+function execConsoleCommand(raw){var str=(raw||'').trim();if(!str)return;consoleLog('&gt; '+escapeHtml(str),'cmd');var parts=str.split(/\s+/),cmd=parts[0].toLowerCase(),args=parts.slice(1);var def=CONSOLE_CMDS[cmd];if(!def){consoleLog('未知命令：'+escapeHtml(cmd),'err');return}if(!G&&cmd!=='help'&&cmd!=='clear'&&cmd!=='save'&&cmd!=='diff'){consoleLog('游戏未运行','err');return}try{def.fn(args)}catch(err){consoleLog('错误：'+escapeHtml(err&&err.message||err),'err');console.error(err)}}
 function consoleSubmit(){var inp=document.getElementById('consoleInput');if(!inp)return;var val=inp.value;inp.value='';if(!val.trim())return;consoleHistory.push(val);if(consoleHistory.length>80)consoleHistory.shift();consoleHistIdx=consoleHistory.length;execConsoleCommand(val)}
 (function initConsole(){var inp=document.getElementById('consoleInput');var dcClose=document.getElementById('dcClose');if(dcClose)dcClose.addEventListener('click',function(){if(consoleOpen)toggleConsole()});if(!inp)return;inp.addEventListener('keydown',function(e){e.stopPropagation();if(e.key==='Enter'){e.preventDefault();consoleSubmit()}else if(e.key==='ArrowUp'){e.preventDefault();if(consoleHistIdx>0){consoleHistIdx--;inp.value=consoleHistory[consoleHistIdx]||''}}else if(e.key==='ArrowDown'){e.preventDefault();if(consoleHistIdx<consoleHistory.length-1){consoleHistIdx++;inp.value=consoleHistory[consoleHistIdx]||''}else{consoleHistIdx=consoleHistory.length;inp.value=''}}else if(e.key==='`'||e.key==='~'){e.preventDefault();toggleConsole()}});inp.addEventListener('click',function(e){e.stopPropagation()})})();
 
@@ -4436,10 +4778,27 @@ function initMenu(){
     for(var cid in CHARACTERS){var C=CHARACTERS[cid];if(!C||C.nonPlayable)continue;var cls=firstC?'charcard on':'charcard';var role=C.prazer?('兽耳·A='+C.A):(C.heavyArmor?'人类·重装':'人类·指挥');chHtml+='<div class="'+cls+'" data-c="'+cid+'"><div class="cn">'+C.name+'</div><div class="cd">'+role+'</div><div class="cs">'+C.weapon+'</div></div>';firstC=false}
     charRow.innerHTML=chHtml;
   }
+  var diffRow=document.getElementById('diffRow');
+  if(diffRow){
+    var keys=Object.keys(MAP_DIFF).filter(function(k){return MAP_DIFF[k];});
+    if(keys.length===0){
+      MAP_DIFF.normal={label:'普通',enemyDmg:1,enemyAcc:.82,enemyHp:1,enemyAgg:1,eliteCount:1,superCount:0,aiCount:2,lootBonus:.08,lootCount:30,enemyCount:14};
+      keys=['normal'];
+    }
+    var defaultDiff=keys.indexOf('normal')>=0?'normal':keys[0];
+    CFG.difficulty=defaultDiff;
+    var diffHtml='';
+    for(var di=0;di<keys.length;di++){
+      var did=keys[di];
+      var D=MAP_DIFF[did]||{};
+      var cls2=(did===defaultDiff)?'diffbtn on':'diffbtn';
+      diffHtml+='<div class="'+cls2+'" data-d="'+did+'">'+(D.label||did)+'</div>';
+    }
+    diffRow.innerHTML=diffHtml;
+  }
   var sws=document.querySelectorAll('.sw');
   for(var i=0;i<sws.length;i++){var a=sws[i].dataset.a;if(!a)continue;if(CFG.assists[a])sws[i].classList.add('on');else sws[i].classList.remove('on')}
-  updateMapDesc();
-  updateDeployInfo();
+  updateMapDesc();updateDeployInfo();
 }
 
 (function boot(){
@@ -4453,7 +4812,7 @@ function initMenu(){
 if(!CanvasRenderingContext2D.prototype.roundRect){
   CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){if(w<2*r)r=w/2;if(h<2*r)r=h/2;this.beginPath();this.moveTo(x+r,y);this.arcTo(x+w,y,x+w,y+h,r);this.arcTo(x+w,y+h,x,y+h,r);this.arcTo(x,y+h,x,y,r);this.arcTo(x,y,x+w,y,r);this.closePath();return this};
 }
-console.log('[ASP] v0.42.6 已加载 · 存档: '+(SAVE.data?'OK':'FAIL')+' · 地图: '+Object.keys(MAPS).length+' · 角色: '+Object.keys(CHARACTERS).length+' · 技能: '+Object.keys(PLAYER_SKILLS).length);
+console.log('[ASP] v0.43.0 已加载 · 存档: '+(SAVE.data?'OK':'FAIL')+' · 地图: '+Object.keys(MAPS).length+' · 角色: '+Object.keys(CHARACTERS).length+' · 难度: '+Object.keys(MAP_DIFF).length);
 </script>
 <script src="netplay.js" onerror="console.warn('[ASP] netplay.js 未加载')"></script>
 </body>
